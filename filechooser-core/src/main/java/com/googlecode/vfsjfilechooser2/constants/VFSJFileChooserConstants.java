@@ -20,19 +20,18 @@ package com.googlecode.vfsjfilechooser2.constants;
 
 import java.io.File;
 
-
 /**
  * VFSJFileChooser constants
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public final class VFSJFileChooserConstants
-{
+public final class VFSJFileChooserConstants {
+
     /**
      * The user directory
      */
     public static final File HOME_DIRECTORY = new File(System.getProperty(
-                "user.home"));
+            "user.home"));
 
     /**
      * The settings directory

@@ -23,52 +23,44 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-
 /**
  * Code based on the <code>AlignedLabel</code> class in swing' MetalFileChooserUI
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-final class AlignedLabel extends JLabel
-{
+final class AlignedLabel extends JLabel {
+
     protected AlignedLabel[] group;
     private int maxWidth = 0;
 
-    public AlignedLabel()
-    {
+    public AlignedLabel() {
         super();
         setAlignmentX(JComponent.LEFT_ALIGNMENT);
     }
 
-    public AlignedLabel(String text)
-    {
+    public AlignedLabel(String text) {
         super(text);
         setAlignmentX(JComponent.LEFT_ALIGNMENT);
     }
 
     @Override
-    public Dimension getPreferredSize()
-    {
+    public Dimension getPreferredSize() {
         Dimension d = super.getPreferredSize();
 
         // Align the width with all other labels in group.
         return new Dimension(getMaxWidth() + 11, d.height);
     }
 
-    private int getMaxWidth()
-    {
-        if ((maxWidth == 0) && (group != null))
-        {
+    private int getMaxWidth() {
+        if ((maxWidth == 0) && (group != null)) {
             int max = 0;
 
-            for (AlignedLabel grp : group)
-            {
+            for (AlignedLabel grp : group) {
                 max = Math.max(grp.getSuperPreferredWidth(), max);
             }
 
-            for (AlignedLabel grp : group)
-            {
+            for (AlignedLabel grp : group) {
                 grp.maxWidth = max;
             }
         }
@@ -76,8 +68,7 @@ final class AlignedLabel extends JLabel
         return maxWidth;
     }
 
-    private int getSuperPreferredWidth()
-    {
+    private int getSuperPreferredWidth() {
         return super.getPreferredSize().width;
     }
 }

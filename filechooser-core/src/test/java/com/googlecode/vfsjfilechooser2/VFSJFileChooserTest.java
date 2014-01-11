@@ -29,7 +29,6 @@ public class VFSJFileChooserTest {
         StandardFileSystemManager manager = new StandardFileSystemManager();
         manager.init();
 
-
         final FileObject root = manager.resolveFile("ram:/");
         FileObject foo = root.resolveFile("foo");
         foo.createFolder();

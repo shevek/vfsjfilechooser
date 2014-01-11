@@ -22,7 +22,6 @@ import java.util.Comparator;
 
 import org.apache.commons.vfs2.FileObject;
 
-
 /**
  *
  * File comparators factory
@@ -30,12 +29,11 @@ import org.apache.commons.vfs2.FileObject;
  * @version 0.0.1
  *
  */
-public final class FileObjectComparatorFactory
-{
-    private FileObjectComparatorFactory()
-    {
+public final class FileObjectComparatorFactory {
+
+    private FileObjectComparatorFactory() {
         throw new AssertionError(
-            "Trying to instanciate FileObjectComparatorFactory");
+                "Trying to instanciate FileObjectComparatorFactory");
     }
 
     /**
@@ -44,8 +42,7 @@ public final class FileObjectComparatorFactory
      * @return a new comparator
      */
     public static Comparator<FileObject> newFileNameComparator(
-        boolean isSortAsc)
-    {
+            boolean isSortAsc) {
         return new DirectoriesFirstComparatorWrapper(new FileNameComparator(
                 isSortAsc));
     }
@@ -55,8 +52,7 @@ public final class FileObjectComparatorFactory
      * @param isSortAsc ascendant sorting
      * @return a new comparator
      */
-    public static Comparator<FileObject> newSizeComparator(boolean isSortAsc)
-    {
+    public static Comparator<FileObject> newSizeComparator(boolean isSortAsc) {
         return new DirectoriesFirstComparatorWrapper(new SizeComparator(
                 isSortAsc));
     }
@@ -66,37 +62,31 @@ public final class FileObjectComparatorFactory
      * @param isSortAsc ascendant sorting
      * @return a new comparator
      */
-    public static Comparator<FileObject> newDateComparator(boolean isSortAsc)
-    {
+    public static Comparator<FileObject> newDateComparator(boolean isSortAsc) {
         return new DirectoriesFirstComparatorWrapper(new DateComparator(
                 isSortAsc));
     }
 
-    private static class FileNameComparator implements Comparator<FileObject>
-    {
+    private static class FileNameComparator implements Comparator<FileObject> {
+
         private boolean isSortAsc = true;
 
-        FileNameComparator(boolean isSortAsc)
-        {
+        FileNameComparator(boolean isSortAsc) {
             this.isSortAsc = isSortAsc;
         }
 
-        public int compare(FileObject a, FileObject b)
-        {
-            try
-            {
+        @Override
+        public int compare(FileObject a, FileObject b) {
+            try {
                 int result = a.getName().toString().toLowerCase()
-                              .compareTo(b.getName().toString().toLowerCase());
+                        .compareTo(b.getName().toString().toLowerCase());
 
-                if (!isSortAsc)
-                {
+                if (!isSortAsc) {
                     result = -result;
                 }
 
                 return result;
-            }
-            catch (Exception err)
-            {
+            } catch (Exception err) {
                 return -1;
             }
         }
@@ -106,31 +96,27 @@ public final class FileObjectComparatorFactory
      * This class sorts directories before files, comparing directory to
      * directory and file to file using the wrapped comparator.
      */
-    private static class DirectoriesFirstComparatorWrapper implements Comparator<FileObject>
-    {
+    private static class DirectoriesFirstComparatorWrapper implements Comparator<FileObject> {
+
         private Comparator<FileObject> delegate;
 
         public DirectoriesFirstComparatorWrapper(
-            Comparator<FileObject> comparator)
-        {
+                Comparator<FileObject> comparator) {
             this.delegate = comparator;
         }
 
-        public int compare(FileObject f1, FileObject f2)
-        {
-            if ((f1 != null) && (f2 != null))
-            {
+        @Override
+        public int compare(FileObject f1, FileObject f2) {
+            if ((f1 != null) && (f2 != null)) {
                 boolean traversable1 = VFSUtils.isDirectory(f1);
                 boolean traversable2 = VFSUtils.isDirectory(f2);
 
                 // directories go first
-                if (traversable1 && !traversable2)
-                {
+                if (traversable1 && !traversable2) {
                     return -1;
                 }
 
-                if (!traversable1 && traversable2)
-                {
+                if (!traversable1 && traversable2) {
                     return 1;
                 }
             }
@@ -139,59 +125,49 @@ public final class FileObjectComparatorFactory
         }
     }
 
-    private static class SizeComparator implements Comparator<FileObject>
-    {
+    private static class SizeComparator implements Comparator<FileObject> {
+
         private boolean isSortAsc = true;
 
-        SizeComparator(boolean isSortAsc)
-        {
+        SizeComparator(boolean isSortAsc) {
             this.isSortAsc = isSortAsc;
         }
 
-        public int compare(FileObject a, FileObject b)
-        {
-            try
-            {
+        @Override
+        public int compare(FileObject a, FileObject b) {
+            try {
                 int result = new Long(a.getContent().getSize()).compareTo(new Long(b.getContent().getSize()));
 
-                if (!isSortAsc)
-                {
+                if (!isSortAsc) {
                     result = -result;
                 }
 
                 return result;
-            }
-            catch (Exception err)
-            {
+            } catch (Exception err) {
                 return -1;
             }
         }
     }
 
-    private static class DateComparator implements Comparator<FileObject>
-    {
+    private static class DateComparator implements Comparator<FileObject> {
+
         private boolean isSortAsc = true;
 
-        DateComparator(boolean isSortAsc)
-        {
+        DateComparator(boolean isSortAsc) {
             this.isSortAsc = isSortAsc;
         }
 
-        public int compare(FileObject a, FileObject b)
-        {
-            try
-            {
+        @Override
+        public int compare(FileObject a, FileObject b) {
+            try {
                 int result = new Long(a.getContent().getLastModifiedTime()).compareTo(new Long(b.getContent().getLastModifiedTime()));
 
-                if (!isSortAsc)
-                {
+                if (!isSortAsc) {
                     result = -result;
                 }
 
                 return result;
-            }
-            catch (Exception err)
-            {
+            } catch (Exception err) {
                 return -1;
             }
         }

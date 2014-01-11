@@ -17,14 +17,13 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
-
 /**
  * @author Dirk Moebius (JEdit)
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public class TitledURLEntry implements Cloneable
-{
+public class TitledURLEntry implements Cloneable {
+
     private String title = null;
     private String url = null;
     private int scrollBarPos = -1;
@@ -33,8 +32,7 @@ public class TitledURLEntry implements Cloneable
      * @param title
      * @param url
      */
-    public TitledURLEntry(String title, String url)
-    {
+    public TitledURLEntry(String title, String url) {
         this.title = title;
         this.url = url;
     }
@@ -44,8 +42,7 @@ public class TitledURLEntry implements Cloneable
      * @param url
      * @param scrPos
      */
-    public TitledURLEntry(String title, String url, int scrPos)
-    {
+    public TitledURLEntry(String title, String url, int scrPos) {
         this(title, url);
         scrollBarPos = scrPos;
     }
@@ -53,54 +50,47 @@ public class TitledURLEntry implements Cloneable
     /**
      * @return
      */
-    public String getTitle()
-    {
+    public String getTitle() {
         return title;
     }
 
     /**
      * @return
      */
-    public String getURL()
-    {
+    public String getURL() {
         return url;
     }
 
     /**
      * @param title
      */
-    public void setTitle(String title)
-    {
+    public void setTitle(String title) {
         this.title = title;
     }
 
     /**
      * @param url
      */
-    public void setURL(String url)
-    {
+    public void setURL(String url) {
         this.url = url;
     }
 
     /**
      * @return
      */
-    public int getScrollBarPos()
-    {
+    public int getScrollBarPos() {
         return scrollBarPos;
     }
 
     /**
      * @param newPos
      */
-    public void setScrollBarPos(int newPos)
-    {
+    public void setScrollBarPos(int newPos) {
         scrollBarPos = newPos;
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int hash = 7;
         hash = 31 * hash;
         hash = (31 * hash) + ((null == title) ? 0 : title.hashCode());
@@ -110,40 +100,33 @@ public class TitledURLEntry implements Cloneable
     }
 
     @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-        {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
 
-        if ((obj == null) || (obj.getClass() != this.getClass()))
-        {
+        if ((obj == null) || (obj.getClass() != this.getClass())) {
             return false;
         }
 
         // object must be TitledURLEntry at this point
         TitledURLEntry tue = (TitledURLEntry) obj;
 
-        return ((url == tue.url) || ((tue != null) && url.equals(tue.url))) &&
-        ((title == tue.title) || ((tue != null) && title.equals(tue.title)));
+        return ((url == tue.url) || ((tue != null) && url.equals(tue.url)))
+                && ((title == tue.title) || ((tue != null) && title.equals(tue.title)));
     }
 
     @Override
-    public Object clone()
-    {
+    public Object clone() {
         TitledURLEntry tue = null;
 
-        try
-        {
+        try {
             tue = (TitledURLEntry) super.clone();
             tue.title = title;
             tue.url = url;
 
             return tue;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             tue = new TitledURLEntry(title, url);
             tue.scrollBarPos = this.scrollBarPos;
         }
@@ -152,8 +135,7 @@ public class TitledURLEntry implements Cloneable
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return url;
     }
 }

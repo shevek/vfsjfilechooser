@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.connection;
 
-
 import org.apache.commons.vfs2.FileObject;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
@@ -64,7 +63,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
-
 /**
  * The connection dialog
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
@@ -72,8 +70,8 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class ConnectionDialog extends JDialog
-{
+public final class ConnectionDialog extends JDialog {
+
     private static final String DIALOG_TITLE = VFSResources.getMessage(
             "VFSJFileChooser.connectionButtonText");
     private JLabel usernameLabel;
@@ -104,8 +102,7 @@ public final class ConnectionDialog extends JDialog
      * @param chooser
      */
     public ConnectionDialog(Frame parent, BookmarksDialog m_dialog,
-        VFSJFileChooser chooser)
-    {
+            VFSJFileChooser chooser) {
         super(parent, DIALOG_TITLE, true);
 
         this.fileChooser = chooser;
@@ -115,8 +112,7 @@ public final class ConnectionDialog extends JDialog
         initListeners();
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         initCenterPanelComponents();
         initBottomPanelComponents();
 
@@ -126,53 +122,50 @@ public final class ConnectionDialog extends JDialog
         pack();
     }
 
-    private void initCenterPanelComponents()
-    {
+    private void initCenterPanelComponents() {
         // create the panel
         this.centerPanel = new JPanel(new GridBagLayout());
         this.centerPanel.setBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3));
 
         // create the components
         this.hostnameLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.hostnameLabelText"));
+                "VFSJFileChooser.hostnameLabelText"));
         this.hostnameLabel.setForeground(Color.RED);
         this.hostnameTextField = new JTextField(25);
 
         this.portLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.portLabelText"));
+                "VFSJFileChooser.portLabelText"));
         this.portTextField = new JFormattedTextField(NumberFormat.getInstance());
         this.isPortTextFieldDirty = false;
 
         this.protocolLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.protocolLabelText"));
+                "VFSJFileChooser.protocolLabelText"));
         this.protocolModel = new DefaultComboBoxModel(Protocol.values());
         this.protocolList = new JComboBox(protocolModel);
         this.protocolList.setRenderer(new ProtocolRenderer());
 
         this.usernameLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.usernameLabelText"));
+                "VFSJFileChooser.usernameLabelText"));
         this.usernameTextField = new JTextField(20);
 
         this.passwordLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.passwordLabelText"));
+                "VFSJFileChooser.passwordLabelText"));
         this.passwordTextField = new JPasswordField(12);
 
         this.defaultRemotePathLabel = new JLabel(VFSResources.getMessage(
-                    "VFSJFileChooser.pathLabelText"));
+                "VFSJFileChooser.pathLabelText"));
         this.defaultRemotePathTextField = new JTextField(20);
 
         // Add the components to the panel
-        makeGridPanel(new Component[]
-            {
-                hostnameLabel, hostnameTextField, portLabel, portTextField,
-                protocolLabel, protocolList, usernameLabel, usernameTextField,
-                passwordLabel, passwordTextField, defaultRemotePathLabel,
-                defaultRemotePathTextField
-            });
+        makeGridPanel(new Component[]{
+            hostnameLabel, hostnameTextField, portLabel, portTextField,
+            protocolLabel, protocolList, usernameLabel, usernameTextField,
+            passwordLabel, passwordTextField, defaultRemotePathLabel,
+            defaultRemotePathTextField
+        });
     }
 
-    private void makeGridPanel(Component[] components)
-    {
+    private void makeGridPanel(Component[] components) {
         final Insets insets = new Insets(5, 5, 5, 5);
         final GridBagConstraints gbc = new GridBagConstraints();
 
@@ -187,8 +180,7 @@ public final class ConnectionDialog extends JDialog
         int i = 0;
         int j = 0;
 
-        for (Component component : components)
-        {
+        for (Component component : components) {
             gbc.gridx = i;
             gbc.gridy = j;
             gbc.gridwidth = 1;
@@ -199,194 +191,165 @@ public final class ConnectionDialog extends JDialog
             i++;
 
             // 2 components per row
-            if ((i % 2) == 0)
-            {
+            if ((i % 2) == 0) {
                 j++;
                 i = 0;
             }
         }
     }
 
-    private void initListeners()
-    {
-        this.portTextField.addKeyListener(new KeyAdapter()
-            {
-                @Override
-                public void keyTyped(KeyEvent e)
-                {
-                    char c = e.getKeyChar();
+    private void initListeners() {
+        this.portTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
 
-                    if (!((Character.isDigit(c) ||
-                            (c == KeyEvent.VK_BACK_SPACE) ||
-                            (c == KeyEvent.VK_DELETE))))
-                    {
-                        getToolkit().beep();
-                        e.consume();
-                    }
-                    else
-                    {
-                        setPortTextFieldDirty(true);
+                if (!((Character.isDigit(c)
+                        || (c == KeyEvent.VK_BACK_SPACE)
+                        || (c == KeyEvent.VK_DELETE)))) {
+                    getToolkit().beep();
+                    e.consume();
+                } else {
+                    setPortTextFieldDirty(true);
+                }
+            }
+        });
+
+        this.portTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                JFormattedTextField f = (JFormattedTextField) e.getSource();
+                String text = f.getText();
+
+                if (text.length() == 0) {
+                    f.setValue(null);
+                }
+
+                try {
+                    f.commitEdit();
+                } catch (ParseException exc) {
+                }
+            }
+        });
+
+        this.cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (currentWorker != null) {
+                    if (currentWorker.isAlive()) {
+                        currentWorker.interrupt();
+                        setCursor(Cursor.getDefaultCursor());
                     }
                 }
-            });
 
-        this.portTextField.addFocusListener(new FocusAdapter()
-            {
-                @Override
-                public void focusLost(FocusEvent e)
-                {
-                    JFormattedTextField f = (JFormattedTextField) e.getSource();
-                    String text = f.getText();
+                setVisible(false);
+            }
+        });
 
-                    if (text.length() == 0)
-                    {
-                        f.setValue(null);
-                    }
+        this.connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentWorker = new Thread() {
+                    @Override
+                    public void run() {
+                        StringBuilder error = new StringBuilder();
+                        FileObject fo = null;
 
-                    try
-                    {
-                        f.commitEdit();
-                    }
-                    catch (ParseException exc)
-                    {
-                    }
-                }
-            });
+                        setCursor(Cursor.getPredefinedCursor(
+                                Cursor.WAIT_CURSOR));
 
-        this.cancelButton.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (currentWorker != null)
-                    {
-                        if (currentWorker.isAlive())
-                        {
-                            currentWorker.interrupt();
+                        try {
+                            String m_username = usernameTextField.getText();
+                            String m_defaultRemotePath = defaultRemotePathTextField.getText();
+                            char[] m_password = passwordTextField.getPassword();
+                            String m_hostname = hostnameTextField.getText();
+                            String m_protocol = protocolList.getSelectedItem()
+                                    .toString();
+
+                            int m_port = -1;
+
+                            if (portTextField.isEditValid()
+                                    && (portTextField.getValue() != null)) {
+                                String s = portTextField.getValue()
+                                        .toString();
+                                m_port = Integer.valueOf(s);
+                            }
+
+                            Builder credentialsBuilder = Credentials.newBuilder(m_hostname)
+                                    .defaultRemotePath(m_defaultRemotePath)
+                                    .username(m_username)
+                                    .password(m_password)
+                                    .protocol(m_protocol)
+                                    .port(m_port);
+
+                            Credentials credentials = credentialsBuilder.build();
+
+                            String uri = credentials.toFileObjectURL();
+
+                            if (isInterrupted()) {
+                                setPortTextFieldDirty(false);
+
+                                return;
+                            }
+
+                            fo = VFSUtils.resolveFileObject(uri);
+
+                            if ((fo != null) && !fo.exists()) {
+                                fo = null;
+                            }
+                        } catch (Exception err) {
+                            error.append(err.getMessage());
                             setCursor(Cursor.getDefaultCursor());
                         }
+
+                        if ((error.length() > 0) || (fo == null)) {
+                            error.delete(0, error.length());
+                            error.append("Failed to connect!");
+                            error.append("\n");
+                            error.append(
+                                    "Please check parameters and try again.");
+
+                            JOptionPane.showMessageDialog(ConnectionDialog.this,
+                                    error, "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                            setCursor(Cursor.getDefaultCursor());
+
+                            return;
+                        }
+
+                        if (isInterrupted()) {
+                            return;
+                        }
+
+                        fileChooser.setCurrentDirectory(fo);
+
+                        setCursor(Cursor.getDefaultCursor());
+
+                        resetFields();
+
+                        if (bookmarksDialog != null) {
+                            String bTitle = fo.getName()
+                                    .getBaseName();
+
+                            if (bTitle.trim().equals("")) {
+                                bTitle = fo.getName().toString();
+                            }
+
+                            String bURL = fo.getName().getURI();
+                            bookmarksDialog.getBookmarks()
+                                    .add(new TitledURLEntry(
+                                                    bTitle, bURL));
+                            bookmarksDialog.getBookmarks().save();
+                        }
+
+                        setVisible(false);
                     }
+                };
 
-                    setVisible(false);
-                }
-            });
-
-        this.connectButton.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    currentWorker = new Thread()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    StringBuilder error = new StringBuilder();
-                                    FileObject fo = null;
-
-                                    setCursor(Cursor.getPredefinedCursor(
-                                            Cursor.WAIT_CURSOR));
-
-                                    try
-                                    {
-                                        String m_username = usernameTextField.getText();
-                                        String m_defaultRemotePath = defaultRemotePathTextField.getText();
-                                        char[] m_password = passwordTextField.getPassword();
-                                        String m_hostname = hostnameTextField.getText();
-                                        String m_protocol = protocolList.getSelectedItem()
-                                                                        .toString();
-
-                                        int m_port = -1;
-
-                                        if (portTextField.isEditValid() &&
-                                                (portTextField.getValue() != null))
-                                        {
-                                            String s = portTextField.getValue()
-                                                                    .toString();
-                                            m_port = Integer.valueOf(s);
-                                        }
-
-                                        Builder credentialsBuilder = Credentials.newBuilder(m_hostname)
-                                                                                .defaultRemotePath(m_defaultRemotePath)
-                                                                                .username(m_username)
-                                                                                .password(m_password)
-                                                                                .protocol(m_protocol)
-                                                                                .port(m_port);
-
-                                        Credentials credentials = credentialsBuilder.build();
-
-                                        String uri = credentials.toFileObjectURL();
-
-                                        if (isInterrupted())
-                                        {
-                                            setPortTextFieldDirty(false);
-
-                                            return;
-                                        }
-
-                                        fo = VFSUtils.resolveFileObject(uri);
-
-                                        if ((fo != null) && !fo.exists())
-                                        {
-                                            fo = null;
-                                        }
-                                    }
-                                    catch (Exception err)
-                                    {
-                                        error.append(err.getMessage());
-                                        setCursor(Cursor.getDefaultCursor());
-                                    }
-
-                                    if ((error.length() > 0) || (fo == null))
-                                    {
-                                        error.delete(0, error.length());
-                                        error.append("Failed to connect!");
-                                        error.append("\n");
-                                        error.append(
-                                            "Please check parameters and try again.");
-
-                                        JOptionPane.showMessageDialog(ConnectionDialog.this,
-                                            error, "Error",
-                                            JOptionPane.ERROR_MESSAGE);
-                                        setCursor(Cursor.getDefaultCursor());
-
-                                        return;
-                                    }
-
-                                    if (isInterrupted())
-                                    {
-                                        return;
-                                    }
-
-                                    fileChooser.setCurrentDirectory(fo);
-
-                                    setCursor(Cursor.getDefaultCursor());
-
-                                    resetFields();
-
-                                    if (bookmarksDialog != null)
-                                    {
-                                        String bTitle = fo.getName()
-                                                          .getBaseName();
-
-                                        if (bTitle.trim().equals(""))
-                                        {
-                                            bTitle = fo.getName().toString();
-                                        }
-
-                                        String bURL = fo.getName().getURI();
-                                        bookmarksDialog.getBookmarks()
-                                                       .add(new TitledURLEntry(
-                                                bTitle, bURL));
-                                        bookmarksDialog.getBookmarks().save();
-                                    }
-
-                                    setVisible(false);
-                                }
-                            };
-
-                    currentWorker.setPriority(Thread.MIN_PRIORITY);
-                    currentWorker.start();
-                }
-            });
+                currentWorker.setPriority(Thread.MIN_PRIORITY);
+                currentWorker.start();
+            }
+        });
 
         // add the usual right click popup menu(copy, paste, etc.)
         PopupHandler.installDefaultMouseListener(hostnameTextField);
@@ -395,76 +358,64 @@ public final class ConnectionDialog extends JDialog
         PopupHandler.installDefaultMouseListener(passwordTextField);
         PopupHandler.installDefaultMouseListener(defaultRemotePathTextField);
 
-        this.protocolList.addItemListener(new ItemListener()
-            {
-                public void itemStateChanged(ItemEvent e)
-                {
-                    if (e.getStateChange() == ItemEvent.SELECTED)
-                    {
-                        selectPortNumber();
-                    }
+        this.protocolList.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    selectPortNumber();
                 }
-            });
+            }
+        });
 
         this.protocolList.setSelectedItem(Protocol.FTP);
     }
 
-    private void selectPortNumber()
-    {
+    private void selectPortNumber() {
         //Go and get default port number according to the selected protocol
         Protocol protocol = (Protocol) protocolList.getSelectedItem();
 
-        if (protocol.toString().equals("FILE"))
-        {
+        if (protocol.toString().equals("FILE")) {
             enableFields(false);
 
             this.isPortTextFieldDirty = false;
 
             return;
-        }
-        else
-        {
+        } else {
             enableFields(true);
         }
 
         //if user types in a port number
         //or empties port number field
         //then do not set protocol's default port number
-        if (isPortTextFieldDirty() && portTextField.isEditValid())
-        {
+        if (isPortTextFieldDirty() && portTextField.isEditValid()) {
             return;
         }
 
         portTextField.setValue(protocol.getPort());
     }
 
-    private void setPortTextFieldDirty(boolean b)
-    {
+    private void setPortTextFieldDirty(boolean b) {
         this.isPortTextFieldDirty = b;
     }
 
-    private boolean isPortTextFieldDirty()
-    {
+    private boolean isPortTextFieldDirty() {
         return this.isPortTextFieldDirty;
     }
 
-    private void enableFields(boolean b)
-    {
-        Component[] components = 
-            {
-                hostnameLabel, hostnameTextField, usernameLabel,
-                usernameTextField, passwordLabel, passwordTextField, portLabel,
-                portTextField
-            };
+    private void enableFields(boolean b) {
+        Component[] components
+                = {
+                    hostnameLabel, hostnameTextField, usernameLabel,
+                    usernameTextField, passwordLabel, passwordTextField, portLabel,
+                    portTextField
+                };
 
-        for (Component component : components)
-        {
+        for (Component component : components) {
             component.setVisible(b);
         }
     }
 
-    private void resetFields()
-    {
+    private void resetFields() {
         this.isPortTextFieldDirty = false;
         hostnameTextField.setText("");
         protocolList.setSelectedItem(Protocol.FTP);
@@ -473,38 +424,32 @@ public final class ConnectionDialog extends JDialog
         defaultRemotePathTextField.setText("");
     }
 
-    private void initBottomPanelComponents()
-    {
+    private void initBottomPanelComponents() {
         this.buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
         this.cancelButton = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.cancelButtonText"));
+                "VFSJFileChooser.cancelButtonText"));
         this.connectButton = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.connectionButtonText"));
+                "VFSJFileChooser.connectionButtonText"));
 
         this.buttonsPanel.add(this.connectButton);
         this.buttonsPanel.add(this.cancelButton);
     }
 
-    private static class ProtocolRenderer extends BasicComboBoxRenderer
-    {
+    private static class ProtocolRenderer extends BasicComboBoxRenderer {
+
         @Override
         public Component getListCellRendererComponent(JList list, Object value,
-            int index, boolean isSelected, boolean cellHasFocus)
-        {
-            if (isSelected)
-            {
+                int index, boolean isSelected, boolean cellHasFocus) {
+            if (isSelected) {
                 setBackground(list.getSelectionBackground());
                 setForeground(list.getSelectionForeground());
 
-                if (-1 < index)
-                {
+                if (-1 < index) {
                     Protocol aProtocol = (Protocol) value;
                     list.setToolTipText(aProtocol.getDescription());
                 }
-            }
-            else
-            {
+            } else {
                 setBackground(list.getBackground());
                 setForeground(list.getForeground());
             }

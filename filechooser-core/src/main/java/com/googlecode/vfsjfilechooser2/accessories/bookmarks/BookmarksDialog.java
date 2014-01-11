@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
-
 import java.awt.CardLayout;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
@@ -29,15 +28,14 @@ import javax.swing.JPanel;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 
-
 /**
  * The bookmarks dialog
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class BookmarksDialog extends JDialog
-{
+public class BookmarksDialog extends JDialog {
+
     private static final String MANAGER_PANEL_ID = "MANAGER";
     private static final String EDITOR_PANEL_ID = "EDITOR";
     private static final String MANAGER_DIALOG_TITLE = VFSResources.getMessage(
@@ -55,8 +53,7 @@ public class BookmarksDialog extends JDialog
      * @param parent The parent window
      * @param chooser the file chooser
      */
-    public BookmarksDialog(Frame parent, VFSJFileChooser chooser)
-    {
+    public BookmarksDialog(Frame parent, VFSJFileChooser chooser) {
         super(parent, MANAGER_DIALOG_TITLE, true);
 
         saveBookmarksOnWindowClosing();
@@ -75,8 +72,7 @@ public class BookmarksDialog extends JDialog
      * Returns the bookmarks
      * @return the bookmarks
      */
-    public Bookmarks getBookmarks()
-    {
+    public Bookmarks getBookmarks() {
         return managerPanel.getModel();
     }
 
@@ -84,8 +80,7 @@ public class BookmarksDialog extends JDialog
      * Display the bookmarks editor
      * @param index The bookmark index to edit (-1 for new entries)
      */
-    public void showEditorView(int index)
-    {
+    public void showEditorView(int index) {
         editorPanel.updateFieds(index);
         setTitle(EDITOR_DIALOG_TITLE);
         layout.show(cards, EDITOR_PANEL_ID);
@@ -96,8 +91,7 @@ public class BookmarksDialog extends JDialog
     /**
      * Show the default view
      */
-    public void restoreDefaultView()
-    {
+    public void restoreDefaultView() {
         setTitle(MANAGER_DIALOG_TITLE);
         layout.show(cards, MANAGER_PANEL_ID);
         defaultViewVisible = true;
@@ -107,33 +101,28 @@ public class BookmarksDialog extends JDialog
     /**
      * Save the bookmarks when the dialog is hidden
      */
-    protected void saveBookmarksOnWindowClosing()
-    {
-        this.addWindowListener(new WindowAdapter()
-            {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
+    protected void saveBookmarksOnWindowClosing() {
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
                     // Use the default view if the dialog was
-                    // closed without the close button
-                    if (!defaultViewVisible)
-                    {
-                        defaultViewVisible = true;
-                        setTitle(MANAGER_DIALOG_TITLE);
-                        layout.show(cards, MANAGER_PANEL_ID);
-                    }
-
-                    // save the bookmarks
-                    managerPanel.getModel().save();
+                // closed without the close button
+                if (!defaultViewVisible) {
+                    defaultViewVisible = true;
+                    setTitle(MANAGER_DIALOG_TITLE);
+                    layout.show(cards, MANAGER_PANEL_ID);
                 }
-            });
+
+                // save the bookmarks
+                managerPanel.getModel().save();
+            }
+        });
     }
 
     /**
      * Hide the dialog
      */
-    public void cancel()
-    {
+    public void cancel() {
         setVisible(false);
     }
 }

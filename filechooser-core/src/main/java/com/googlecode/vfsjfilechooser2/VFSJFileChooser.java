@@ -102,8 +102,8 @@ import java.io.File;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class VFSJFileChooser extends JComponent implements Accessible
-{
+public class VFSJFileChooser extends JComponent implements Accessible {
+
     private static final Frame SHARED_FRAME = new Frame();
     private static final FileObject[] EMPTY_FILEOBJECT_ARRAY = new FileObject[]{};
 
@@ -143,7 +143,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
 
     // for converting files
     protected FileObjectConverter fileObjectConverter = new DefaultFileObjectConverter();
-    
+
     // Accessibility support 
     protected AccessibleContext m_accessibleContext = null;
 
@@ -156,8 +156,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * It is typically the "My Documents" folder on Windows, and the
      * user's home directory on Unix.
      */
-    public VFSJFileChooser()
-    {
+    public VFSJFileChooser() {
         this((FileObject) null, (AbstractVFSFileSystemView) null);
     }
 
@@ -172,8 +171,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param currentDirectoryPath  a <code>String</code> giving the path
      *                          to a file or directory
      */
-    public VFSJFileChooser(String currentDirectoryPath)
-    {
+    public VFSJFileChooser(String currentDirectoryPath) {
         this(currentDirectoryPath, (AbstractVFSFileSystemView) null);
     }
 
@@ -188,9 +186,8 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param currentDirectory  a <code>File</code> object specifying
      *                          the path to a file or directory
      */
-    public VFSJFileChooser(File currentDirectory)
-    {
-      this(VFSUtils.toFileObject(currentDirectory));
+    public VFSJFileChooser(File currentDirectory) {
+        this(VFSUtils.toFileObject(currentDirectory));
     }
 
     /**
@@ -204,8 +201,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param currentDirectory  a <code>File</code> object specifying
      *                          the path to a file or directory
      */
-    public VFSJFileChooser(FileObject currentDirectory)
-    {
+    public VFSJFileChooser(FileObject currentDirectory) {
         this(currentDirectory, (AbstractVFSFileSystemView) null);
     }
 
@@ -213,8 +209,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * Constructs a <code>VFSJFileChooser</code> using the given
      * <code>FileSystemView</code>.
      */
-    public VFSJFileChooser(AbstractVFSFileSystemView fsv)
-    {
+    public VFSJFileChooser(AbstractVFSFileSystemView fsv) {
         this((FileObject) null, fsv);
     }
 
@@ -223,8 +218,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * and <code>FileSystemView</code>.
      */
     public VFSJFileChooser(FileObject currentDirectory,
-        AbstractVFSFileSystemView fsv)
-    {
+            AbstractVFSFileSystemView fsv) {
         setup(fsv);
         setCurrentDirectory(currentDirectory);
     }
@@ -236,38 +230,30 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param fsv
      */
     public VFSJFileChooser(String currentDirectoryPath,
-        AbstractVFSFileSystemView fsv)
-    {
+            AbstractVFSFileSystemView fsv) {
         setup(fsv);
 
-        if (currentDirectoryPath == null)
-        {
+        if (currentDirectoryPath == null) {
             setCurrentDirectory(null);
-        }
-        else
-        {
+        } else {
             setCurrentDirectory(fileSystemView.createFileObject(
                     currentDirectoryPath));
         }
     }
 
-    public JPanel getNavigationButtonsPanel()
-    {
+    public JPanel getNavigationButtonsPanel() {
         return defaultUI.getNavigationButtonsPanel();
     }
 
-    public JButton getUpFolderButton()
-    {
+    public JButton getUpFolderButton() {
         return defaultUI.getUpFolderButton();
     }
 
-    public JButton getHomeFolderButton()
-    {
+    public JButton getHomeFolderButton() {
         return defaultUI.getHomeFolderButton();
     }
 
-    public JButton getNewFolderButton()
-    {
+    public JButton getNewFolderButton() {
         return defaultUI.getNewFolderButton();
     }
 
@@ -275,34 +261,29 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * Performs common constructor initialization and setup.
      * @param view
      */
-    protected void setup(AbstractVFSFileSystemView view)
-    {
+    protected void setup(AbstractVFSFileSystemView view) {
         installShowFilesListener();
 
-        if (view == null)
-        {
+        if (view == null) {
             view = AbstractVFSFileSystemView.getFileSystemView();
         }
 
         setFileSystemView(view);
         updateUI();
 
-        if (isAcceptAllFileFilterUsed())
-        {
+        if (isAcceptAllFileFilterUsed()) {
             setFileFilter(getAcceptAllFileFilter());
         }
 
         enableEvents(AWTEvent.MOUSE_EVENT_MASK);
     }
 
-    private void installShowFilesListener()
-    {
+    private void installShowFilesListener() {
         // Track native setting for showing hidden files
         Toolkit tk = Toolkit.getDefaultToolkit();
         Object showHiddenProperty = tk.getDesktopProperty(SHOW_HIDDEN_PROP);
 
-        if (showHiddenProperty instanceof Boolean)
-        {
+        if (showHiddenProperty instanceof Boolean) {
             useFileHiding = !((Boolean) showHiddenProperty).booleanValue();
             showFilesListener = new WeakPCL(this);
             tk.addPropertyChangeListener(SHOW_HIDDEN_PROP, showFilesListener);
@@ -353,10 +334,8 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *  description: determines whether automatic drag handling is enabled
      *        bound: false
      */
-    public void setDragEnabled(boolean b)
-    {
-        if (b && GraphicsEnvironment.isHeadless())
-        {
+    public void setDragEnabled(boolean b) {
+        if (b && GraphicsEnvironment.isHeadless()) {
             throw new HeadlessException();
         }
 
@@ -370,8 +349,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setDragEnabled
      * @since 1.4
      */
-    public boolean getDragEnabled()
-    {
+    public boolean getDragEnabled() {
         return dragEnabled;
     }
 
@@ -384,8 +362,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setSelectedFile
      * @return the selected file
      */
-    public FileObject getSelectedFile()
-    {
+    public FileObject getSelectedFile() {
         return selectedFile;
     }
 
@@ -402,41 +379,33 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @param file the selected file
      */
-    public void setSelectedFile(FileObject file)
-    {
+    public void setSelectedFile(FileObject file) {
         FileObject oldValue = selectedFile;
         selectedFile = file;
 
-        if (selectedFile != null)
-        {
-            if (!getFileSystemView().isParent(getCurrentDirectory(), selectedFile))
-            {
+        if (selectedFile != null) {
+            if (!getFileSystemView().isParent(getCurrentDirectory(), selectedFile)) {
                 setCurrentDirectory(VFSUtils.getParentDirectory(selectedFile));
             }
 
-            if (!isMultiSelectionEnabled() || (selectedFiles == null) ||
-                    (selectedFiles.length == 1))
-            {
+            if (!isMultiSelectionEnabled() || (selectedFiles == null)
+                    || (selectedFiles.length == 1)) {
                 ensureFileIsVisible(selectedFile);
             }
         }
 
         firePropertyChange(SELECTED_FILE_CHANGED_PROPERTY, oldValue,
-            selectedFile);
+                selectedFile);
     }
 
     /**
      * Returns a list of selected files if the file chooser is
      * set to allow multiple selection.
      */
-    public FileObject[] getSelectedFiles()
-    {
-        if (selectedFiles == null)
-        {
+    public FileObject[] getSelectedFiles() {
+        if (selectedFiles == null) {
             return new FileObject[0];
-        }
-        else
-        {
+        } else {
             return (FileObject[]) selectedFiles.clone();
         }
     }
@@ -449,24 +418,20 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *       bound: true
      * description: The list of selected files if the chooser is in multiple selection mode.
      */
-    public void setSelectedFiles(FileObject[] selectedFiles)
-    {
+    public void setSelectedFiles(FileObject[] selectedFiles) {
         FileObject[] oldValue = this.selectedFiles;
 
-        if ((selectedFiles == null) || (selectedFiles.length == 0))
-        {
+        if ((selectedFiles == null) || (selectedFiles.length == 0)) {
             selectedFiles = null;
             this.selectedFiles = null;
             setSelectedFile(null);
-        }
-        else
-        {
+        } else {
             this.selectedFiles = selectedFiles.clone();
             setSelectedFile(this.selectedFiles[0]);
         }
 
         firePropertyChange(SELECTED_FILES_CHANGED_PROPERTY, oldValue,
-            selectedFiles);
+                selectedFiles);
     }
 
     /**
@@ -475,8 +440,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return the current directory
      * @see #setCurrentDirectory
      */
-    public FileObject getCurrentDirectory()
-    {
+    public FileObject getCurrentDirectory() {
         return currentDirectory;
     }
 
@@ -501,33 +465,27 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param dir the current directory to point to
      * @see #getCurrentDirectory
      */
-    public void setCurrentDirectory(FileObject dir)
-    {
+    public void setCurrentDirectory(FileObject dir) {
         FileObject oldValue = currentDirectory;
 
-        if ((dir != null) && !VFSUtils.exists(dir))
-        {
+        if ((dir != null) && !VFSUtils.exists(dir)) {
             dir = currentDirectory;
         }
 
-        if (dir == null)
-        {
+        if (dir == null) {
             dir = getFileSystemView().getDefaultDirectory();
         }
 
-        if (currentDirectory != null)
-        {
+        if (currentDirectory != null) {
             /* Verify the toString of object */
-            if (this.currentDirectory.equals(dir))
-            {
+            if (this.currentDirectory.equals(dir)) {
                 return;
             }
         }
 
         FileObject prev = null;
 
-        while (!isTraversable(dir) && (prev != dir))
-        {
+        while (!isTraversable(dir) && (prev != dir)) {
             prev = dir;
             dir = getFileSystemView().getParentDirectory(dir);
         }
@@ -535,7 +493,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
         currentDirectory = dir;
 
         firePropertyChange(DIRECTORY_CHANGED_PROPERTY, oldValue,
-            currentDirectory);
+                currentDirectory);
     }
 
     /**
@@ -544,8 +502,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #getCurrentDirectory
      */
-    public void changeToParentDirectory()
-    {
+    public void changeToParentDirectory() {
         selectedFile = null;
 
         FileObject oldValue = getCurrentDirectory();
@@ -555,8 +512,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
     /**
      * Tells the UI to rescan its files list from the current directory.
      */
-    public void rescanCurrentDirectory()
-    {
+    public void rescanCurrentDirectory() {
         getUI().rescanCurrentDirectory(this);
     }
 
@@ -566,15 +522,13 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @param fileObject  a File object
      */
-    public void ensureFileIsVisible(FileObject f)
-    {
+    public void ensureFileIsVisible(FileObject f) {
         getUI().ensureFileIsVisible(this, f);
     }
 
     // **************************************
     // ***** VFSJFileChooser Dialog methods *****
     // **************************************
-
     /**
      * Pops up an "Open File" file chooser dialog. Note that the
      * text that appears in the approve button is determined by
@@ -596,8 +550,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #showDialog
      */
     public RETURN_TYPE showOpenDialog(Component parent)
-        throws HeadlessException
-    {
+            throws HeadlessException {
         setDialogType(DIALOG_TYPE.OPEN);
 
         return showDialog(parent, null);
@@ -624,8 +577,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #showDialog
      */
     public RETURN_TYPE showSaveDialog(Component parent)
-        throws HeadlessException
-    {
+            throws HeadlessException {
         setDialogType(DIALOG_TYPE.SAVE);
 
         return showDialog(parent, null);
@@ -681,23 +633,19 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see java.awt.GraphicsEnvironment#isHeadless
      */
     public RETURN_TYPE showDialog(Component parent, String approveButtonText)
-        throws HeadlessException
-    {
-        if (approveButtonText != null)
-        {
+            throws HeadlessException {
+        if (approveButtonText != null) {
             setApproveButtonText(approveButtonText);
             setDialogType(DIALOG_TYPE.CUSTOM);
         }
 
         dialog = createDialog(parent);
-        dialog.addWindowListener(new WindowAdapter()
-            {
-                @Override
-                public void windowClosing(WindowEvent e)
-                {
-                    returnValue = RETURN_TYPE.CANCEL;
-                }
-            });
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                returnValue = RETURN_TYPE.CANCEL;
+            }
+        });
         returnValue = RETURN_TYPE.ERROR;
         rescanCurrentDirectory();
 
@@ -734,42 +682,29 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see java.awt.GraphicsEnvironment#isHeadless
      * @since 1.4
      */
-    protected JDialog createDialog(Component parent) throws HeadlessException
-    {
+    protected JDialog createDialog(Component parent) throws HeadlessException {
         String title = getUI().getDialogTitle(this);
         putClientProperty(AccessibleContext.ACCESSIBLE_DESCRIPTION_PROPERTY,
-            title);
+                title);
 
         Window window = null;
 
-        try
-        {
+        try {
             window = SwingUtilities.getWindowAncestor(parent);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
         }
 
-        if (window == null)
-        {
-            if (parent instanceof Window)
-            {
+        if (window == null) {
+            if (parent instanceof Window) {
                 window = (Window) parent;
-            }
-            else
-            {
+            } else {
                 window = SHARED_FRAME;
             }
 
             dialog = new JDialog((Frame) window, title, true);
-        }
-
-        else if (window instanceof Frame)
-        {
+        } else if (window instanceof Frame) {
             dialog = new JDialog((Frame) window, title, true);
-        }
-        else
-        {
+        } else {
             dialog = new JDialog((Dialog) window, title, true);
         }
 
@@ -779,15 +714,13 @@ public class VFSJFileChooser extends JComponent implements Accessible
         contentPane.setLayout(new BorderLayout());
         contentPane.add(this, BorderLayout.CENTER);
 
-        if (JDialog.isDefaultLookAndFeelDecorated())
-        {
+        if (JDialog.isDefaultLookAndFeelDecorated()) {
             boolean supportsWindowDecorations = UIManager.getLookAndFeel()
-                                                         .getSupportsWindowDecorations();
+                    .getSupportsWindowDecorations();
 
-            if (supportsWindowDecorations)
-            {
+            if (supportsWindowDecorations) {
                 dialog.getRootPane()
-                      .setWindowDecorationStyle(JRootPane.FILE_CHOOSER_DIALOG);
+                        .setWindowDecorationStyle(JRootPane.FILE_CHOOSER_DIALOG);
             }
         }
 
@@ -807,8 +740,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setControlButtonsAreShown
      * @since 1.3
      */
-    public boolean getControlButtonsAreShown()
-    {
+    public boolean getControlButtonsAreShown() {
         return controlsShown;
     }
 
@@ -836,17 +768,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #CONTROL_BUTTONS_ARE_SHOWN_CHANGED_PROPERTY
      * @since 1.3
      */
-    public void setControlButtonsAreShown(boolean b)
-    {
-        if (controlsShown == b)
-        {
+    public void setControlButtonsAreShown(boolean b) {
+        if (controlsShown == b) {
             return;
         }
 
         boolean oldValue = controlsShown;
         controlsShown = b;
         firePropertyChange(CONTROL_BUTTONS_ARE_SHOWN_CHANGED_PROPERTY,
-            oldValue, controlsShown);
+                oldValue, controlsShown);
     }
 
     /**
@@ -862,8 +792,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #setDialogType
      */
-    public DIALOG_TYPE getDialogType()
-    {
+    public DIALOG_TYPE getDialogType() {
         return dialogType;
     }
 
@@ -902,27 +831,23 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #getDialogType
      * @see #setApproveButtonText
      */
-    public void setDialogType(DIALOG_TYPE dialogType)
-    {
-        if (this.dialogType == dialogType)
-        {
+    public void setDialogType(DIALOG_TYPE dialogType) {
+        if (this.dialogType == dialogType) {
             return;
         }
 
-        if (!((dialogType == DIALOG_TYPE.OPEN) ||
-                (dialogType == DIALOG_TYPE.SAVE) ||
-                (dialogType == DIALOG_TYPE.CUSTOM)))
-        {
-            throw new IllegalArgumentException("Incorrect Dialog Type: " +
-                dialogType);
+        if (!((dialogType == DIALOG_TYPE.OPEN)
+                || (dialogType == DIALOG_TYPE.SAVE)
+                || (dialogType == DIALOG_TYPE.CUSTOM))) {
+            throw new IllegalArgumentException("Incorrect Dialog Type: "
+                    + dialogType);
         }
 
         DIALOG_TYPE oldValue = this.dialogType;
         this.dialogType = dialogType;
 
-        if ((dialogType == DIALOG_TYPE.OPEN) ||
-                (dialogType == DIALOG_TYPE.SAVE))
-        {
+        if ((dialogType == DIALOG_TYPE.OPEN)
+                || (dialogType == DIALOG_TYPE.SAVE)) {
             setApproveButtonText(null);
         }
 
@@ -943,13 +868,11 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #getDialogTitle
      *
      */
-    public void setDialogTitle(String dialogTitle)
-    {
+    public void setDialogTitle(String dialogTitle) {
         String oldValue = this.dialogTitle;
         this.dialogTitle = dialogTitle;
 
-        if (dialog != null)
-        {
+        if (dialog != null) {
             dialog.setTitle(dialogTitle);
         }
 
@@ -961,8 +884,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #setDialogTitle
      */
-    public String getDialogTitle()
-    {
+    public String getDialogTitle() {
         return dialogTitle;
     }
 
@@ -980,19 +902,17 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setDialogType
      * @see #showDialog
      */
-    public void setApproveButtonToolTipText(String toolTipText)
-    {
-        if ((this.approveButtonToolTipText == toolTipText) ||
-                ((this.approveButtonToolTipText != null) &&
-                this.approveButtonToolTipText.equals(toolTipText)))
-        {
+    public void setApproveButtonToolTipText(String toolTipText) {
+        if ((this.approveButtonToolTipText == toolTipText)
+                || ((this.approveButtonToolTipText != null)
+                && this.approveButtonToolTipText.equals(toolTipText))) {
             return;
         }
 
         String oldValue = approveButtonToolTipText;
         approveButtonToolTipText = toolTipText;
         firePropertyChange(APPROVE_BUTTON_TOOL_TIP_TEXT_CHANGED_PROPERTY,
-            oldValue, approveButtonToolTipText);
+                oldValue, approveButtonToolTipText);
     }
 
     /**
@@ -1005,8 +925,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setDialogType
      * @see #showDialog
      */
-    public String getApproveButtonToolTipText()
-    {
+    public String getApproveButtonToolTipText() {
         return approveButtonToolTipText;
     }
 
@@ -1016,8 +935,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #setApproveButtonMnemonic
      */
-    public int getApproveButtonMnemonic()
-    {
+    public int getApproveButtonMnemonic() {
         return approveButtonMnemonic;
     }
 
@@ -1033,17 +951,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #getApproveButtonMnemonic
      */
-    public void setApproveButtonMnemonic(int mnemonic)
-    {
-        if (approveButtonMnemonic == mnemonic)
-        {
+    public void setApproveButtonMnemonic(int mnemonic) {
+        if (approveButtonMnemonic == mnemonic) {
             return;
         }
 
         int oldValue = approveButtonMnemonic;
         approveButtonMnemonic = mnemonic;
         firePropertyChange(APPROVE_BUTTON_MNEMONIC_CHANGED_PROPERTY, oldValue,
-            approveButtonMnemonic);
+                approveButtonMnemonic);
     }
 
     /**
@@ -1052,12 +968,10 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #getApproveButtonMnemonic
      */
-    public void setApproveButtonMnemonic(char mnemonic)
-    {
+    public void setApproveButtonMnemonic(char mnemonic) {
         int vk = (int) mnemonic;
 
-        if ((vk >= 'a') && (vk <= 'z'))
-        {
+        if ((vk >= 'a') && (vk <= 'z')) {
             vk -= ('a' - 'A');
         }
 
@@ -1079,21 +993,18 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setDialogType
      * @see #showDialog
      */
-
     // PENDING(jeff) - have ui set this on dialog type change
-    public void setApproveButtonText(String approveButtonText)
-    {
-        if ((this.approveButtonText == approveButtonText) ||
-                ((this.approveButtonText != null) &&
-                this.approveButtonText.equals(approveButtonText)))
-        {
+    public void setApproveButtonText(String approveButtonText) {
+        if ((this.approveButtonText == approveButtonText)
+                || ((this.approveButtonText != null)
+                && this.approveButtonText.equals(approveButtonText))) {
             return;
         }
 
         String oldValue = this.approveButtonText;
         this.approveButtonText = approveButtonText;
         firePropertyChange(APPROVE_BUTTON_TEXT_CHANGED_PROPERTY, oldValue,
-            approveButtonText);
+                approveButtonText);
     }
 
     /**
@@ -1109,8 +1020,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setDialogType
      * @see #showDialog
      */
-    public String getApproveButtonText()
-    {
+    public String getApproveButtonText() {
         return approveButtonText;
     }
 
@@ -1124,8 +1034,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #removeChoosableFileFilter
      * @see #resetChoosableFileFilters
      */
-    public AbstractVFSFileFilter[] getChoosableFileFilters()
-    {
+    public AbstractVFSFileFilter[] getChoosableFileFilters() {
         return filters.toArray(new AbstractVFSFileFilter[filters.size()]);
     }
 
@@ -1147,17 +1056,14 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #resetChoosableFileFilters
      * @see #setFileSelectionMode
      */
-    public void addChoosableFileFilter(AbstractVFSFileFilter filter)
-    {
-        if ((filter != null) && !filters.contains(filter))
-        {
+    public void addChoosableFileFilter(AbstractVFSFileFilter filter) {
+        if ((filter != null) && !filters.contains(filter)) {
             AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
             filters.add(filter);
             firePropertyChange(CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY,
-                oldValue, getChoosableFileFilters());
+                    oldValue, getChoosableFileFilters());
 
-            if ((fileFilter == null) && (filters.size() == 1))
-            {
+            if ((fileFilter == null) && (filters.size() == 1)) {
                 setFileFilter(filter);
             }
         }
@@ -1171,24 +1077,19 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #getChoosableFileFilters
      * @see #resetChoosableFileFilters
      */
-    public boolean removeChoosableFileFilter(AbstractVFSFileFilter f)
-    {
-        if (filters.contains(f))
-        {
-            if (getFileFilter() == f)
-            {
+    public boolean removeChoosableFileFilter(AbstractVFSFileFilter f) {
+        if (filters.contains(f)) {
+            if (getFileFilter() == f) {
                 setFileFilter(null);
             }
 
             AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
             filters.remove(f);
             firePropertyChange(CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY,
-                oldValue, getChoosableFileFilters());
+                    oldValue, getChoosableFileFilters());
 
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -1202,31 +1103,27 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #getChoosableFileFilters
      * @see #removeChoosableFileFilter
      */
-    public void resetChoosableFileFilters()
-    {
+    public void resetChoosableFileFilters() {
         AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
         setFileFilter(null);
         filters.clear();
 
-        if (isAcceptAllFileFilterUsed())
-        {
+        if (isAcceptAllFileFilterUsed()) {
             addChoosableFileFilter(getAcceptAllFileFilter());
         }
 
         firePropertyChange(CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY, oldValue,
-            getChoosableFileFilters());
+                getChoosableFileFilters());
     }
 
     /**
      * Returns the <code>AcceptAll</code> file filter.
      * For example, on Microsoft Windows this would be All Files (*.*).
      */
-    public AbstractVFSFileFilter getAcceptAllFileFilter()
-    {
+    public AbstractVFSFileFilter getAcceptAllFileFilter() {
         AbstractVFSFileFilter filter = null;
 
-        if (getUI() != null)
-        {
+        if (getUI() != null) {
             filter = getUI().getAcceptAllFileFilter(this);
         }
 
@@ -1239,8 +1136,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setAcceptAllFileFilterUsed
      * @since 1.3
      */
-    public boolean isAcceptAllFileFilterUsed()
-    {
+    public boolean isAcceptAllFileFilterUsed() {
         return useAcceptAllFileFilter;
     }
 
@@ -1262,23 +1158,19 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setFileFilter
      * @since 1.3
      */
-    public void setAcceptAllFileFilterUsed(boolean b)
-    {
+    public void setAcceptAllFileFilterUsed(boolean b) {
         boolean oldValue = useAcceptAllFileFilter;
         useAcceptAllFileFilter = b;
 
-        if (!b)
-        {
+        if (!b) {
             removeChoosableFileFilter(getAcceptAllFileFilter());
-        }
-        else
-        {
+        } else {
             removeChoosableFileFilter(getAcceptAllFileFilter());
             addChoosableFileFilter(getAcceptAllFileFilter());
         }
 
         firePropertyChange(ACCEPT_ALL_FILE_FILTER_USED_CHANGED_PROPERTY,
-            oldValue, useAcceptAllFileFilter);
+                oldValue, useAcceptAllFileFilter);
     }
 
     /**
@@ -1287,8 +1179,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return this VFSJFileChooser's accessory component, or null
      * @see #setAccessory
      */
-    public JComponent getAccessory()
-    {
+    public JComponent getAccessory() {
         return accessory;
     }
 
@@ -1307,8 +1198,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *       bound: true
      * description: Sets the accessory component on the VFSJFileChooser.
      */
-    public void setAccessory(JComponent newAccessory)
-    {
+    public void setAccessory(JComponent newAccessory) {
         JComponent oldValue = accessory;
         accessory = newAccessory;
         firePropertyChange(ACCESSORY_CHANGED_PROPERTY, oldValue, accessory);
@@ -1335,26 +1225,21 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #getFileSelectionMode
      */
-    public void setFileSelectionMode(SELECTION_MODE mode)
-    {
-        if (fileSelectionMode == mode)
-        {
+    public void setFileSelectionMode(SELECTION_MODE mode) {
+        if (fileSelectionMode == mode) {
             return;
         }
 
-        if ((mode == SELECTION_MODE.FILES_ONLY) ||
-                (mode == SELECTION_MODE.DIRECTORIES_ONLY) ||
-                (mode == SELECTION_MODE.FILES_AND_DIRECTORIES))
-        {
+        if ((mode == SELECTION_MODE.FILES_ONLY)
+                || (mode == SELECTION_MODE.DIRECTORIES_ONLY)
+                || (mode == SELECTION_MODE.FILES_AND_DIRECTORIES)) {
             SELECTION_MODE oldValue = fileSelectionMode;
             fileSelectionMode = mode;
             firePropertyChange(FILE_SELECTION_MODE_CHANGED_PROPERTY, oldValue,
-                fileSelectionMode);
-        }
-        else
-        {
+                    fileSelectionMode);
+        } else {
             throw new IllegalArgumentException(
-                "Incorrect Mode for file selection: " + mode);
+                    "Incorrect Mode for file selection: " + mode);
         }
     }
 
@@ -1370,8 +1255,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * </ul>
      * @see #setFileSelectionMode
      */
-    public SELECTION_MODE getFileSelectionMode()
-    {
+    public SELECTION_MODE getFileSelectionMode() {
         return fileSelectionMode;
     }
 
@@ -1382,10 +1266,9 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setFileSelectionMode
      * @see #getFileSelectionMode
      */
-    public boolean isFileSelectionEnabled()
-    {
-        return ((fileSelectionMode == SELECTION_MODE.FILES_ONLY) ||
-        (fileSelectionMode == SELECTION_MODE.FILES_AND_DIRECTORIES));
+    public boolean isFileSelectionEnabled() {
+        return ((fileSelectionMode == SELECTION_MODE.FILES_ONLY)
+                || (fileSelectionMode == SELECTION_MODE.FILES_AND_DIRECTORIES));
     }
 
     /**
@@ -1395,10 +1278,9 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setFileSelectionMode
      * @see #getFileSelectionMode
      */
-    public boolean isDirectorySelectionEnabled()
-    {
-        return ((fileSelectionMode == SELECTION_MODE.DIRECTORIES_ONLY) ||
-        (fileSelectionMode == SELECTION_MODE.FILES_AND_DIRECTORIES));
+    public boolean isDirectorySelectionEnabled() {
+        return ((fileSelectionMode == SELECTION_MODE.DIRECTORIES_ONLY)
+                || (fileSelectionMode == SELECTION_MODE.FILES_AND_DIRECTORIES));
     }
 
     /**
@@ -1411,17 +1293,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #isMultiSelectionEnabled
      */
-    public void setMultiSelectionEnabled(boolean b)
-    {
-        if (multiSelectionEnabled == b)
-        {
+    public void setMultiSelectionEnabled(boolean b) {
+        if (multiSelectionEnabled == b) {
             return;
         }
 
         boolean oldValue = multiSelectionEnabled;
         multiSelectionEnabled = b;
         firePropertyChange(MULTI_SELECTION_ENABLED_CHANGED_PROPERTY, oldValue,
-            multiSelectionEnabled);
+                multiSelectionEnabled);
     }
 
     /**
@@ -1429,8 +1309,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return true if multiple files can be selected
      * @see #setMultiSelectionEnabled
      */
-    public boolean isMultiSelectionEnabled()
-    {
+    public boolean isMultiSelectionEnabled() {
         return multiSelectionEnabled;
     }
 
@@ -1441,8 +1320,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return the status of the file hiding property
      * @see #setFileHidingEnabled
      */
-    public boolean isFileHidingEnabled()
-    {
+    public boolean isFileHidingEnabled() {
         return useFileHiding;
     }
 
@@ -1460,14 +1338,12 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *          turned on
      * @see #isFileHidingEnabled
      */
-    public void setFileHidingEnabled(boolean b)
-    {
+    public void setFileHidingEnabled(boolean b) {
         // Dump showFilesListener since we'll ignore it from now on
-        if (showFilesListener != null)
-        {
+        if (showFilesListener != null) {
             Toolkit.getDefaultToolkit()
-                   .removePropertyChangeListener(SHOW_HIDDEN_PROP,
-                showFilesListener);
+                    .removePropertyChangeListener(SHOW_HIDDEN_PROP,
+                            showFilesListener);
             showFilesListener = null;
         }
 
@@ -1488,38 +1364,28 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param filter the new current file filter to use
      * @see #getFileFilter
      */
-    public void setFileFilter(AbstractVFSFileFilter filter)
-    {
+    public void setFileFilter(AbstractVFSFileFilter filter) {
         AbstractVFSFileFilter oldValue = fileFilter;
         fileFilter = filter;
 
-        if (filter != null)
-        {
-            if (isMultiSelectionEnabled() && (selectedFiles != null) &&
-                    (selectedFiles.length > 0))
-            {
+        if (filter != null) {
+            if (isMultiSelectionEnabled() && (selectedFiles != null)
+                    && (selectedFiles.length > 0)) {
                 List<FileObject> fList = new ArrayList<FileObject>(selectedFiles.length);
                 boolean failed = false;
 
-                for (FileObject aSelectedFile : selectedFiles)
-                {
-                    if (filter.accept(aSelectedFile))
-                    {
+                for (FileObject aSelectedFile : selectedFiles) {
+                    if (filter.accept(aSelectedFile)) {
                         fList.add(aSelectedFile);
-                    }
-                    else
-                    {
+                    } else {
                         failed = true;
                     }
                 }
 
-                if (failed)
-                {
+                if (failed) {
                     setSelectedFiles(EMPTY_FILEOBJECT_ARRAY);
                 }
-            }
-            else if ((selectedFile != null) && !filter.accept(selectedFile))
-            {
+            } else if ((selectedFile != null) && !filter.accept(selectedFile)) {
                 setSelectedFile(null);
             }
         }
@@ -1534,8 +1400,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setFileFilter
      * @see #addChoosableFileFilter
      */
-    public AbstractVFSFileFilter getFileFilter()
-    {
+    public AbstractVFSFileFilter getFileFilter() {
         return fileFilter;
     }
 
@@ -1550,8 +1415,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #getFileView
      */
-    public void setFileView(AbstractVFSFileView fileView)
-    {
+    public void setFileView(AbstractVFSFileView fileView) {
         AbstractVFSFileView oldValue = this.fileView;
         this.fileView = fileView;
         firePropertyChange(FILE_VIEW_CHANGED_PROPERTY, oldValue, fileView);
@@ -1562,8 +1426,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #setFileView
      */
-    public AbstractVFSFileView getFileView()
-    {
+    public AbstractVFSFileView getFileView() {
         return fileView;
     }
 
@@ -1572,41 +1435,35 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * 
      * @param value the converter
      */
-    public void setFileObjectConverter(FileObjectConverter value) 
-    {
-      	fileObjectConverter = value;
+    public void setFileObjectConverter(FileObjectConverter value) {
+        fileObjectConverter = value;
     }
-    
+
     /**
      * Returns the current converter for {@link FileObject} objects.
      * 
      * @return the converter
      */
-    public FileObjectConverter getFileObjectConverter()
-    {
-      	return fileObjectConverter;
+    public FileObjectConverter getFileObjectConverter() {
+        return fileObjectConverter;
     }
 
     /**
-      * Returns the filename.
-      * @param fileObject the <code>File</code>
-      * @return the <code>String</code> containing the filename for
-      *          <code>fileObject</code>
-      * @see FileView#getName
-      */
-    public String getName(FileObject fileObject)
-    {
+     * Returns the filename.
+     * @param fileObject the <code>File</code>
+     * @return the <code>String</code> containing the filename for
+     *          <code>fileObject</code>
+     * @see FileView#getName
+     */
+    public String getName(FileObject fileObject) {
         String filename = null;
 
-        if (fileObject != null)
-        {
-            if (getFileView() != null)
-            {
+        if (fileObject != null) {
+            if (getFileView() != null) {
                 filename = getFileView().getName(fileObject);
             }
 
-            if ((filename == null) && (uiFileView != null))
-            {
+            if ((filename == null) && (uiFileView != null)) {
                 filename = uiFileView.getName(fileObject);
             }
         }
@@ -1621,19 +1478,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *          <code>fileObject</code>
      * @see FileView#getDescription
      */
-    public String getDescription(FileObject fileObject)
-    {
+    public String getDescription(FileObject fileObject) {
         String description = null;
 
-        if (fileObject != null)
-        {
-            if (getFileView() != null)
-            {
+        if (fileObject != null) {
+            if (getFileView() != null) {
                 description = getFileView().getDescription(fileObject);
             }
 
-            if ((description == null) && (uiFileView != null))
-            {
+            if ((description == null) && (uiFileView != null)) {
                 description = uiFileView.getDescription(fileObject);
             }
         }
@@ -1648,19 +1501,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *          <code>fileObject</code>
      * @see FileView#getTypeDescription
      */
-    public String getTypeDescription(FileObject fileObject)
-    {
+    public String getTypeDescription(FileObject fileObject) {
         String typeDescription = null;
 
-        if (fileObject != null)
-        {
-            if (getFileView() != null)
-            {
+        if (fileObject != null) {
+            if (getFileView() != null) {
                 typeDescription = getFileView().getTypeDescription(fileObject);
             }
 
-            if ((typeDescription == null) && (uiFileView != null))
-            {
+            if ((typeDescription == null) && (uiFileView != null)) {
                 typeDescription = uiFileView.getTypeDescription(fileObject);
             }
         }
@@ -1675,19 +1524,15 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return the <code>Icon</code> for this file, or type of file
      * @see FileView#getIcon
      */
-    public Icon getIcon(FileObject fileObject)
-    {
+    public Icon getIcon(FileObject fileObject) {
         Icon icon = null;
 
-        if (fileObject != null)
-        {
-            if (getFileView() != null)
-            {
+        if (fileObject != null) {
+            if (getFileView() != null) {
                 icon = getFileView().getIcon(fileObject);
             }
 
-            if ((icon == null) && (uiFileView != null))
-            {
+            if ((icon == null) && (uiFileView != null)) {
                 icon = uiFileView.getIcon(fileObject);
             }
         }
@@ -1702,24 +1547,19 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return true if the file/directory can be traversed, otherwise false
      * @see FileView#isTraversable
      */
-    public boolean isTraversable(FileObject fileObject)
-    {
+    public boolean isTraversable(FileObject fileObject) {
         Boolean traversable = null;
 
-        if (fileObject != null)
-        {
-            if (getFileView() != null)
-            {
+        if (fileObject != null) {
+            if (getFileView() != null) {
                 traversable = getFileView().isTraversable(fileObject);
             }
 
-            if ((traversable == null) && (uiFileView != null))
-            {
+            if ((traversable == null) && (uiFileView != null)) {
                 traversable = uiFileView.isTraversable(fileObject);
             }
 
-            if (traversable == null)
-            {
+            if (traversable == null) {
                 traversable = getFileSystemView().isTraversable(fileObject);
             }
         }
@@ -1733,12 +1573,10 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return true if the file should be displayed, otherwise false
      * @see FileFilter#accept
      */
-    public boolean accept(FileObject fileObject)
-    {
+    public boolean accept(FileObject fileObject) {
         boolean shown = true;
 
-        if ((fileObject != null) && (fileFilter != null))
-        {
+        if ((fileObject != null) && (fileFilter != null)) {
             shown = fileFilter.accept(fileObject);
         }
 
@@ -1758,12 +1596,11 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see FileSystemView
      */
-    public void setFileSystemView(AbstractVFSFileSystemView fsv)
-    {
+    public void setFileSystemView(AbstractVFSFileSystemView fsv) {
         AbstractVFSFileSystemView oldValue = fileSystemView;
         fileSystemView = fsv;
         firePropertyChange(FILE_SYSTEM_VIEW_CHANGED_PROPERTY, oldValue,
-            fileSystemView);
+                fileSystemView);
     }
 
     /**
@@ -1771,8 +1608,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return the <code>AbstractVFSFileSystemView</code> object
      * @see #setFileSystemView
      */
-    public AbstractVFSFileSystemView getFileSystemView()
-    {
+    public AbstractVFSFileSystemView getFileSystemView() {
         return fileSystemView;
     }
 
@@ -1786,12 +1622,10 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #APPROVE_SELECTION
      */
-    public void approveSelection()
-    {
+    public void approveSelection() {
         returnValue = RETURN_TYPE.APPROVE;
 
-        if (dialog != null)
-        {
+        if (dialog != null) {
             dialog.setVisible(false);
         }
 
@@ -1807,12 +1641,10 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see #CANCEL_SELECTION
      */
-    public void cancelSelection()
-    {
+    public void cancelSelection() {
         returnValue = RETURN_TYPE.CANCEL;
 
-        if (dialog != null)
-        {
+        if (dialog != null) {
             dialog.setVisible(false);
         }
 
@@ -1825,8 +1657,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #approveSelection
      * @see #cancelSelection
      */
-    public void addActionListener(ActionListener l)
-    {
+    public void addActionListener(ActionListener l) {
         listenerList.add(ActionListener.class, l);
     }
 
@@ -1835,8 +1666,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param l  the listener to be removed
      * @see #addActionListener
      */
-    public void removeActionListener(ActionListener l)
-    {
+    public void removeActionListener(ActionListener l) {
         listenerList.remove(ActionListener.class, l);
     }
 
@@ -1853,8 +1683,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @since 1.4
      */
-    public ActionListener[] getActionListeners()
-    {
+    public ActionListener[] getActionListeners() {
         return (ActionListener[]) listenerList.getListeners(ActionListener.class);
     }
 
@@ -1865,20 +1694,16 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @see EventListenerList
      */
-    protected void fireActionPerformed(String command)
-    {
+    protected void fireActionPerformed(String command) {
         // Guaranteed to return a non-null array
         Object[] listeners = listenerList.getListenerList();
         long mostRecentEventTime = EventQueue.getMostRecentEventTime();
         int modifiers = 0;
         AWTEvent currentEvent = EventQueue.getCurrentEvent();
 
-        if (currentEvent instanceof InputEvent)
-        {
+        if (currentEvent instanceof InputEvent) {
             modifiers = ((InputEvent) currentEvent).getModifiers();
-        }
-        else if (currentEvent instanceof ActionEvent)
-        {
+        } else if (currentEvent instanceof ActionEvent) {
             modifiers = ((ActionEvent) currentEvent).getModifiers();
         }
 
@@ -1886,13 +1711,10 @@ public class VFSJFileChooser extends JComponent implements Accessible
 
         // Process the listeners last to first, notifying
         // those that are interested in this event
-        for (int i = listeners.length - 2; i >= 0; i -= 2)
-        {
-            if (listeners[i] == ActionListener.class)
-            {
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if (listeners[i] == ActionListener.class) {
                 // Lazily create the event:
-                if (e == null)
-                {
+                if (e == null) {
                     e = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
                             command, mostRecentEventTime, modifiers);
                 }
@@ -1907,29 +1729,24 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see JComponent#updateUI
      */
     @Override
-    public void updateUI()
-    {
-        if (isAcceptAllFileFilterUsed())
-        {
+    public void updateUI() {
+        if (isAcceptAllFileFilterUsed()) {
             removeChoosableFileFilter(getAcceptAllFileFilter());
         }
 
-        if (defaultUI == null)
-        {
+        if (defaultUI == null) {
             defaultUI = createDefaultUI();
             setUI(defaultUI);
         }
 
-        if (fileSystemView == null)
-        {
+        if (fileSystemView == null) {
             // We were probably deserialized
             setFileSystemView(AbstractVFSFileSystemView.getFileSystemView());
         }
 
         uiFileView = getUI().getFileView(this);
 
-        if (isAcceptAllFileFilterUsed())
-        {
+        if (isAcceptAllFileFilterUsed()) {
             addChoosableFileFilter(getAcceptAllFileFilter());
         }
     }
@@ -1946,8 +1763,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *   description: A string that specifies the name of the L&F class.
      */
     @Override
-    public String getUIClassID()
-    {
+    public String getUIClassID() {
         return uiClassID;
     }
 
@@ -1956,18 +1772,16 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @return the FileChooserUI object that implements the FileChooserUI L&F
      */
-    public AbstractVFSFileChooserUI getUI()
-    {
+    public AbstractVFSFileChooserUI getUI() {
         return (AbstractVFSFileChooserUI) defaultUI;
     }
-    
+
     /**
      * Returns the default UI to use.
      * 
      * @return the default UI
      */
-    protected MetalVFSFileChooserUI createDefaultUI() 
-    {
+    protected MetalVFSFileChooserUI createDefaultUI() {
         return new MetalVFSFileChooserUI(this);
     }
 
@@ -1977,8 +1791,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * information about serialization in Swing.
      */
     private void readObject(java.io.ObjectInputStream in)
-        throws IOException, ClassNotFoundException
-    {
+            throws IOException, ClassNotFoundException {
     }
 
     /**
@@ -1986,8 +1799,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * <code>JComponent</code> for more
      * information about serialization in Swing.
      */
-    private void writeObject(ObjectOutputStream s) throws IOException
-    {
+    private void writeObject(ObjectOutputStream s) throws IOException {
     }
 
     /**
@@ -2001,109 +1813,105 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return  a string representation of this <code>VFSJFileChooser</code>
      */
     @Override
-    protected String paramString()
-    {
+    protected String paramString() {
         String approveButtonTextString = ((approveButtonText != null)
-            ? approveButtonText : "");
+                ? approveButtonText : "");
         String dialogTitleString = ((dialogTitle != null) ? dialogTitle : "");
         String dialogTypeString;
 
-        switch (dialogType)
-        {
-        case OPEN:
-            dialogTypeString = "OPEN_DIALOG";
+        switch (dialogType) {
+            case OPEN:
+                dialogTypeString = "OPEN_DIALOG";
 
-            break;
+                break;
 
-        case SAVE:
-            dialogTypeString = "SAVE_DIALOG";
+            case SAVE:
+                dialogTypeString = "SAVE_DIALOG";
 
-            break;
+                break;
 
-        case CUSTOM:
-            dialogTypeString = "CUSTOM_DIALOG";
+            case CUSTOM:
+                dialogTypeString = "CUSTOM_DIALOG";
 
-            break;
+                break;
 
-        default:
-            dialogTypeString = "";
+            default:
+                dialogTypeString = "";
 
-            break;
+                break;
         }
 
         String returnValueString;
 
-        switch (returnValue)
-        {
-        case CANCEL:
-            returnValueString = "CANCEL_OPTION";
+        switch (returnValue) {
+            case CANCEL:
+                returnValueString = "CANCEL_OPTION";
 
-            break;
+                break;
 
-        case APPROVE:
-            returnValueString = "APPROVE_OPTION";
+            case APPROVE:
+                returnValueString = "APPROVE_OPTION";
 
-            break;
+                break;
 
-        case ERROR:
-            returnValueString = "ERROR_OPTION";
+            case ERROR:
+                returnValueString = "ERROR_OPTION";
 
-            break;
+                break;
 
-        default:
-            returnValueString = "";
+            default:
+                returnValueString = "";
 
-            break;
+                break;
         }
 
         String useFileHidingString = (useFileHiding ? "true" : "false");
         String fileSelectionModeString;
 
-        switch (fileSelectionMode)
-        {
-        case FILES_ONLY:
-            fileSelectionModeString = "FILES_ONLY";
+        switch (fileSelectionMode) {
+            case FILES_ONLY:
+                fileSelectionModeString = "FILES_ONLY";
 
-            break;
+                break;
 
-        case DIRECTORIES_ONLY:
-            fileSelectionModeString = "DIRECTORIES_ONLY";
+            case DIRECTORIES_ONLY:
+                fileSelectionModeString = "DIRECTORIES_ONLY";
 
-            break;
+                break;
 
-        case FILES_AND_DIRECTORIES:
-            fileSelectionModeString = "FILES_AND_DIRECTORIES";
+            case FILES_AND_DIRECTORIES:
+                fileSelectionModeString = "FILES_AND_DIRECTORIES";
 
-            break;
+                break;
 
-        default:
-            fileSelectionModeString = "";
+            default:
+                fileSelectionModeString = "";
 
-            break;
+                break;
         }
 
         String currentDirectoryString = ((currentDirectory != null)
-            ? currentDirectory.toString() : "");
+                ? currentDirectory.toString() : "");
         String selectedFileString = ((selectedFile != null)
-            ? selectedFile.toString() : "");
+                ? selectedFile.toString() : "");
 
         return new StringBuilder(super.paramString()).append(
-            ",approveButtonText=").append(approveButtonTextString)
-                                                     .append(",currentDirectory=")
-                                                     .append(currentDirectoryString)
-                                                     .append(",dialogTitle=")
-                                                     .append(dialogTitleString)
-                                                     .append(",dialogType=")
-                                                     .append(dialogTypeString)
-                                                     .append(",fileSelectionMode=")
-                                                     .append(fileSelectionModeString)
-                                                     .append(",returnValue=")
-                                                     .append(returnValueString)
-                                                     .append(",selectedFile=")
-                                                     .append(selectedFileString)
-                                                     .append(",useFileHiding=")
-                                                     .append(useFileHidingString)
-                                                     .toString();
+                ",approveButtonText=").append(approveButtonTextString)
+                .append(",currentDirectory=")
+                .append(currentDirectoryString)
+                .append(",dialogTitle=")
+                .append(dialogTitleString)
+                .append(",dialogType=")
+                .append(dialogTypeString)
+                .append(",fileSelectionMode=")
+                .append(fileSelectionModeString)
+                .append(",returnValue=")
+                .append(returnValueString)
+                .append(",selectedFile=")
+                .append(selectedFileString)
+                .append(",useFileHiding=")
+                .append(useFileHidingString)
+                .toString();
     }
 
     /**
@@ -2116,44 +1924,38 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *         AccessibleContext of this VFSJFileChooser
      */
     @Override
-    public AccessibleContext getAccessibleContext()
-    {
-        if (m_accessibleContext == null)
-        {
+    public AccessibleContext getAccessibleContext() {
+        if (m_accessibleContext == null) {
             m_accessibleContext = new AccessibleJFileChooser();
         }
 
         return m_accessibleContext;
     }
 
-    private static class WeakPCL implements PropertyChangeListener
-    {
+    private static class WeakPCL implements PropertyChangeListener {
+
         WeakReference<VFSJFileChooser> jfcRef;
 
-        public WeakPCL(VFSJFileChooser jfc)
-        {
+        public WeakPCL(VFSJFileChooser jfc) {
             jfcRef = new WeakReference<VFSJFileChooser>(jfc);
         }
 
-        public void propertyChange(PropertyChangeEvent ev)
-        {
+        @Override
+        public void propertyChange(PropertyChangeEvent ev) {
             assert ev.getPropertyName().equals(SHOW_HIDDEN_PROP);
 
             VFSJFileChooser jfc = jfcRef.get();
 
-            if (jfc == null)
-            {
+            if (jfc == null) {
                 // Our VFSJFileChooser is no longer around, so we no longer need to
                 // listen for PropertyChangeEvents.
                 Toolkit.getDefaultToolkit()
-                       .removePropertyChangeListener(SHOW_HIDDEN_PROP, this);
-            }
-            else
-            {
+                        .removePropertyChangeListener(SHOW_HIDDEN_PROP, this);
+            } else {
                 boolean oldValue = jfc.useFileHiding;
                 jfc.useFileHiding = !((Boolean) ev.getNewValue()).booleanValue();
                 jfc.firePropertyChange(FILE_HIDING_CHANGED_PROPERTY, oldValue,
-                    jfc.useFileHiding);
+                        jfc.useFileHiding);
             }
         }
     }
@@ -2164,8 +1966,8 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * Java Accessibility API appropriate to file chooser user-interface
      * elements.
      */
-    protected class AccessibleJFileChooser extends AccessibleJComponent
-    {
+    protected class AccessibleJFileChooser extends AccessibleJComponent {
+
         /**
          * Gets the role of this object.
          *
@@ -2174,8 +1976,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
          * @see AccessibleRole
          */
         @Override
-        public AccessibleRole getAccessibleRole()
-        {
+        public AccessibleRole getAccessibleRole() {
             return AccessibleRole.FILE_CHOOSER;
         }
     } // inner class AccessibleJFileChooser
@@ -2185,17 +1986,17 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @author Yves Zoundi <yveszoundi at users dot sf dot net>
      * @version 0.0.1
      */
-    public enum DIALOG_TYPE
-    {
+    public enum DIALOG_TYPE {
+
         /**
-        * Type value indicating that the <code>VFSJFileChooser</code> supports an
-        * "Open" file operation.
-        */
+         * Type value indicating that the <code>VFSJFileChooser</code> supports an
+         * "Open" file operation.
+         */
         OPEN,
         /**
-        * Type value indicating that the <code>VFSJFileChooser</code> supports a
-        * "Save" file operation.
-        */
+         * Type value indicating that the <code>VFSJFileChooser</code> supports a
+         * "Save" file operation.
+         */
         SAVE,
         /**
          * Type value indicating that the <code>VFSJFileChooser</code> supports a
@@ -2210,23 +2011,23 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @author Stan Love
      * @version 0.0.2
      */
-    public enum RETURN_TYPE
-    {
+    public enum RETURN_TYPE {
+
         /**
-        * Return value if cancel is chosen.
-        */
+         * Return value if cancel is chosen.
+         */
         CANCEL,
         /**
-        * Return value if approve (yes, ok) is chosen.
-        */
+         * Return value if approve (yes, ok) is chosen.
+         */
         APPROVE,
         /**
-        * Return value if an error occured.
-        */
+         * Return value if an error occured.
+         */
         ERROR,
         /**
-        * Return value so users can pre-set a selection value
-        */
+         * Return value so users can pre-set a selection value
+         */
         NO_SELECTION;
 
     }
@@ -2236,8 +2037,8 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @author Yves Zoundi <yveszoundi at users dot sf dot net>
      * @version 0.0.1
      */
-    public enum SELECTION_MODE
-    {
+    public enum SELECTION_MODE {
+
         /** files selection */
         FILES_ONLY,
         /** directories selection */

@@ -20,67 +20,60 @@ package com.googlecode.vfsjfilechooser2.utils;
 
 import junit.framework.TestCase;
 
-
 import java.util.logging.Logger;
 
 import com.googlecode.vfsjfilechooser2.accessories.connection.Protocol;
 import com.googlecode.vfsjfilechooser2.utils.VFSURIParser;
-
 
 /**
  * Unit test for the VFS URI parser
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public class VFSURIParserTest extends TestCase
-{
+public class VFSURIParserTest extends TestCase {
+
     private static final Logger logger = Logger.getLogger(VFSURIParserTest.class.getName());
 
-    public VFSURIParserTest(String testName)
-    {
+    public VFSURIParserTest(String testName) {
         super(testName);
     }
 
     /**
      * Parsing local files
      */
-    public void testParseLocalFiles()
-    {
+    public void testParseLocalFiles() {
         logger.info("Testing VFSURIParser for local files\n");
 
         // testing local files
-
         VFSURIParser parser;
-        
-            parser = new VFSURIParser("file:///C:/home/birdman");
-            assertEquals(Protocol.FILE, parser.getProtocol());
-            assertEquals("C:/home/birdman", parser.getPath());
-            assertNull(parser.getHostname());
-            assertNull(parser.getPortnumber());
-            assertNull(parser.getUsername());
-            assertNull(parser.getPassword());
-       
-            parser = new VFSURIParser("file:///home/birdman");
-            assertEquals(Protocol.FILE, parser.getProtocol());
-            assertEquals("/home/birdman", parser.getPath());
-            assertNull(parser.getHostname());
-            assertNull(parser.getPortnumber());
-            assertNull(parser.getUsername());
-            assertNull(parser.getPassword());
-        
+
+        parser = new VFSURIParser("file:///C:/home/birdman");
+        assertEquals(Protocol.FILE, parser.getProtocol());
+        assertEquals("C:/home/birdman", parser.getPath());
+        assertNull(parser.getHostname());
+        assertNull(parser.getPortnumber());
+        assertNull(parser.getUsername());
+        assertNull(parser.getPassword());
+
+        parser = new VFSURIParser("file:///home/birdman");
+        assertEquals(Protocol.FILE, parser.getProtocol());
+        assertEquals("/home/birdman", parser.getPath());
+        assertNull(parser.getHostname());
+        assertNull(parser.getPortnumber());
+        assertNull(parser.getUsername());
+        assertNull(parser.getPassword());
+
     }
 
     /**
      * Parsing with a default port number
      */
-    public void testParseDefaultPort()
-    {
+    public void testParseDefaultPort() {
         logger.info("Testing VFSURIParser for remote files(default port)\n");
 
         VFSURIParser parser;
 
-        try
-        {
+        try {
             //////////////////////////////////////////////////////////
             //  TESTING WITH DEFAULT PORT
             //////////////////////////////////////////////////////////
@@ -90,7 +83,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/", parser.getPath());
             assertEquals("shell.sf.net", parser.getHostname());
             assertEquals(Protocol.SFTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertNull(parser.getUsername());
             assertNull(parser.getPassword());
 
@@ -100,7 +93,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/", parser.getPath());
             assertEquals("ftp.ca.freebsd.org", parser.getHostname());
             assertEquals(Protocol.FTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertNull(parser.getUsername());
             assertNull(parser.getPassword());
 
@@ -110,7 +103,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/home/yves", parser.getPath());
             assertEquals("myserver.net", parser.getHostname());
             assertEquals(Protocol.WEBDAV.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertNull(parser.getUsername());
             assertNull(parser.getPassword());
 
@@ -120,7 +113,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/", parser.getPath());
             assertEquals("shell.sf.net", parser.getHostname());
             assertEquals(Protocol.SFTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertEquals("yves", parser.getUsername());
             assertNull(parser.getPassword());
 
@@ -130,7 +123,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/", parser.getPath());
             assertEquals("shell.sf.net", parser.getHostname());
             assertEquals(Protocol.SFTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertEquals("yves", parser.getUsername());
             assertEquals("yves", parser.getPassword());
 
@@ -140,7 +133,7 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/home/yves", parser.getPath());
             assertEquals("shell.sf.net", parser.getHostname());
             assertEquals(Protocol.SFTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertEquals("yves", parser.getUsername());
             assertNull(parser.getPassword());
 
@@ -150,12 +143,10 @@ public class VFSURIParserTest extends TestCase
             assertEquals("/home/yves", parser.getPath());
             assertEquals("shell.sf.net", parser.getHostname());
             assertEquals(Protocol.SFTP.getPort(),
-                Integer.parseInt(parser.getPortnumber()));
+                    Integer.parseInt(parser.getPortnumber()));
             assertEquals("yves", parser.getUsername());
             assertEquals("yves", parser.getPassword());
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             fail("Error in the parser\n" + ex.getMessage());
         }
     }
@@ -163,8 +154,7 @@ public class VFSURIParserTest extends TestCase
     /**
      * parsing with a custom port number
      */
-    public void testParseCustomPort()
-    {
+    public void testParseCustomPort() {
         logger.info("Testing VFSURIParser for remote files(custom port)\n");
 
         VFSURIParser parser;

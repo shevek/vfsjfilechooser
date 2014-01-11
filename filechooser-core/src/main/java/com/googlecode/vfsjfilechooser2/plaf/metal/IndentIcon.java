@@ -23,14 +23,13 @@ import java.awt.Graphics;
 
 import javax.swing.Icon;
 
-
 /**
  * Icon in the navigation panel (home, up, new, etc.)
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-final class IndentIcon implements Icon
-{
+final class IndentIcon implements Icon {
+
     private final static int space = 10;
     private Icon icon = null;
     protected int depth = 0;
@@ -38,43 +37,34 @@ final class IndentIcon implements Icon
     /**
      * @param icone
      */
-    public IndentIcon(final Icon icone)
-    {
+    public IndentIcon(final Icon icone) {
         icon = icone;
     }
 
-    public void paintIcon(Component c, Graphics g, int x, int y)
-    {
-        if (icon == null)
-        {
-        }
-        else
-        {
-            if (c.getComponentOrientation().isLeftToRight())
-            {
+    @Override
+    public void paintIcon(Component c, Graphics g, int x, int y) {
+        if (icon == null) {
+        } else {
+            if (c.getComponentOrientation().isLeftToRight()) {
                 icon.paintIcon(c, g, x + (depth * space), y);
-            }
-            else
-            {
+            } else {
                 icon.paintIcon(c, g, x, y);
             }
         }
     }
 
-    public int getIconWidth()
-    {
-        if (icon == null)
-        {
+    @Override
+    public int getIconWidth() {
+        if (icon == null) {
             return depth * space;
         }
 
         return icon.getIconWidth() + (depth * space);
     }
 
-    public int getIconHeight()
-    {
-        if (icon == null)
-        {
+    @Override
+    public int getIconHeight() {
+        if (icon == null) {
             return depth * space;
         }
 

@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -44,7 +43,6 @@ import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
-
 /**
  * Bookmarks manager panel
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
@@ -52,8 +50,8 @@ import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class BookmarksManagerPanel extends JPanel
-{
+public class BookmarksManagerPanel extends JPanel {
+
     public static final int NO_BOOKMARK_SELECTION_INDEX = -1;
     private JScrollPane scrollPane;
     private JTable table;
@@ -70,8 +68,7 @@ public class BookmarksManagerPanel extends JPanel
     private BookmarksDialog parentDialog;
 
     public BookmarksManagerPanel(BookmarksDialog parentDialog,
-        VFSJFileChooser chooser)
-    {
+            VFSJFileChooser chooser) {
         this.parentDialog = parentDialog;
         this.chooser = chooser;
 
@@ -84,42 +81,42 @@ public class BookmarksManagerPanel extends JPanel
         table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
         bCancel = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.closeButtonText"));
+                "VFSJFileChooser.closeButtonText"));
 
         bOpen = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.openButtonText"));
+                "VFSJFileChooser.openButtonText"));
         bOpen.setIcon(new ImageIcon(getClass()
-                                        .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/document-open.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/document-open.png")));
         bOpen.setHorizontalAlignment(SwingConstants.LEFT);
 
         bAdd = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.addButtonText"));
+                "VFSJFileChooser.addButtonText"));
         bAdd.setIcon(new ImageIcon(getClass()
-                                       .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/list-add.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/list-add.png")));
         bAdd.setHorizontalAlignment(SwingConstants.LEFT);
 
         bEdit = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.editButtonText"));
+                "VFSJFileChooser.editButtonText"));
         bEdit.setIcon(new ImageIcon(getClass()
-                                        .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/book_edit.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/book_edit.png")));
         bEdit.setHorizontalAlignment(SwingConstants.LEFT);
 
         bDelete = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.deleteButtonText"));
+                "VFSJFileChooser.deleteButtonText"));
         bDelete.setIcon(new ImageIcon(getClass()
-                                          .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/list-remove.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/list-remove.png")));
         bDelete.setHorizontalAlignment(SwingConstants.LEFT);
 
         bMoveUp = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.moveUpButtonText"));
+                "VFSJFileChooser.moveUpButtonText"));
         bMoveUp.setIcon(new ImageIcon(getClass()
-                                          .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/go-up.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/go-up.png")));
         bMoveUp.setHorizontalAlignment(SwingConstants.LEFT);
 
         bMoveDown = new JButton(VFSResources.getMessage(
-                    "VFSJFileChooser.moveDownButtonText"));
+                "VFSJFileChooser.moveDownButtonText"));
         bMoveDown.setIcon(new ImageIcon(getClass()
-                                            .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/go-down.png")));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/go-down.png")));
         bMoveDown.setHorizontalAlignment(SwingConstants.LEFT);
 
         final ActionHandler ah = new ActionHandler();
@@ -161,183 +158,139 @@ public class BookmarksManagerPanel extends JPanel
                 UIManager.getColor("Panel.background")));
     }
 
-    public Bookmarks getModel()
-    {
+    public Bookmarks getModel() {
         return model;
     }
 
-    public void cancel()
-    {
+    public void cancel() {
         parentDialog.setVisible(false);
     }
 
-    private class ActionHandler implements ActionListener
-    {
-        public void actionPerformed(ActionEvent actionEvent)
-        {
+    private class ActionHandler implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
             JButton button = (JButton) actionEvent.getSource();
 
             final int row = table.getSelectedRow();
 
-            if (button.equals(bAdd))
-            {
+            if (button.equals(bAdd)) {
                 parentDialog.showEditorView(NO_BOOKMARK_SELECTION_INDEX);
-            }
-            else if (button.equals(bEdit))
-            {
-                if (row != NO_BOOKMARK_SELECTION_INDEX)
-                {
+            } else if (button.equals(bEdit)) {
+                if (row != NO_BOOKMARK_SELECTION_INDEX) {
                     parentDialog.showEditorView(row);
-                }
-                else
-                {
+                } else {
                     JOptionPane.showMessageDialog(getParent(),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.noselectionLabel"),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.errorLabel"),
-                        JOptionPane.ERROR_MESSAGE);
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.noselectionLabel"),
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.errorLabel"),
+                            JOptionPane.ERROR_MESSAGE);
                 }
-            }
-            else if (button.equals(bOpen))
-            {
-                if (row != NO_BOOKMARK_SELECTION_INDEX)
-                {
-                    Thread worker = new Thread()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                setCursor(Cursor.getPredefinedCursor(
-                                        Cursor.WAIT_CURSOR));
+            } else if (button.equals(bOpen)) {
+                if (row != NO_BOOKMARK_SELECTION_INDEX) {
+                    Thread worker = new Thread() {
+                        @Override
+                        public void run() {
+                            setCursor(Cursor.getPredefinedCursor(
+                                    Cursor.WAIT_CURSOR));
 
-                                TitledURLEntry aTitledURLEntry = model.getEntry(row);
+                            TitledURLEntry aTitledURLEntry = model.getEntry(row);
 
-                                FileObject fo = null;
+                            FileObject fo = null;
 
-                                try
-                                {
-                                    fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
+                            try {
+                                fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
 
-                                    if ((fo != null) && !fo.exists())
-                                    {
-                                        fo = null;
-                                    }
-                                }
-                                catch (Exception exc)
-                                {
+                                if ((fo != null) && !fo.exists()) {
                                     fo = null;
                                 }
-
-                                setCursor(Cursor.getDefaultCursor());
-
-                                if (fo == null)
-                                {
-                                    StringBuilder msg = new StringBuilder();
-                                    msg.append("Failed to connect to ");
-                                    msg.append(aTitledURLEntry.getURL());
-                                    msg.append("\n");
-                                    msg.append(
-                                        "Please check URL entry and try again.");
-                                    JOptionPane.showMessageDialog(null, msg,
-                                        "Error", JOptionPane.ERROR_MESSAGE);
-                                }
-                                else
-                                {
-                                    chooser.setCurrentDirectory(fo);
-                                    parentDialog.setVisible(false);
-                                }
+                            } catch (Exception exc) {
+                                fo = null;
                             }
-                        };
+
+                            setCursor(Cursor.getDefaultCursor());
+
+                            if (fo == null) {
+                                StringBuilder msg = new StringBuilder();
+                                msg.append("Failed to connect to ");
+                                msg.append(aTitledURLEntry.getURL());
+                                msg.append("\n");
+                                msg.append(
+                                        "Please check URL entry and try again.");
+                                JOptionPane.showMessageDialog(null, msg,
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                chooser.setCurrentDirectory(fo);
+                                parentDialog.setVisible(false);
+                            }
+                        }
+                    };
 
                     worker.setPriority(Thread.MIN_PRIORITY);
                     SwingUtilities.invokeLater(worker);
-                }
-                else
-                {
+                } else {
                     JOptionPane.showMessageDialog(getParent(),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.noselectionLabel"),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.errorLabel"),
-                        JOptionPane.ERROR_MESSAGE);
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.noselectionLabel"),
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.errorLabel"),
+                            JOptionPane.ERROR_MESSAGE);
                 }
-            }
-            else if (button.equals(bDelete))
-            {
+            } else if (button.equals(bDelete)) {
                 int[] rows = table.getSelectedRows();
 
-                if (rows.length == 0)
-                {
+                if (rows.length == 0) {
                     JOptionPane.showMessageDialog(getParent(),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.noselectionLabel"),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.errorLabel"),
-                        JOptionPane.ERROR_MESSAGE);
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.noselectionLabel"),
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.errorLabel"),
+                            JOptionPane.ERROR_MESSAGE);
 
                     return;
-                }
-                else
-                {
-                    for (int i = rows.length - 1; i >= 0; i--)
-                    {
+                } else {
+                    for (int i = rows.length - 1; i >= 0; i--) {
                         model.delete(rows[i]);
                     }
                 }
-            }
-            else if (button.equals(bMoveUp))
-            {
+            } else if (button.equals(bMoveUp)) {
                 int[] rows = table.getSelectedRows();
 
-                if (rows.length == 0)
-                {
+                if (rows.length == 0) {
                     JOptionPane.showMessageDialog(getParent(),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.noselectionLabel"),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.errorLabel"),
-                        JOptionPane.ERROR_MESSAGE);
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.noselectionLabel"),
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.errorLabel"),
+                            JOptionPane.ERROR_MESSAGE);
 
                     return;
-                }
-                else if (rows.length > 1)
-                {
+                } else if (rows.length > 1) {
                     return;
-                }
-                else if (rows[0] > 0)
-                {
+                } else if (rows[0] > 0) {
                     model.moveup(rows[0]);
                     table.setRowSelectionInterval(rows[0] - 1, rows[0] - 1);
                 }
-            }
-            else if (button.equals(bMoveDown))
-            {
+            } else if (button.equals(bMoveDown)) {
                 int[] rows = table.getSelectedRows();
 
-                if (rows.length == 0)
-                {
+                if (rows.length == 0) {
                     JOptionPane.showMessageDialog(getParent(),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.noselectionLabel"),
-                        VFSResources.getMessage(
-                            "VFSJFileChooser.errorLabel"),
-                        JOptionPane.ERROR_MESSAGE);
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.noselectionLabel"),
+                            VFSResources.getMessage(
+                                    "VFSJFileChooser.errorLabel"),
+                            JOptionPane.ERROR_MESSAGE);
 
                     return;
-                }
-                else if (rows.length > 1)
-                {
+                } else if (rows.length > 1) {
                     return;
-                }
-                else if (rows[0] < (model.getRowCount() - 1))
-                {
+                } else if (rows[0] < (model.getRowCount() - 1)) {
                     model.movedown(rows[0]);
                     table.setRowSelectionInterval(rows[0] + 1, rows[0] + 1);
                 }
-            }
-            else if (button.equals(bCancel))
-            {
+            } else if (button.equals(bCancel)) {
                 cancel();
             }
         }

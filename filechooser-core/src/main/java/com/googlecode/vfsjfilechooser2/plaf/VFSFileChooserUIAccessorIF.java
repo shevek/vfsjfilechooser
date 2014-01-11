@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf;
 
-
 import org.apache.commons.vfs2.FileObject;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
@@ -30,14 +29,13 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionListener;
 
-
 /**
  * Interface for a delegate class of the FileChooserUI
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public interface VFSFileChooserUIAccessorIF
-{
+public interface VFSFileChooserUIAccessorIF {
+
     /**
      *
      * @return
@@ -57,9 +55,9 @@ public interface VFSFileChooserUIAccessorIF
     public JPanel createList();
 
     /**
-    *
-    * @return
-    */
+     *
+     * @return
+     */
     public JPanel createDetailsView();
 
     /**

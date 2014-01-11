@@ -18,7 +18,6 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -31,14 +30,13 @@ import javax.swing.text.JTextComponent;
 
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 
-
 /**
  * Right click popup menu handler
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public final class PopupHandler extends MouseAdapter
-{
+public final class PopupHandler extends MouseAdapter {
+
     private JTextComponent txt;
     private JPopupMenu popup = new JPopupMenu();
     private JMenuItem copyItem;
@@ -50,64 +48,58 @@ public final class PopupHandler extends MouseAdapter
     /**
      * Create a new instance of PopupListener
      */
-    private PopupHandler()
-    {
+    private PopupHandler() {
         // initialize the menu items of the popup menu
         clearItem = new JMenuItem(VFSResources.getMessage(
-                    "VFSJFileChooser.clearItemText"));
+                "VFSJFileChooser.clearItemText"));
         copyItem = new JMenuItem(VFSResources.getMessage(
-                    "VFSJFileChooser.copyItemText"));
+                "VFSJFileChooser.copyItemText"));
         pasteItem = new JMenuItem(VFSResources.getMessage(
-                    "VFSJFileChooser.pasteItemText"));
+                "VFSJFileChooser.pasteItemText"));
         cutItem = new JMenuItem(VFSResources.getMessage(
-                    "VFSJFileChooser.cutItemText"));
+                "VFSJFileChooser.cutItemText"));
         selectAllItem = new JMenuItem(VFSResources.getMessage(
-                    "VFSJFileChooser.selectAllItemText"));
+                "VFSJFileChooser.selectAllItemText"));
 
         // listener for the cut item
-        cutItem.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    txt.cut();
-                }
-            });
+        cutItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt.cut();
+            }
+        });
 
         // listener for the copy item
-        copyItem.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    txt.copy();
-                }
-            });
+        copyItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt.copy();
+            }
+        });
 
         // listener for the paste menu item
-        pasteItem.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    txt.paste();
-                }
-            });
+        pasteItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt.paste();
+            }
+        });
 
         // listener for the "clear" menu item
-        clearItem.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    txt.setText("");
-                }
-            });
+        clearItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt.setText("");
+            }
+        });
 
         // listener for the "Select all" menu item
-        selectAllItem.addActionListener(new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    txt.selectAll();
-                }
-            });
+        selectAllItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt.selectAll();
+            }
+        });
 
         // add the menu items to the popup menu
         popup.add(cutItem);
@@ -119,15 +111,15 @@ public final class PopupHandler extends MouseAdapter
 
     private static final PopupHandler INSTANCE = new PopupHandler();
 
-    public static void installDefaultMouseListener(JTextComponent jtc){
+    public static void installDefaultMouseListener(JTextComponent jtc) {
         jtc.addMouseListener(INSTANCE);
     }
+
     /**
      * Create a new instance of PopupListener
      * @param popup A popup menu
      */
-    public PopupHandler(JPopupMenu popup)
-    {
+    public PopupHandler(JPopupMenu popup) {
         setPopup(popup);
     }
 
@@ -136,10 +128,8 @@ public final class PopupHandler extends MouseAdapter
      * @see  java.awt.event.MouseAdapter#mouseReleased(java.awt.event.MouseEvent)
      */
     @Override
-    public void mouseReleased(MouseEvent e)
-    {
-        if (e.isPopupTrigger() || SwingUtilities.isRightMouseButton(e))
-        {
+    public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger() || SwingUtilities.isRightMouseButton(e)) {
             txt = (JTextComponent) e.getSource();
 
             final boolean editable = txt.isEditable();
@@ -156,8 +146,7 @@ public final class PopupHandler extends MouseAdapter
      * Set the popup menu associated to this listener
      * @param popup The popup menu associated to this listener
      */
-    public void setPopup(JPopupMenu popup)
-    {
+    public void setPopup(JPopupMenu popup) {
         this.popup = popup;
     }
 
@@ -165,8 +154,7 @@ public final class PopupHandler extends MouseAdapter
      * Returns the popup menu associated to this listener
      * @return The popup menu associated to this listener
      */
-    public JPopupMenu getPopup()
-    {
+    public JPopupMenu getPopup() {
         return popup;
     }
 }

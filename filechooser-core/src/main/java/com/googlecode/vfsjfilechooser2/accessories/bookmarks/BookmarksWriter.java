@@ -40,125 +40,124 @@ import javax.crypto.spec.*;
  * @version 0.0.2
  */
 final class BookmarksWriter {
-	private Writer writer;
 
-	public BookmarksWriter() {
-	}
+    private Writer writer;
 
-	private void startAttribute(String name, String value) throws IOException {
-		writer.write(" ");
-		writer.write(name);
-		writer.write(" =");
-		writer.write("\"");
-		writer.write(value);
-		writer.write("\"");
-	}
+    public BookmarksWriter() {
+    }
 
-	private void startTag(String name) throws IOException {
-		writer.write("<" + name + ">");
-	}
+    private void startAttribute(String name, String value) throws IOException {
+        writer.write(" ");
+        writer.write(name);
+        writer.write(" =");
+        writer.write("\"");
+        writer.write(value);
+        writer.write("\"");
+    }
 
-	private void startNewLine() throws IOException {
-		writer.write("\n");
-	}
+    private void startTag(String name) throws IOException {
+        writer.write("<" + name + ">");
+    }
 
-	private void endTag(String tagName) throws IOException {
-		writer.write("</" + tagName + ">");
-	}
+    private void startNewLine() throws IOException {
+        writer.write("\n");
+    }
 
-	private void writeData(List<TitledURLEntry> entries)
-			throws java.io.IOException {
-		startTag("entries");
+    private void endTag(String tagName) throws IOException {
+        writer.write("</" + tagName + ">");
+    }
 
-		Iterator<TitledURLEntry> it = entries.iterator();
+    private void writeData(List<TitledURLEntry> entries)
+            throws java.io.IOException {
+        startTag("entries");
 
-		while (it.hasNext()) {
-			TitledURLEntry entry = it.next();
+        Iterator<TitledURLEntry> it = entries.iterator();
 
-			if ((entry == null)
-					|| ((entry.getTitle() == null) || (entry.getTitle()
-							.length() == 0))) {
-				it.remove();
-			}
+        while (it.hasNext()) {
+            TitledURLEntry entry = it.next();
 
-			startNewLine();
-			writer.write("<entry");
-			startAttribute("title", entry.getTitle());
-			startAttribute("url", entry.getURL());
-			writer.write("/>");
-		}
+            if ((entry == null)
+                    || ((entry.getTitle() == null) || (entry.getTitle()
+                    .length() == 0))) {
+                it.remove();
+            }
 
-		startNewLine();
-		endTag("entries");
-	}
+            startNewLine();
+            writer.write("<entry");
+            startAttribute("title", entry.getTitle());
+            startAttribute("url", entry.getURL());
+            writer.write("/>");
+        }
 
-	public void writeToFile(List<TitledURLEntry> entries, File bookmarksFile)
-			throws IOException, NoSuchAlgorithmException, InvalidKeyException,
-			NoSuchPaddingException, IllegalBlockSizeException,
-			BadPaddingException {
-		if ((entries == null) || (bookmarksFile == null)) {
-			throw new NullPointerException();
-		}
+        startNewLine();
+        endTag("entries");
+    }
 
-		// String write_type=""; //allow multiple encryption options
-		String write_type = "b1"; // allow multiple encryption options
-		if (write_type.equals("")) {
-			writer = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(bookmarksFile), "UTF-8"));
+    public void writeToFile(List<TitledURLEntry> entries, File bookmarksFile)
+            throws IOException, NoSuchAlgorithmException, InvalidKeyException,
+            NoSuchPaddingException, IllegalBlockSizeException,
+            BadPaddingException {
+        if ((entries == null) || (bookmarksFile == null)) {
+            throw new NullPointerException();
+        }
 
-			writeData(entries);
+        // String write_type=""; //allow multiple encryption options
+        String write_type = "b1"; // allow multiple encryption options
+        if (write_type.equals("")) {
+            writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(bookmarksFile), "UTF-8"));
 
-			writer.flush();
-			writer.close();
-		}// if(write_type.equals(""))
-		else if (write_type.equals("b1")) {
+            writeData(entries);
+
+            writer.flush();
+            writer.close();
+        }// if(write_type.equals(""))
+        else if (write_type.equals("b1")) {
 			// writer = new BufferedWriter(new OutputStreamWriter(
-			// new FileOutputStream(bookmarksFile), "UTF-8"));
-			writer = (new StringWriter());
+            // new FileOutputStream(bookmarksFile), "UTF-8"));
+            writer = (new StringWriter());
 
-			writeData(entries);
+            writeData(entries);
 
 			// get the bytes so we can do the encryption
-
-			byte[] out = writer.toString().getBytes();
+            byte[] out = writer.toString().getBytes();
 
 			// do the encryption
+            byte[] raw = new byte[16];
+            raw[0] = (byte) 1;
+            raw[2] = (byte) 23;
+            raw[3] = (byte) 24;
+            raw[4] = (byte) 2;
+            raw[5] = (byte) 99;
+            raw[6] = (byte) 200;
+            raw[7] = (byte) 202;
+            raw[8] = (byte) 209;
+            raw[9] = (byte) 199;
+            raw[10] = (byte) 181;
+            raw[11] = (byte) 255;
+            raw[12] = (byte) 33;
+            raw[13] = (byte) 210;
+            raw[14] = (byte) 214;
+            raw[15] = (byte) 216;
 
-			byte[] raw = new byte[16];
-			raw[0] = (byte) 1;
-			raw[2] = (byte) 23;
-			raw[3] = (byte) 24;
-			raw[4] = (byte) 2;
-			raw[5] = (byte) 99;
-			raw[6] = (byte) 200;
-			raw[7] = (byte) 202;
-			raw[8] = (byte) 209;
-			raw[9] = (byte) 199;
-			raw[10] = (byte) 181;
-			raw[11] = (byte) 255;
-			raw[12] = (byte) 33;
-			raw[13] = (byte) 210;
-			raw[14] = (byte) 214;
-			raw[15] = (byte) 216;
+            SecretKeySpec skeyspec = new SecretKeySpec(raw, "Blowfish");
+            Cipher cipher = Cipher.getInstance("Blowfish");
+            cipher.init(Cipher.ENCRYPT_MODE, skeyspec);
+            byte[] encrypted = cipher.doFinal(out);
 
-			SecretKeySpec skeyspec = new SecretKeySpec(raw, "Blowfish");
-			Cipher cipher = Cipher.getInstance("Blowfish");
-			cipher.init(Cipher.ENCRYPT_MODE, skeyspec);
-			byte[] encrypted = cipher.doFinal(out);
-
-			// write out results
-			BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(bookmarksFile), "UTF-8"));
-			writer2.write("b1");
-			// writer2.write(out);
-			writer2.write(Util.byteArraytoHexString(encrypted));
-			writer2.flush();
-			writer2.close();
-		}// if(write_type.equals("b1"))
-		else {
-			System.out
-					.println("FATAL ERROR -- BookmarksWriter.java  unknown write style");
-			System.exit(10);
-		}
-	}
+            // write out results
+            BufferedWriter writer2 = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(bookmarksFile), "UTF-8"));
+            writer2.write("b1");
+            // writer2.write(out);
+            writer2.write(Util.byteArraytoHexString(encrypted));
+            writer2.flush();
+            writer2.close();
+        }// if(write_type.equals("b1"))
+        else {
+            System.out
+                    .println("FATAL ERROR -- BookmarksWriter.java  unknown write style");
+            System.exit(10);
+        }
+    }
 }

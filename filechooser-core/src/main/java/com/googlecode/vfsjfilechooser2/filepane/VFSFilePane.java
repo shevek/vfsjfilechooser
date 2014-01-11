@@ -114,8 +114,8 @@ import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class VFSFilePane extends JPanel implements PropertyChangeListener
-{
+public final class VFSFilePane extends JPanel implements PropertyChangeListener {
+
     public final static String ACTION_APPROVE_SELECTION = "approveSelection";
     public final static String ACTION_CANCEL = "cancelSelection";
     public final static String ACTION_EDIT_FILE_NAME = "editFileName";
@@ -129,59 +129,50 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     public static final int VIEWTYPE_DETAILS = 1;
     private static final int VIEWTYPE_COUNT = 2;
     private static final Cursor waitCursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR);
-    private static FocusListener repaintListener = new FocusListener()
-        {
-            public void focusGained(FocusEvent fe)
-            {
-                repaintSelection(fe.getSource());
+    private static FocusListener repaintListener = new FocusListener() {
+        @Override
+        public void focusGained(FocusEvent fe) {
+            repaintSelection(fe.getSource());
+        }
+
+        @Override
+        public void focusLost(FocusEvent fe) {
+            repaintSelection(fe.getSource());
+        }
+
+        private void repaintSelection(Object source) {
+            if (source instanceof JList) {
+                repaintListSelection((JList) source);
+            } else if (source instanceof JTable) {
+                repaintTableSelection((JTable) source);
+            }
+        }
+
+        private void repaintListSelection(JList list) {
+            int[] indices = list.getSelectedIndices();
+
+            for (int i : indices) {
+                Rectangle bounds = list.getCellBounds(i, i);
+                list.repaint(bounds);
+            }
+        }
+
+        private void repaintTableSelection(JTable table) {
+            int minRow = table.getSelectionModel().getMinSelectionIndex();
+            int maxRow = table.getSelectionModel().getMaxSelectionIndex();
+
+            if ((minRow == -1) || (maxRow == -1)) {
+                return;
             }
 
-            public void focusLost(FocusEvent fe)
-            {
-                repaintSelection(fe.getSource());
-            }
+            int col0 = table.convertColumnIndexToView(COLUMN_FILENAME);
 
-            private void repaintSelection(Object source)
-            {
-                if (source instanceof JList)
-                {
-                    repaintListSelection((JList) source);
-                }
-                else if (source instanceof JTable)
-                {
-                    repaintTableSelection((JTable) source);
-                }
-            }
-
-            private void repaintListSelection(JList list)
-            {
-                int[] indices = list.getSelectedIndices();
-
-                for (int i : indices)
-                {
-                    Rectangle bounds = list.getCellBounds(i, i);
-                    list.repaint(bounds);
-                }
-            }
-
-            private void repaintTableSelection(JTable table)
-            {
-                int minRow = table.getSelectionModel().getMinSelectionIndex();
-                int maxRow = table.getSelectionModel().getMaxSelectionIndex();
-
-                if ((minRow == -1) || (maxRow == -1))
-                {
-                    return;
-                }
-
-                int col0 = table.convertColumnIndexToView(COLUMN_FILENAME);
-
-                Rectangle first = table.getCellRect(minRow, col0, false);
-                Rectangle last = table.getCellRect(maxRow, col0, false);
-                Rectangle dirty = first.union(last);
-                table.repaint(dirty);
-            }
-        };
+            Rectangle first = table.getCellRect(minRow, col0, false);
+            Rectangle last = table.getCellRect(maxRow, col0, false);
+            Rectangle dirty = first.union(last);
+            table.repaint(dirty);
+        }
+    };
 
     private static final int COLUMN_FILENAME = 0;
     private static final int COLUMN_SIZE = 1;
@@ -208,17 +199,14 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     private String fileNameHeaderText = null;
     private String fileSizeHeaderText = null;
     private String fileDateHeaderText = null;
-    private transient final FocusListener editorFocusListener = new FocusAdapter()
-        {
-            @Override
-            public void focusLost(FocusEvent e)
-            {
-                if (!e.isTemporary())
-                {
-                    applyEdit();
-                }
+    private transient final FocusListener editorFocusListener = new FocusAdapter() {
+        @Override
+        public void focusLost(FocusEvent e) {
+            if (!e.isTemporary()) {
+                applyEdit();
             }
-        };
+        }
+    };
 
     private boolean smallIconsView = false;
     private Border listViewBorder;
@@ -245,123 +233,106 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
     // details view
     @SuppressWarnings("unused")
-    private final transient KeyListener detailsKeyListener = new KeyAdapter()
-        {
-            private final long timeFactor;
-            private final StringBuilder typedString = new StringBuilder();
-            private long lastTime = 1000L;
+    private final transient KeyListener detailsKeyListener = new KeyAdapter() {
+        private final long timeFactor;
+        private final StringBuilder typedString = new StringBuilder();
+        private long lastTime = 1000L;
 
-            {
-                Long l = (Long) UIManager.get("Table.timeFactor");
-                timeFactor = (l != null) ? l : 1000L;
+        {
+            Long l = (Long) UIManager.get("Table.timeFactor");
+            timeFactor = (l != null) ? l : 1000L;
+        }
+
+        /**
+         * Moves the keyboard focus to the first element whose prefix matches
+         * the sequence of alphanumeric keys pressed by the user with delay
+         * less than value of <code>timeFactor</code>. Subsequent same key
+         * presses move the keyboard focus to the next object that starts with
+         * the same letter until another key is pressed, then it is treated
+         * as the prefix with appropriate number of the same letters followed
+         * by first typed another letter.
+         */
+        @Override
+        public void keyTyped(KeyEvent e) {
+            BasicVFSDirectoryModel model = getModel();
+            int rowCount = model.getSize();
+
+            if ((detailsTable == null) || (rowCount == 0) || e.isAltDown()
+                    || e.isControlDown() || e.isMetaDown()) {
+                return;
             }
 
-            /**
-             * Moves the keyboard focus to the first element whose prefix matches
-             * the sequence of alphanumeric keys pressed by the user with delay
-             * less than value of <code>timeFactor</code>. Subsequent same key
-             * presses move the keyboard focus to the next object that starts with
-             * the same letter until another key is pressed, then it is treated
-             * as the prefix with appropriate number of the same letters followed
-             * by first typed another letter.
-             */
-            @Override
-            public void keyTyped(KeyEvent e)
-            {
-                BasicVFSDirectoryModel model = getModel();
-                int rowCount = model.getSize();
+            InputMap inputMap = detailsTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            KeyStroke key = KeyStroke.getKeyStrokeForEvent(e);
 
-                if ((detailsTable == null) || (rowCount == 0) || e.isAltDown() ||
-                        e.isControlDown() || e.isMetaDown())
-                {
-                    return;
-                }
+            if ((inputMap != null) && (inputMap.get(key) != null)) {
+                return;
+            }
 
-                InputMap inputMap = detailsTable.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-                KeyStroke key = KeyStroke.getKeyStrokeForEvent(e);
+            int startIndex = detailsTable.getSelectionModel()
+                    .getLeadSelectionIndex();
 
-                if ((inputMap != null) && (inputMap.get(key) != null))
-                {
-                    return;
-                }
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
 
-                int startIndex = detailsTable.getSelectionModel()
-                                             .getLeadSelectionIndex();
+            if (startIndex >= rowCount) {
+                startIndex = rowCount - 1;
+            }
 
-                if (startIndex < 0)
-                {
-                    startIndex = 0;
-                }
+            char c = e.getKeyChar();
 
-                if (startIndex >= rowCount)
-                {
-                    startIndex = rowCount - 1;
-                }
+            long time = e.getWhen();
 
-                char c = e.getKeyChar();
-
-                long time = e.getWhen();
-
-                if ((time - lastTime) < timeFactor)
-                {
-                    if ((typedString.length() == 1) &&
-                            (typedString.charAt(0) == c))
-                    {
+            if ((time - lastTime) < timeFactor) {
+                if ((typedString.length() == 1)
+                        && (typedString.charAt(0) == c)) {
                         // Subsequent same key presses move the keyboard focus to the next
-                        // object that starts with the same letter.
-                        startIndex++;
-                    }
-                    else
-                    {
-                        typedString.append(c);
-                    }
-                }
-                else
-                {
+                    // object that starts with the same letter.
                     startIndex++;
-
-                    typedString.setLength(0);
+                } else {
                     typedString.append(c);
                 }
+            } else {
+                startIndex++;
 
-                lastTime = time;
+                typedString.setLength(0);
+                typedString.append(c);
+            }
 
-                if (startIndex >= rowCount)
-                {
-                    startIndex = 0;
-                }
+            lastTime = time;
 
-                // Find next file 
-                int index = getNextMatch(startIndex, rowCount - 1);
+            if (startIndex >= rowCount) {
+                startIndex = 0;
+            }
 
-                if ((index < 0) && (startIndex > 0))
-                { // wrap
-                    index = getNextMatch(0, startIndex - 1);
-                }
+            // Find next file 
+            int index = getNextMatch(startIndex, rowCount - 1);
 
-                if (index >= 0)
-                {
-                    detailsTable.getSelectionModel()
-                                .setSelectionInterval(index, index);
+            if ((index < 0) && (startIndex > 0)) { // wrap
+                index = getNextMatch(0, startIndex - 1);
+            }
 
-                    Rectangle cellRect = detailsTable.getCellRect(index,
-                            detailsTable.convertColumnIndexToView(
+            if (index >= 0) {
+                detailsTable.getSelectionModel()
+                        .setSelectionInterval(index, index);
+
+                Rectangle cellRect = detailsTable.getCellRect(index,
+                        detailsTable.convertColumnIndexToView(
                                 COLUMN_FILENAME), false);
-                    detailsTable.scrollRectToVisible(cellRect);
-                }
+                detailsTable.scrollRectToVisible(cellRect);
             }
+        }
 
-            private int getNextMatch(int startIndex, int finishIndex)
-            {
-                return -1;
-            }
-        };
+        private int getNextMatch(int startIndex, int finishIndex) {
+            return -1;
+        }
+    };
 
     /**
      * @param fileChooserUIAccessor
      */
-    public VFSFilePane(VFSFileChooserUIAccessorIF fileChooserUIAccessor)
-    {
+    public VFSFilePane(VFSFileChooserUIAccessorIF fileChooserUIAccessor) {
         super(new BorderLayout());
 
         this.fileChooserUIAccessor = fileChooserUIAccessor;
@@ -372,10 +343,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     /**
      *
      */
-    public void uninstallUI()
-    {
-        if (getModel() != null)
-        {
+    public void uninstallUI() {
+        if (getModel() != null) {
             getModel().removePropertyChangeListener(this);
         }
     }
@@ -383,49 +352,41 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     /**
      * @return
      */
-    protected VFSJFileChooser getFileChooser()
-    {
+    protected VFSJFileChooser getFileChooser() {
         return fileChooserUIAccessor.getFileChooser();
     }
 
     /**
      * @return
      */
-    protected BasicVFSDirectoryModel getModel()
-    {
+    protected BasicVFSDirectoryModel getModel() {
         return fileChooserUIAccessor.getModel();
     }
 
     /**
      * @return
      */
-    public int getViewType()
-    {
+    public int getViewType() {
         return viewType;
     }
 
     /**
      * @param viewType
      */
-    public void setViewType(int viewType)
-    {
+    public void setViewType(int viewType) {
         int oldValue = this.viewType;
 
-        if (viewType == oldValue)
-        {
+        if (viewType == oldValue) {
             return;
         }
 
         this.viewType = viewType;
 
-        if (viewType == VIEWTYPE_LIST)
-        {
-            if (viewPanels[viewType] == null)
-            {
+        if (viewType == VIEWTYPE_LIST) {
+            if (viewPanels[viewType] == null) {
                 JPanel p = fileChooserUIAccessor.createList();
 
-                if (p == null)
-                {
+                if (p == null) {
                     p = createList();
                 }
 
@@ -433,15 +394,11 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             }
 
             list.setLayoutOrientation(JList.VERTICAL_WRAP);
-        }
-        else if (viewType == VIEWTYPE_DETAILS)
-        {
-            if (viewPanels[viewType] == null)
-            {
+        } else if (viewType == VIEWTYPE_DETAILS) {
+            if (viewPanels[viewType] == null) {
                 JPanel p = fileChooserUIAccessor.createDetailsView();
 
-                if (p == null)
-                {
+                if (p == null) {
                     p = createDetailsView();
                 }
 
@@ -452,10 +409,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         JPanel oldViewPanel = currentViewPanel;
         currentViewPanel = viewPanels[viewType];
 
-        if (currentViewPanel != oldViewPanel)
-        {
-            if (oldViewPanel != null)
-            {
+        if (currentViewPanel != oldViewPanel) {
+            if (oldViewPanel != null) {
                 remove(oldViewPanel);
             }
 
@@ -472,49 +427,37 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * @param viewType
      * @param viewPanel
      */
-    public void setViewPanel(int viewType, JPanel viewPanel)
-    {
+    public void setViewPanel(int viewType, JPanel viewPanel) {
         viewPanels[viewType] = viewPanel;
         recursivelySetInheritsPopupMenu(viewPanel, true);
 
         // switch to list view
-        if (viewType == VIEWTYPE_LIST)
-        {
+        if (viewType == VIEWTYPE_LIST) {
             list = (JList) findChildComponent(viewPanels[viewType], JList.class);
 
-            if (listSelectionModel == null)
-            {
+            if (listSelectionModel == null) {
                 listSelectionModel = list.getSelectionModel();
 
-                if (detailsTable != null)
-                {
+                if (detailsTable != null) {
                     detailsTable.setSelectionModel(listSelectionModel);
                 }
-            }
-            else
-            {
+            } else {
                 list.setSelectionModel(listSelectionModel);
             }
-        }
-
-        // switch to details view
-        else if (viewType == VIEWTYPE_DETAILS)
-        {
+        } // switch to details view
+        else if (viewType == VIEWTYPE_DETAILS) {
             detailsTable = (JTable) findChildComponent(viewPanels[viewType],
                     JTable.class);
-            detailsTable.setRowHeight(Math.max(detailsTable.getFont().getSize() +
-                    4, 16 + 1));
+            detailsTable.setRowHeight(Math.max(detailsTable.getFont().getSize()
+                    + 4, 16 + 1));
 
-            if (listSelectionModel != null)
-            {
+            if (listSelectionModel != null) {
                 detailsTable.setSelectionModel(listSelectionModel);
             }
         }
 
-        if (this.viewType == viewType)
-        {
-            if (currentViewPanel != null)
-            {
+        if (this.viewType == viewType) {
+            if (currentViewPanel != null) {
                 remove(currentViewPanel);
             }
 
@@ -529,29 +472,24 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * @param viewType
      * @return
      */
-    public Action getViewTypeAction(int viewType)
-    {
+    public Action getViewTypeAction(int viewType) {
         return new ViewTypeAction(viewType);
     }
 
     private static void recursivelySetInheritsPopupMenu(Container container,
-        boolean b)
-    {
-        if (container instanceof JComponent)
-        {
+            boolean b) {
+        if (container instanceof JComponent) {
             ((JComponent) container).setInheritsPopupMenu(b);
         }
 
         final Component[] components = container.getComponents();
 
-        for (Component component : components)
-        {
+        for (Component component : components) {
             recursivelySetInheritsPopupMenu((Container) component, b);
         }
     }
 
-    protected void installDefaults()
-    {
+    protected void installDefaults() {
 
         listViewBorder = UIManager.getBorder("FileChooser.listViewBorder");
         listViewBackground = UIManager.getColor(
@@ -566,7 +504,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         refreshActionLabelText = VFSResources.getMessage(
                 "VFSJFileChooser.refreshActionLabelText");
         showHiddenFilesLabelText = VFSResources.getMessage(
-            "VFSJFileChooser.showHiddenFilesLabelText");
+                "VFSJFileChooser.showHiddenFilesLabelText");
         newFolderActionLabelText = VFSResources.getMessage(
                 "VFSJFileChooser.newFolderActionLabelText");
 
@@ -594,75 +532,54 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      *
      * @return the command list
      */
-    public Action[] getActions()
-    {
-        if (actions == null)
-        {
-            class FilePaneAction extends AbstractAction
-            {
-                FilePaneAction(String name)
-                {
+    public Action[] getActions() {
+        if (actions == null) {
+            class FilePaneAction extends AbstractAction {
+
+                FilePaneAction(String name) {
                     this(name, name);
                 }
 
-                FilePaneAction(String name, String cmd)
-                {
+                FilePaneAction(String name, String cmd) {
                     super(name);
                     putValue(Action.ACTION_COMMAND_KEY, cmd);
                 }
 
-                public void actionPerformed(ActionEvent e)
-                {
+                @Override
+                public void actionPerformed(ActionEvent e) {
                     String cmd = (String) getValue(Action.ACTION_COMMAND_KEY);
 
-                    if (cmd.equals(ACTION_CANCEL))
-                    {
-                        if (editFile != null)
-                        {
+                    if (cmd.equals(ACTION_CANCEL)) {
+                        if (editFile != null) {
                             cancelEdit();
-                        }
-                        else
-                        {
+                        } else {
                             getFileChooser().cancelSelection();
                         }
-                    }
-                    else if (cmd.equals(ACTION_EDIT_FILE_NAME))
-                    {
+                    } else if (cmd.equals(ACTION_EDIT_FILE_NAME)) {
                         VFSJFileChooser fc = getFileChooser();
                         int index = listSelectionModel.getMinSelectionIndex();
 
-                        if ((index >= 0) && (editFile == null) &&
-                                (!fc.isMultiSelectionEnabled() ||
-                                (fc.getSelectedFiles().length <= 1)))
-                        {
+                        if ((index >= 0) && (editFile == null)
+                                && (!fc.isMultiSelectionEnabled()
+                                || (fc.getSelectedFiles().length <= 1))) {
                             editFileName(index);
                         }
-                    }
-                    else if (cmd.equals(ACTION_REFRESH))
-                    {
+                    } else if (cmd.equals(ACTION_REFRESH)) {
                         getFileChooser().rescanCurrentDirectory();
-                    }
-                    else if (cmd.equals(ACTION_VIEW_HIDDEN))
-                    {
+                    } else if (cmd.equals(ACTION_VIEW_HIDDEN)) {
                         getFileChooser().setFileHidingEnabled(!getFileChooser().isFileHidingEnabled());
                     }
                 }
 
                 @Override
-                public boolean isEnabled()
-                {
+                public boolean isEnabled() {
                     String cmd = (String) getValue(Action.ACTION_COMMAND_KEY);
 
-                    if (cmd.equals(ACTION_CANCEL))
-                    {
+                    if (cmd.equals(ACTION_CANCEL)) {
                         return getFileChooser().isEnabled();
-                    }
-                    else if (cmd.equals(ACTION_EDIT_FILE_NAME))
-                    {
+                    } else if (cmd.equals(ACTION_EDIT_FILE_NAME)) {
                         return !readOnly && getFileChooser().isEnabled();
-                    }
-                    else
-                    {
+                    } else {
                         return true;
                     }
                 }
@@ -674,37 +591,33 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             actionList.add(new FilePaneAction(ACTION_CANCEL));
             actionList.add(new FilePaneAction(ACTION_EDIT_FILE_NAME));
             FilePaneAction showHidden = new FilePaneAction(showHiddenFilesLabelText,
-                ACTION_VIEW_HIDDEN);
+                    ACTION_VIEW_HIDDEN);
             showHidden.putValue(Action.SELECTED_KEY, false);
             actionList.add(showHidden);
             actionList.add(new FilePaneAction(refreshActionLabelText,
-                ACTION_REFRESH));
+                    ACTION_REFRESH));
 
             action = fileChooserUIAccessor.getApproveSelectionAction();
 
-            if (action != null)
-            {
+            if (action != null) {
                 actionList.add(action);
             }
 
             action = fileChooserUIAccessor.getChangeToParentDirectoryAction();
 
-            if (action != null)
-            {
+            if (action != null) {
                 actionList.add(action);
             }
 
             action = getNewFolderAction();
 
-            if (action != null)
-            {
+            if (action != null) {
                 actionList.add(action);
             }
 
             action = getViewTypeAction(VIEWTYPE_LIST);
 
-            if (action != null)
-            {
+            if (action != null) {
                 actionList.add(action);
             }
 
@@ -714,8 +627,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         return actions.clone();
     }
 
-    protected void createActionMap()
-    {
+    protected void createActionMap() {
         addActionsToMap(super.getActionMap(), getActions());
     }
 
@@ -723,16 +635,12 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * @param map
      * @param actions
      */
-    public static void addActionsToMap(ActionMap map, Action[] actions)
-    {
-        if ((map != null) && (actions != null))
-        {
-            for (Action a : actions)
-            {
+    public static void addActionsToMap(ActionMap map, Action[] actions) {
+        if ((map != null) && (actions != null)) {
+            for (Action a : actions) {
                 String cmd = (String) a.getValue(Action.ACTION_COMMAND_KEY);
 
-                if (cmd == null)
-                {
+                if (cmd == null) {
                     cmd = (String) a.getValue(Action.NAME);
                 }
 
@@ -741,56 +649,46 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         }
     }
 
-    private void updateListRowCount(JList list)
-    {
-        if (smallIconsView)
-        {
+    private void updateListRowCount(JList list) {
+        if (smallIconsView) {
             list.setVisibleRowCount(getModel().getSize() / 3);
-        }
-        else
-        {
+        } else {
             list.setVisibleRowCount(-1);
         }
     }
 
-    public JPanel createList()
-    {
+    public JPanel createList() {
         JPanel p = new JPanel(new BorderLayout());
         final VFSJFileChooser fileChooser = getFileChooser();
-        final JList aList = new JList()
-            {
-                @Override
-                public int getNextMatch(String prefix, int startIndex,
-                    Position.Bias bias)
-                {
-                    ListModel model = getModel();
-                    int max = model.getSize();
+        final JList aList = new JList() {
+            @Override
+            public int getNextMatch(String prefix, int startIndex,
+                    Position.Bias bias) {
+                ListModel model = getModel();
+                int max = model.getSize();
 
-                    if ((prefix == null) || (startIndex < 0) ||
-                            (startIndex >= max))
-                    {
-                        throw new IllegalArgumentException();
-                    }
-
-                    // start search from the next element before/after the selected element
-                    boolean backwards = (bias == Position.Bias.Backward);
-
-                    for (int i = startIndex; backwards ? (i >= 0) : (i < max);
-                            i += (backwards ? (-1) : 1))
-                    {
-                        String filename = fileChooser.getName((FileObject) model.getElementAt(
-                                    i));
-
-                        if (filename.regionMatches(true, 0, prefix, 0,
-                                    prefix.length()))
-                        {
-                            return i;
-                        }
-                    }
-
-                    return -1;
+                if ((prefix == null) || (startIndex < 0)
+                        || (startIndex >= max)) {
+                    throw new IllegalArgumentException();
                 }
-            };
+
+                // start search from the next element before/after the selected element
+                boolean backwards = (bias == Position.Bias.Backward);
+
+                for (int i = startIndex; backwards ? (i >= 0) : (i < max);
+                        i += (backwards ? (-1) : 1)) {
+                    String filename = fileChooser.getName((FileObject) model.getElementAt(
+                            i));
+
+                    if (filename.regionMatches(true, 0, prefix, 0,
+                            prefix.length())) {
+                        return i;
+                    }
+                }
+
+                return -1;
+            }
+        };
 
         aList.setCellRenderer(new FileRenderer());
         aList.setLayoutOrientation(JList.VERTICAL_WRAP);
@@ -798,44 +696,38 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         // 4835633 : tell BasicListUI that this is a file list
         aList.putClientProperty("List.isFileList", Boolean.TRUE);
 
-        if (listViewWindowsStyle)
-        {
+        if (listViewWindowsStyle) {
             aList.addFocusListener(repaintListener);
         }
 
         updateListRowCount(aList);
 
-        getModel().addListDataListener(new ListDataListener()
-            {
-                public void intervalAdded(ListDataEvent e)
-                {
-                    updateListRowCount(aList);
+        getModel().addListDataListener(new ListDataListener() {
+            @Override
+            public void intervalAdded(ListDataEvent e) {
+                updateListRowCount(aList);
+            }
+
+            @Override
+            public void intervalRemoved(ListDataEvent e) {
+                updateListRowCount(aList);
+            }
+
+            @Override
+            public void contentsChanged(ListDataEvent e) {
+                if (isShowing()) {
+                    clearSelection();
                 }
 
-                public void intervalRemoved(ListDataEvent e)
-                {
-                    updateListRowCount(aList);
-                }
-
-                public void contentsChanged(ListDataEvent e)
-                {
-                    if (isShowing())
-                    {
-                        clearSelection();
-                    }
-
-                    updateListRowCount(aList);
-                }
-            });
+                updateListRowCount(aList);
+            }
+        });
 
         getModel().addPropertyChangeListener(this);
 
-        if (fileChooser.isMultiSelectionEnabled())
-        {
+        if (fileChooser.isMultiSelectionEnabled()) {
             aList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        }
-        else
-        {
+        } else {
             aList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         }
 
@@ -846,13 +738,11 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
         JScrollPane scrollpane = new JScrollPane(aList);
 
-        if (listViewBackground != null)
-        {
+        if (listViewBackground != null) {
             aList.setBackground(listViewBackground);
         }
 
-        if (listViewBorder != null)
-        {
+        if (listViewBorder != null) {
             scrollpane.setBorder(listViewBorder);
         }
 
@@ -866,30 +756,24 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      *
      * @return a <code>ListSelectionListener</code>
      */
-    public ListSelectionListener createListSelectionListener()
-    {
+    public ListSelectionListener createListSelectionListener() {
         return fileChooserUIAccessor.createListSelectionListener();
     }
 
-    private int getEditIndex()
-    {
+    private int getEditIndex() {
         return lastIndex;
     }
 
-    private void setEditIndex(int i)
-    {
+    private void setEditIndex(int i) {
         lastIndex = i;
     }
 
-    private void resetEditIndex()
-    {
+    private void resetEditIndex() {
         lastIndex = -1;
     }
 
-    private void cancelEdit()
-    {
-        if (editFile != null)
-        {
+    private void cancelEdit() {
+        if (editFile != null) {
             editFile = null;
             list.remove(editCell);
             repaint();
@@ -900,193 +784,160 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * @param index visual index of the file to be edited
      */
     @SuppressWarnings("deprecation")
-    private void editFileName(int index)
-    {
+    private void editFileName(int index) {
         FileObject currentDirectory = getFileChooser().getCurrentDirectory();
 
-        if (readOnly || !canWrite(currentDirectory))
-        {
+        if (readOnly || !canWrite(currentDirectory)) {
             return;
         }
 
         ensureIndexIsVisible(index);
 
-        switch (viewType)
-        {
-        case VIEWTYPE_LIST:
-            editFile = (FileObject) getModel().getElementAt(index);
+        switch (viewType) {
+            case VIEWTYPE_LIST:
+                editFile = (FileObject) getModel().getElementAt(index);
 
-            Rectangle r = list.getCellBounds(index, index);
+                Rectangle r = list.getCellBounds(index, index);
 
-            if (editCell == null)
-            {
-                editCell = new JTextField();
+                if (editCell == null) {
+                    editCell = new JTextField();
 
-                editCell.addActionListener(new EditActionListener());
-                editCell.addFocusListener(editorFocusListener);
-                editCell.setNextFocusableComponent(list);
-            }
+                    editCell.addActionListener(new EditActionListener());
+                    editCell.addFocusListener(editorFocusListener);
+                    editCell.setNextFocusableComponent(list);
+                }
 
-            list.add(editCell);
-            editCell.setText(getFileChooser().getName(editFile));
+                list.add(editCell);
+                editCell.setText(getFileChooser().getName(editFile));
 
-            ComponentOrientation orientation = list.getComponentOrientation();
-            editCell.setComponentOrientation(orientation);
+                ComponentOrientation orientation = list.getComponentOrientation();
+                editCell.setComponentOrientation(orientation);
 
-            if (orientation.isLeftToRight())
-            {
-                editCell.setBounds(editX + r.x, r.y, r.width - editX, r.height);
-            }
-            else
-            {
-                editCell.setBounds(r.x, r.y, r.width - editX, r.height);
-            }
+                if (orientation.isLeftToRight()) {
+                    editCell.setBounds(editX + r.x, r.y, r.width - editX, r.height);
+                } else {
+                    editCell.setBounds(r.x, r.y, r.width - editX, r.height);
+                }
 
-            editCell.requestFocus();
-            editCell.selectAll();
+                editCell.requestFocus();
+                editCell.selectAll();
 
-            break;
+                break;
 
-        case VIEWTYPE_DETAILS:
-            detailsTable.editCellAt(index, COLUMN_FILENAME);
+            case VIEWTYPE_DETAILS:
+                detailsTable.editCellAt(index, COLUMN_FILENAME);
 
-            break;
+                break;
         }
     }
 
-    private void applyEdit()
-    {
-        if ((editFile != null) && VFSUtils.exists(editFile))
-        {
+    private void applyEdit() {
+        if ((editFile != null) && VFSUtils.exists(editFile)) {
             VFSJFileChooser chooser = getFileChooser();
             String oldDisplayName = chooser.getName(editFile);
             String oldFileName = editFile.getName().getBaseName();
             String newDisplayName = editCell.getText().trim();
             String newFileName;
 
-            if (!newDisplayName.equals(oldDisplayName))
-            {
+            if (!newDisplayName.equals(oldDisplayName)) {
                 newFileName = newDisplayName;
 
                 //Check if extension is hidden from user
                 int i1 = oldFileName.length();
                 int i2 = oldDisplayName.length();
 
-                if ((i1 > i2) && (oldFileName.charAt(i2) == '.'))
-                {
+                if ((i1 > i2) && (oldFileName.charAt(i2) == '.')) {
                     newFileName = newDisplayName + oldFileName.substring(i2);
                 }
 
                 // rename
                 AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
                 FileObject f2 = fsv.createFileObject(VFSUtils.getParentDirectory(
-                            editFile), newFileName);
+                        editFile), newFileName);
 
-                if (VFSUtils.exists(f2))
-                {
+                if (VFSUtils.exists(f2)) {
                     JOptionPane.showMessageDialog(chooser,
-                        MessageFormat.format(renameErrorFileExistsText,
-                            oldFileName), renameErrorTitleText,
-                        JOptionPane.ERROR_MESSAGE);
-                }
-                else
-                {
-                    if (getModel().renameFile(editFile, f2))
-                    {
-                        if (fsv.isParent(chooser.getCurrentDirectory(), f2))
-                        {
-                            if (chooser.isMultiSelectionEnabled())
-                            {
-                                chooser.setSelectedFiles(new FileObject[] { f2 });
-                            }
-                            else
-                            {
+                            MessageFormat.format(renameErrorFileExistsText,
+                                    oldFileName), renameErrorTitleText,
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    if (getModel().renameFile(editFile, f2)) {
+                        if (fsv.isParent(chooser.getCurrentDirectory(), f2)) {
+                            if (chooser.isMultiSelectionEnabled()) {
+                                chooser.setSelectedFiles(new FileObject[]{f2});
+                            } else {
                                 chooser.setSelectedFile(f2);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             //Could be because of delay in updating Desktop folder
                             //chooser.setSelectedFile(null);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         JOptionPane.showMessageDialog(chooser,
-                            MessageFormat.format(renameErrorText, oldFileName),
-                            renameErrorTitleText, JOptionPane.ERROR_MESSAGE);
+                                MessageFormat.format(renameErrorText, oldFileName),
+                                renameErrorTitleText, JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         }
 
-        if ((detailsTable != null) && detailsTable.isEditing())
-        {
+        if ((detailsTable != null) && detailsTable.isEditing()) {
             detailsTable.getCellEditor().stopCellEditing();
         }
 
         cancelEdit();
     }
 
-    public Action getNewFolderAction()
-    {
-        if (!readOnly && (newFolderAction == null))
-        {
-            newFolderAction = new AbstractAction(newFolderActionLabelText)
-                    {
-                        private Action basicNewFolderAction;
+    public Action getNewFolderAction() {
+        if (!readOnly && (newFolderAction == null)) {
+            newFolderAction = new AbstractAction(newFolderActionLabelText) {
+                private Action basicNewFolderAction;
 
-                        {
-                            putValue(Action.ACTION_COMMAND_KEY,
-                                VFSFilePane.ACTION_NEW_FOLDER);
+                {
+                    putValue(Action.ACTION_COMMAND_KEY,
+                            VFSFilePane.ACTION_NEW_FOLDER);
 
-                            FileObject currentDirectory = getFileChooser()
-                                                              .getCurrentDirectory();
+                    FileObject currentDirectory = getFileChooser()
+                            .getCurrentDirectory();
 
-                            if (currentDirectory != null)
-                            {
-                                setEnabled(canWrite(currentDirectory));
-                            }
-                        }
+                    if (currentDirectory != null) {
+                        setEnabled(canWrite(currentDirectory));
+                    }
+                }
 
-                        public void actionPerformed(ActionEvent ev)
-                        {
-                            if (basicNewFolderAction == null)
-                            {
-                                basicNewFolderAction = fileChooserUIAccessor.getNewFolderAction();
-                            }
+                @Override
+                public void actionPerformed(ActionEvent ev) {
+                    if (basicNewFolderAction == null) {
+                        basicNewFolderAction = fileChooserUIAccessor.getNewFolderAction();
+                    }
 
-                            VFSJFileChooser fc = getFileChooser();
-                            FileObject oldFile = fc.getSelectedFile();
-                            basicNewFolderAction.actionPerformed(ev);
+                    VFSJFileChooser fc = getFileChooser();
+                    FileObject oldFile = fc.getSelectedFile();
+                    basicNewFolderAction.actionPerformed(ev);
 
-                            FileObject newFile = fc.getSelectedFile();
+                    FileObject newFile = fc.getSelectedFile();
 
-                            if ((newFile != null) && !newFile.equals(oldFile) &&
-                                    VFSUtils.isDirectory(newFile))
-                            {
-                                newFolderFile = newFile;
-                            }
-                        }
-                    };
+                    if ((newFile != null) && !newFile.equals(oldFile)
+                            && VFSUtils.isDirectory(newFile)) {
+                        newFolderFile = newFile;
+                    }
+                }
+            };
         }
 
         return newFolderAction;
     }
 
-    void setFileSelected()
-    {
-        if (getFileChooser().isMultiSelectionEnabled() &&
-                !isDirectorySelected())
-        {
+    void setFileSelected() {
+        if (getFileChooser().isMultiSelectionEnabled()
+                && !isDirectorySelected()) {
             FileObject[] files = getFileChooser().getSelectedFiles(); // Should be selected
 
             Object[] selectedObjects = list.getSelectedValues(); // Are actually selected
 
             listSelectionModel.setValueIsAdjusting(true);
 
-            try
-            {
+            try {
                 int lead = listSelectionModel.getLeadSelectionIndex();
                 int anchor = listSelectionModel.getAnchorSelectionIndex();
 
@@ -1100,165 +951,133 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
                 // Remove files that shouldn't be selected and add files which should be selected
                 // Note: Assume files are already sorted in compareTo order.
-                while ((shouldIndex < fileCount) &&
-                        (actuallyIndex < selectedFileCount))
-                {
+                while ((shouldIndex < fileCount)
+                        && (actuallyIndex < selectedFileCount)) {
                     shouldIndex++;
                     actuallyIndex++;
                 }
 
-                while (shouldIndex < fileCount)
-                {
+                while (shouldIndex < fileCount) {
                     doSelectFile(files[shouldIndex++]);
                 }
 
-                while (actuallyIndex < selectedFileCount)
-                {
+                while (actuallyIndex < selectedFileCount) {
                     doDeselectFile(selectedObjects[actuallyIndex++]);
                 }
 
                 // restore the anchor and lead
-                if (listSelectionModel instanceof DefaultListSelectionModel)
-                {
+                if (listSelectionModel instanceof DefaultListSelectionModel) {
                     ((DefaultListSelectionModel) listSelectionModel).moveLeadSelectionIndex(lead);
                     listSelectionModel.setAnchorSelectionIndex(anchor);
                 }
-            }
-            finally
-            {
+            } finally {
                 listSelectionModel.setValueIsAdjusting(false);
             }
-        }
-        else
-        {
+        } else {
             VFSJFileChooser chooser = getFileChooser();
             FileObject f;
 
-            if (isDirectorySelected())
-            {
+            if (isDirectorySelected()) {
                 f = getDirectory();
-            }
-            else
-            {
+            } else {
                 f = chooser.getSelectedFile();
             }
 
             int i;
 
-            if ((f != null) && ((i = getModel().indexOf(f)) >= 0))
-            {
+            if ((f != null) && ((i = getModel().indexOf(f)) >= 0)) {
                 int viewIndex = i;
 
                 listSelectionModel.setSelectionInterval(viewIndex, viewIndex);
                 ensureIndexIsVisible(viewIndex);
-            }
-            else
-            {
+            } else {
                 clearSelection();
             }
         }
     }
 
-    private void doSelectFile(FileObject fileToSelect)
-    {
+    private void doSelectFile(FileObject fileToSelect) {
         int index = getModel().indexOf(fileToSelect);
 
         // could be missed in the current directory if it changed
-        if (index >= 0)
-        {
+        if (index >= 0) {
             listSelectionModel.addSelectionInterval(index, index);
         }
     }
 
-    private void doDeselectFile(Object fileToDeselect)
-    {
+    private void doDeselectFile(Object fileToDeselect) {
         int index = getModel().indexOf(fileToDeselect);
         listSelectionModel.removeSelectionInterval(index, index);
     }
 
     /* The following methods are used by the PropertyChange Listener */
-    private void doSelectedFileChanged(PropertyChangeEvent e)
-    {
+    private void doSelectedFileChanged(PropertyChangeEvent e) {
         applyEdit();
 
         FileObject f = (FileObject) e.getNewValue();
 
-        if ((f != null))
-        {
+        if ((f != null)) {
             setFileSelected();
         }
     }
 
-    private void doSelectedFilesChanged(PropertyChangeEvent e)
-    {
+    private void doSelectedFilesChanged(PropertyChangeEvent e) {
         applyEdit();
 
         FileObject[] files = (FileObject[]) e.getNewValue();
         VFSJFileChooser fc = getFileChooser();
 
-        if ((files != null) && (files.length > 0) &&
-                ((files.length > 1) || fc.isDirectorySelectionEnabled() ||
-                !VFSUtils.isDirectory(files[0])))
-        {
+        if ((files != null) && (files.length > 0)
+                && ((files.length > 1) || fc.isDirectorySelectionEnabled()
+                || !VFSUtils.isDirectory(files[0]))) {
             setFileSelected();
         }
     }
 
-    private void doDirectoryChanged(PropertyChangeEvent e)
-    {
+    private void doDirectoryChanged(PropertyChangeEvent e) {
         VFSJFileChooser fc = getFileChooser();
         AbstractVFSFileSystemView fsv = fc.getFileSystemView();
 
         applyEdit();
         resetEditIndex();
         try {
-          ensureIndexIsVisible(0);
-        }
-        catch (Exception ex) {
-          // ignored, TODO race condition?
+            ensureIndexIsVisible(0);
+        } catch (Exception ex) {
+            // ignored, TODO race condition?
         }
 
         FileObject currentDirectory = fc.getCurrentDirectory();
 
-        if (currentDirectory != null)
-        {
-            if (!readOnly)
-            {
+        if (currentDirectory != null) {
+            if (!readOnly) {
                 getNewFolderAction().setEnabled(canWrite(currentDirectory));
             }
 
             fileChooserUIAccessor.getChangeToParentDirectoryAction()
-                                 .setEnabled(!fsv.isRoot(currentDirectory));
+                    .setEnabled(!fsv.isRoot(currentDirectory));
         }
 
-        if (list != null)
-        {
+        if (list != null) {
             list.clearSelection();
         }
     }
 
-    private void doFilterChanged(PropertyChangeEvent e)
-    {
+    private void doFilterChanged(PropertyChangeEvent e) {
         applyEdit();
         resetEditIndex();
         clearSelection();
     }
 
-    private void doFileSelectionModeChanged(PropertyChangeEvent e)
-    {
+    private void doFileSelectionModeChanged(PropertyChangeEvent e) {
         applyEdit();
         resetEditIndex();
         clearSelection();
     }
 
-    private void doMultiSelectionChanged(PropertyChangeEvent e)
-    {
-        if (getFileChooser().isMultiSelectionEnabled())
-        {
+    private void doMultiSelectionChanged(PropertyChangeEvent e) {
+        if (getFileChooser().isMultiSelectionEnabled()) {
             listSelectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        }
-        else
-        {
+        } else {
             listSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             clearSelection();
             getFileChooser().setSelectedFiles(null);
@@ -1269,135 +1088,99 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * Listen for filechooser property changes, such as
      * the selected file changing, or the type of the dialog changing.
      */
-    public void propertyChange(PropertyChangeEvent e)
-    {
-        if (viewType == -1)
-        {
+    @Override
+    public void propertyChange(PropertyChangeEvent e) {
+        if (viewType == -1) {
             setViewType(VIEWTYPE_LIST);
         }
 
         String s = e.getPropertyName();
 
-        if (s.equals(VFSJFileChooserConstants.SELECTED_FILE_CHANGED_PROPERTY))
-        {
+        if (s.equals(VFSJFileChooserConstants.SELECTED_FILE_CHANGED_PROPERTY)) {
             doSelectedFileChanged(e);
-        }
-        else if (s.equals(
-                    VFSJFileChooserConstants.SELECTED_FILES_CHANGED_PROPERTY))
-        {
+        } else if (s.equals(
+                VFSJFileChooserConstants.SELECTED_FILES_CHANGED_PROPERTY)) {
             doSelectedFilesChanged(e);
-        }
-        else if (s.equals(VFSJFileChooserConstants.DIRECTORY_CHANGED_PROPERTY))
-        {
+        } else if (s.equals(VFSJFileChooserConstants.DIRECTORY_CHANGED_PROPERTY)) {
             doDirectoryChanged(e);
-        }
-        else if (s.equals(VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY))
-        {
+        } else if (s.equals(VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY)) {
             doFilterChanged(e);
-        }
-        else if (s.equals(
-                    VFSJFileChooserConstants.FILE_SELECTION_MODE_CHANGED_PROPERTY))
-        {
+        } else if (s.equals(
+                VFSJFileChooserConstants.FILE_SELECTION_MODE_CHANGED_PROPERTY)) {
             doFileSelectionModeChanged(e);
-        }
-        else if (s.equals(
-                    VFSJFileChooserConstants.MULTI_SELECTION_ENABLED_CHANGED_PROPERTY))
-        {
+        } else if (s.equals(
+                VFSJFileChooserConstants.MULTI_SELECTION_ENABLED_CHANGED_PROPERTY)) {
             doMultiSelectionChanged(e);
-        }
-        else if (s.equals(VFSJFileChooserConstants.CANCEL_SELECTION))
-        {
+        } else if (s.equals(VFSJFileChooserConstants.CANCEL_SELECTION)) {
             applyEdit();
-        }
-        else if (s.equals("busy"))
-        {
+        } else if (s.equals("busy")) {
             setCursor((Boolean) e.getNewValue() ? waitCursor : null);
-        }
-        else if (s.equals("componentOrientation"))
-        {
+        } else if (s.equals("componentOrientation")) {
             ComponentOrientation o = (ComponentOrientation) e.getNewValue();
             VFSJFileChooser cc = (VFSJFileChooser) e.getSource();
 
-            if (o != e.getOldValue())
-            {
+            if (o != e.getOldValue()) {
                 cc.applyComponentOrientation(o);
             }
         }
     }
 
-    private void ensureIndexIsVisible(int i)
-    {
-        if (i >= 0)
-        {
-            if ((list != null) && (list.getModel().getSize() > i))
-            {
+    private void ensureIndexIsVisible(int i) {
+        if (i >= 0) {
+            if ((list != null) && (list.getModel().getSize() > i)) {
                 Rectangle cellBounds = list.getCellBounds(i, i);
 
-                if (cellBounds == null)
-                {
+                if (cellBounds == null) {
                     cellBounds = list.getCellBounds(i - 1, i - 1);
 
-                    if (cellBounds != null)
-                    {
+                    if (cellBounds != null) {
                         //  2* so that you get bottom of cell
                         cellBounds.translate(0, 2 * cellBounds.height);
                         list.scrollRectToVisible(cellBounds);
                     }
-                }
-                else
-                {
+                } else {
                     list.ensureIndexIsVisible(i);
                 }
             }
 
-            if (detailsTable != null)
-            {
+            if (detailsTable != null) {
                 Rectangle r = detailsTable.getCellRect(i, COLUMN_FILENAME, true);
                 detailsTable.scrollRectToVisible(r);
             }
         }
     }
 
-    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f)
-    {
+    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f) {
         int modelIndex = getModel().indexOf(f);
 
-        if (modelIndex >= 0)
-        {
+        if (modelIndex >= 0) {
             ensureIndexIsVisible(modelIndex);
         }
     }
 
-    public void rescanCurrentDirectory()
-    {
-      	getModel().invalidateFileCache();
+    public void rescanCurrentDirectory() {
+        getModel().invalidateFileCache();
         getModel().validateFileCache();
     }
 
-    public void clearSelection()
-    {
-        if (listSelectionModel != null)
-        {
+    public void clearSelection() {
+        if (listSelectionModel != null) {
             listSelectionModel.clearSelection();
 
-            if (listSelectionModel instanceof DefaultListSelectionModel)
-            {
+            if (listSelectionModel instanceof DefaultListSelectionModel) {
                 ((DefaultListSelectionModel) listSelectionModel).moveLeadSelectionIndex(0);
                 listSelectionModel.setAnchorSelectionIndex(0);
             }
         }
     }
 
-    public JMenu getViewMenu()
-    {
-        if (viewMenu == null)
-        {
+    public JMenu getViewMenu() {
+        if (viewMenu == null) {
             viewMenu = new JMenu(viewMenuLabelText);
 
             ButtonGroup viewButtonGroup = new ButtonGroup();
 
-            for (int i = 0; i < VIEWTYPE_COUNT; i++)
-            {
+            for (int i = 0; i < VIEWTYPE_COUNT; i++) {
                 JRadioButtonMenuItem mi = new JRadioButtonMenuItem();
                 mi.setAction(new ViewTypeAction(i));
                 viewButtonGroup.add(mi);
@@ -1410,55 +1193,43 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         return viewMenu;
     }
 
-    private void updateViewMenu()
-    {
-        if (viewMenu != null)
-        {
+    private void updateViewMenu() {
+        if (viewMenu != null) {
             Component[] components = viewMenu.getMenuComponents();
 
-            for (Component component : components)
-            {
-                if (component instanceof JRadioButtonMenuItem)
-                {
+            for (Component component : components) {
+                if (component instanceof JRadioButtonMenuItem) {
                     JRadioButtonMenuItem mi = (JRadioButtonMenuItem) component;
 
-                    if (((ViewTypeAction) mi.getAction()).viewType == viewType)
-                    {
+                    if (((ViewTypeAction) mi.getAction()).viewType == viewType) {
                         mi.setSelected(true);
                     }
-                }
-                else if (component instanceof JCheckBoxMenuItem) 
-                {
+                } else if (component instanceof JCheckBoxMenuItem) {
                     JCheckBoxMenuItem mi = (JCheckBoxMenuItem) component;
                     if (mi.getActionCommand().equals(ACTION_VIEW_HIDDEN))
-                      mi.setSelected(getFileChooser().isFileHidingEnabled());
+                        mi.setSelected(getFileChooser().isFileHidingEnabled());
                 }
             }
         }
     }
 
     @Override
-    public JPopupMenu getComponentPopupMenu()
-    {
+    public JPopupMenu getComponentPopupMenu() {
         JPopupMenu popupMenu = getFileChooser().getComponentPopupMenu();
 
-        if (popupMenu != null)
-        {
+        if (popupMenu != null) {
             return popupMenu;
         }
 
         JMenu aViewMenu = getViewMenu();
 
-        if (contextMenu == null)
-        {
+        if (contextMenu == null) {
             contextMenu = new JPopupMenu();
 
-            if (aViewMenu != null)
-            {
+            if (aViewMenu != null) {
                 contextMenu.add(aViewMenu);
 
-                if (listViewWindowsStyle)
-                {
+                if (listViewWindowsStyle) {
                     contextMenu.addSeparator();
                 }
             }
@@ -1468,41 +1239,34 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             Action aNewFolderAction = actionMap.get(ACTION_NEW_FOLDER);
             Action showHiddenFiles = actionMap.get(ACTION_VIEW_HIDDEN);
 
-            if (refreshAction != null)
-            {
+            if (refreshAction != null) {
                 contextMenu.add(refreshAction);
 
-                if (listViewWindowsStyle && (aNewFolderAction != null))
-                {
+                if (listViewWindowsStyle && (aNewFolderAction != null)) {
                     contextMenu.addSeparator();
                 }
             }
-            
-            if (showHiddenFiles != null)
-            {
-              JCheckBoxMenuItem menuitem = new JCheckBoxMenuItem(showHiddenFiles);
-              menuitem.setSelected((Boolean) showHiddenFiles.getValue(Action.SELECTED_KEY));
-              contextMenu.add(menuitem);
+
+            if (showHiddenFiles != null) {
+                JCheckBoxMenuItem menuitem = new JCheckBoxMenuItem(showHiddenFiles);
+                menuitem.setSelected((Boolean) showHiddenFiles.getValue(Action.SELECTED_KEY));
+                contextMenu.add(menuitem);
             }
 
-            if (aNewFolderAction != null)
-            {
+            if (aNewFolderAction != null) {
                 contextMenu.add(aNewFolderAction);
             }
         }
 
-        if (aViewMenu != null)
-        {
+        if (aViewMenu != null) {
             aViewMenu.getPopupMenu().setInvoker(aViewMenu);
         }
 
         return contextMenu;
     }
 
-    protected Handler getMouseHandler()
-    {
-        if (handler == null)
-        {
+    protected Handler getMouseHandler() {
+        if (handler == null) {
             handler = new Handler();
         }
 
@@ -1514,8 +1278,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      *
      * @return <code>true</code> iff a directory is currently selected.
      */
-    protected boolean isDirectorySelected()
-    {
+    protected boolean isDirectorySelected() {
         return fileChooserUIAccessor.isDirectorySelected();
     }
 
@@ -1525,28 +1288,21 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
      * @return the value of the <code>directory</code> property
      * @see javax.swing.plaf.basic.BasicFileChooserUI#setDirectory
      */
-    protected FileObject getDirectory()
-    {
+    protected FileObject getDirectory() {
         return fileChooserUIAccessor.getDirectory();
     }
 
     private Component findChildComponent(Container container,
-        Class<?extends Object> cls)
-    {
+            Class<? extends Object> cls) {
         final Component[] components = container.getComponents();
 
-        for (Component component : components)
-        {
-            if (cls.isInstance(component))
-            {
+        for (Component component : components) {
+            if (cls.isInstance(component)) {
                 return component;
-            }
-            else if (component instanceof Container)
-            {
+            } else if (component instanceof Container) {
                 Component c = findChildComponent((Container) component, cls);
 
-                if (c != null)
-                {
+                if (c != null) {
                     return c;
                 }
             }
@@ -1555,81 +1311,67 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         return null;
     }
 
-    public boolean canWrite(FileObject f)
-    {
+    public boolean canWrite(FileObject f) {
         return VFSUtils.canWrite(f);
     }
 
-    private void updateDetailsColumnModel(JTable table)
-    {
-        if (table != null)
-        {
+    private void updateDetailsColumnModel(JTable table) {
+        if (table != null) {
             // Install cell editor for editing file name
-            if (!readOnly && (table.getColumnCount() > COLUMN_FILENAME))
-            {
+            if (!readOnly && (table.getColumnCount() > COLUMN_FILENAME)) {
                 table.getColumnModel().getColumn(COLUMN_FILENAME)
-                     .setCellEditor(getDetailsTableCellEditor());
+                        .setCellEditor(getDetailsTableCellEditor());
             }
         }
     }
 
-    private DetailsTableCellEditor getDetailsTableCellEditor()
-    {
-        if (tableCellEditor == null)
-        {
+    private DetailsTableCellEditor getDetailsTableCellEditor() {
+        if (tableCellEditor == null) {
             tableCellEditor = new DetailsTableCellEditor(new JTextField());
         }
 
         return tableCellEditor;
     }
 
-    private DetailsTableModel getDetailsTableModel()
-    {
-        if (detailsTableModel == null)
-        {
+    private DetailsTableModel getDetailsTableModel() {
+        if (detailsTableModel == null) {
             detailsTableModel = new DetailsTableModel(getFileChooser());
         }
 
         return detailsTableModel;
     }
 
-    public JPanel createDetailsView()
-    {
+    public JPanel createDetailsView() {
         final VFSJFileChooser chooser = getFileChooser();
 
         JPanel p = new JPanel(new BorderLayout());
 
-        final JTable detailsTable = new JTable(getDetailsTableModel())
-            {
-                // Handle Escape key events here
-                @Override
-                protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
-                    int condition, boolean pressed)
-                {
-                    if ((e.getKeyCode() == KeyEvent.VK_ESCAPE) &&
-                            (getCellEditor() == null))
-                    {
-                        // We are not editing, forward to filechooser.
-                        chooser.dispatchEvent(e);
+        final JTable detailsTable = new JTable(getDetailsTableModel()) {
+            // Handle Escape key events here
+            @Override
+            protected boolean processKeyBinding(KeyStroke ks, KeyEvent e,
+                    int condition, boolean pressed) {
+                if ((e.getKeyCode() == KeyEvent.VK_ESCAPE)
+                        && (getCellEditor() == null)) {
+                    // We are not editing, forward to filechooser.
+                    chooser.dispatchEvent(e);
 
-                        return true;
-                    }
-
-                    return super.processKeyBinding(ks, e, condition, pressed);
+                    return true;
                 }
 
-                @Override
-                public void tableChanged(TableModelEvent e)
-                {
-                    super.tableChanged(e);
+                return super.processKeyBinding(ks, e, condition, pressed);
+            }
 
-                    if (e.getFirstRow() == TableModelEvent.HEADER_ROW)
-                    {
-                        // update header with possibly changed column set
-                        updateDetailsColumnModel(this);
-                    }
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                super.tableChanged(e);
+
+                if (e.getFirstRow() == TableModelEvent.HEADER_ROW) {
+                    // update header with possibly changed column set
+                    updateDetailsColumnModel(this);
                 }
-            };
+            }
+        };
 
         //        detailsTable.setRowSorter(getRowSorter());
         detailsTable.setAutoCreateColumnsFromModel(false);
@@ -1644,7 +1386,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         detailsTable.setIntercellSpacing(new Dimension(0, 0));
 
         TableCellRenderer headerRenderer = new AlignableTableHeaderRenderer(detailsTable.getTableHeader()
-                                                                                        .getDefaultRenderer());
+                .getDefaultRenderer());
         detailsTable.getTableHeader().setDefaultRenderer(headerRenderer);
 
         TableCellRenderer cellRenderer = new DetailsTableCellRenderer(chooser);
@@ -1652,7 +1394,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
         // So that drag can be started on a mouse press
         detailsTable.getColumnModel().getSelectionModel()
-                    .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         detailsTable.addMouseListener(getMouseHandler());
         // No need to addListSelectionListener because selections are forwarded
@@ -1661,8 +1403,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         // 4835633 : tell BasicTableUI that this is a file list
         detailsTable.putClientProperty("Table.isFileList", Boolean.TRUE);
 
-        if (listViewWindowsStyle)
-        {
+        if (listViewWindowsStyle) {
             detailsTable.addFocusListener(repaintListener);
         }
 
@@ -1679,60 +1420,53 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         am.remove("selectNextColumnCell");
         am.remove("selectPreviousColumnCell");
         detailsTable.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS,
-            null);
+                null);
         detailsTable.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS,
-            null);
+                null);
 
         JScrollPane scrollpane = new JScrollPane(detailsTable);
         scrollpane.setComponentOrientation(chooser.getComponentOrientation());
         LookAndFeel.installColors(scrollpane.getViewport(), "Table.background",
-            "Table.foreground");
+                "Table.foreground");
 
         // Adjust width of first column so the table fills the viewport when
         // first displayed (temporary listener).
-        scrollpane.addComponentListener(new ComponentAdapter()
-            {
-                @Override
-                public void componentResized(ComponentEvent e)
-                {
-                    JScrollPane sp = (JScrollPane) e.getComponent();
-                    fixNameColumnWidth(sp.getViewport().getSize().width);
-                    sp.removeComponentListener(this);
-                }
-            });
+        scrollpane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                JScrollPane sp = (JScrollPane) e.getComponent();
+                fixNameColumnWidth(sp.getViewport().getSize().width);
+                sp.removeComponentListener(this);
+            }
+        });
 
         // 4835633.
         // If the mouse is pressed in the area below the Details view table, the
         // event is not dispatched to the Table MouseListener but to the
         // scrollpane.  Listen for that here so we can clear the selection.
-        scrollpane.addMouseListener(new MouseAdapter()
-            {
-                @Override
-                public void mousePressed(MouseEvent e)
-                {
-                    JScrollPane jsp = ((JScrollPane) e.getComponent());
-                    JTable table = (JTable) jsp.getViewport().getView();
+        scrollpane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                JScrollPane jsp = ((JScrollPane) e.getComponent());
+                JTable table = (JTable) jsp.getViewport().getView();
 
-                    if (!e.isShiftDown() ||
-                            (table.getSelectionModel().getSelectionMode() == ListSelectionModel.SINGLE_SELECTION))
-                    {
-                        clearSelection();
+                if (!e.isShiftDown()
+                        || (table.getSelectionModel().getSelectionMode() == ListSelectionModel.SINGLE_SELECTION)) {
+                    clearSelection();
 
-                        TableCellEditor tce = table.getCellEditor();
+                    TableCellEditor tce = table.getCellEditor();
 
-                        if (tce != null)
-                        {
-                            tce.stopCellEditing();
-                        }
+                    if (tce != null) {
+                        tce.stopCellEditing();
                     }
                 }
-            });
+            }
+        });
 
         detailsTable.setForeground(list.getForeground());
         detailsTable.setBackground(list.getBackground());
 
-        if (listViewBorder != null)
-        {
+        if (listViewBorder != null) {
             scrollpane.setBorder(listViewBorder);
         }
 
@@ -1743,41 +1477,34 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         return p;
     } // createDetailsView
 
-    private void fixNameColumnWidth(int viewWidth)
-    {
+    private void fixNameColumnWidth(int viewWidth) {
         TableColumn nameCol = detailsTable.getColumnModel()
-                                          .getColumn(COLUMN_FILENAME);
+                .getColumn(COLUMN_FILENAME);
         int tableWidth = detailsTable.getPreferredSize().width;
 
-        if (tableWidth < viewWidth)
-        {
-            nameCol.setPreferredWidth((nameCol.getPreferredWidth() + viewWidth) -
-                tableWidth);
+        if (tableWidth < viewWidth) {
+            nameCol.setPreferredWidth((nameCol.getPreferredWidth() + viewWidth)
+                    - tableWidth);
         }
     }
 
-    class DetailsTableCellRenderer extends DefaultTableCellRenderer
-    {
+    class DetailsTableCellRenderer extends DefaultTableCellRenderer {
+
         VFSJFileChooser chooser;
         DateFormat df;
 
-        DetailsTableCellRenderer(VFSJFileChooser chooser)
-        {
+        DetailsTableCellRenderer(VFSJFileChooser chooser) {
             this.chooser = chooser;
             df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
                     DateFormat.SHORT, chooser.getLocale());
         }
 
         @Override
-        public void setBounds(int x, int y, int width, int height)
-        {
-            if (getHorizontalAlignment() == SwingConstants.LEADING)
-            {
+        public void setBounds(int x, int y, int width, int height) {
+            if (getHorizontalAlignment() == SwingConstants.LEADING) {
                 // Restrict width to actual text
                 width = Math.min(width, this.getPreferredSize().width + 4);
-            }
-            else
-            {
+            } else {
                 x -= 4;
             }
 
@@ -1785,8 +1512,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         }
 
         @Override
-        public Insets getInsets(Insets i)
-        {
+        public Insets getInsets(Insets i) {
             // Provide some space between columns
             i = super.getInsets(i);
             i.left += 4;
@@ -1797,17 +1523,15 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
         @Override
         public Component getTableCellRendererComponent(JTable table,
-            Object value, boolean isSelected, boolean hasFocus, int row,
-            int column)
-        {
-            if ((table.convertColumnIndexToModel(column) != COLUMN_FILENAME) ||
-                    (listViewWindowsStyle && !table.isFocusOwner()))
-            {
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
+            if ((table.convertColumnIndexToModel(column) != COLUMN_FILENAME)
+                    || (listViewWindowsStyle && !table.isFocusOwner())) {
                 isSelected = false;
             }
 
             super.getTableCellRendererComponent(table, value, isSelected,
-                hasFocus, row, column);
+                    hasFocus, row, column);
 
             setIcon(null);
             setHorizontalAlignment(SwingConstants.LEFT);
@@ -1816,30 +1540,21 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             // TODO: it's rather a temporary trick, to be revised
             String text;
 
-            if (value == null)
-            {
+            if (value == null) {
                 text = "";
-            }
-            else if (value instanceof FileObject)
-            {
+            } else if (value instanceof FileObject) {
                 FileObject file = (FileObject) value;
                 text = chooser.getName(file);
 
                 Icon icon = chooser.getIcon(file);
                 setIcon(icon);
-            }
-            else if (value instanceof Long)
-            {
+            } else if (value instanceof Long) {
                 long len = (Long) value; //((Long) value) / 1024L;
 
                 text = VFSUtils.byteCountToDisplaySize(len);
-            }
-            else if (value instanceof Date)
-            {
+            } else if (value instanceof Date) {
                 text = df.format((Date) value);
-            }
-            else
-            {
+            } else {
                 text = value.toString();
             }
 
@@ -1851,60 +1566,51 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
     // This interface is used to access methods in the FileChooserUI
     // that are not public.
-    class ViewTypeAction extends AbstractAction
-    {
+    class ViewTypeAction extends AbstractAction {
+
         private int viewType;
 
-        ViewTypeAction(int viewType)
-        {
+        ViewTypeAction(int viewType) {
             super(viewTypeActionNames[viewType]);
             this.viewType = viewType;
 
             String cmd;
 
-            if (viewType == VIEWTYPE_LIST)
-            {
+            if (viewType == VIEWTYPE_LIST) {
                 cmd = ACTION_VIEW_LIST;
-            }
-            else if (viewType == VIEWTYPE_DETAILS)
-            {
+            } else if (viewType == VIEWTYPE_DETAILS) {
                 cmd = ACTION_VIEW_DETAILS;
-            }
-            else
-            {
+            } else {
                 cmd = (String) getValue(Action.NAME);
             }
 
             putValue(Action.ACTION_COMMAND_KEY, cmd);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             setViewType(viewType);
         }
     }
 
-    private class DetailsTableCellEditor extends DefaultCellEditor
-    {
+    private class DetailsTableCellEditor extends DefaultCellEditor {
+
         private final JTextField tf;
 
-        public DetailsTableCellEditor(JTextField tf)
-        {
+        public DetailsTableCellEditor(JTextField tf) {
             super(tf);
             this.tf = tf;
             tf.addFocusListener(editorFocusListener);
         }
 
         @Override
-        public boolean isCellEditable(EventObject e)
-        {
-            if (e instanceof MouseEvent)
-            {
+        public boolean isCellEditable(EventObject e) {
+            if (e instanceof MouseEvent) {
                 MouseEvent me = (MouseEvent) e;
                 int index = detailsTable.rowAtPoint(me.getPoint());
 
-                return ((me.getClickCount() == 1) &&
-                detailsTable.isRowSelected(index));
+                return ((me.getClickCount() == 1)
+                        && detailsTable.isRowSelected(index));
             }
 
             return super.isCellEditable(e);
@@ -1912,13 +1618,11 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
         @Override
         public Component getTableCellEditorComponent(JTable table,
-            Object value, boolean isSelected, int row, int column)
-        {
+                Object value, boolean isSelected, int row, int column) {
             Component comp = super.getTableCellEditorComponent(table, value,
                     isSelected, row, column);
 
-            if (value instanceof FileObject)
-            {
+            if (value instanceof FileObject) {
                 tf.setText(getFileChooser().getName((FileObject) value));
                 tf.selectAll();
             }
@@ -1927,73 +1631,62 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         }
     }
 
-    private class DelayedSelectionUpdater implements Runnable
-    {
+    private class DelayedSelectionUpdater implements Runnable {
+
         FileObject editFile;
 
-        DelayedSelectionUpdater()
-        {
+        DelayedSelectionUpdater() {
             this(null);
         }
 
-        DelayedSelectionUpdater(FileObject editFile)
-        {
+        DelayedSelectionUpdater(FileObject editFile) {
             this.editFile = editFile;
 
-            if (isShowing())
-            {
+            if (isShowing()) {
                 SwingUtilities.invokeLater(this);
             }
         }
 
-        public void run()
-        {
+        @Override
+        public void run() {
             setFileSelected();
 
-            if (editFile != null)
-            {
+            if (editFile != null) {
                 editFileName(getModel().indexOf(editFile));
                 editFile = null;
             }
         }
     }
 
-    class EditActionListener implements ActionListener
-    {
-        public void actionPerformed(ActionEvent e)
-        {
+    class EditActionListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
             applyEdit();
         }
     }
 
-    protected class FileRenderer extends DefaultListCellRenderer
-    {
+    protected class FileRenderer extends DefaultListCellRenderer {
+
         @Override
         public Component getListCellRendererComponent(JList list, Object value,
-            int index, boolean isSelected, boolean cellHasFocus)
-        {
+                int index, boolean isSelected, boolean cellHasFocus) {
             FileObject f = (FileObject) value;
 
-            if (f != null)
-            {
+            if (f != null) {
                 setText(getFileChooser().getName(f));
                 setIcon(getFileChooser().getIcon(f));
-            }
-            else
-            {
+            } else {
                 setText("");
                 setIcon(null);
             }
 
             setOpaque(true);
 
-            if (isSelected)
-            {
+            if (isSelected) {
                 setBackground(list.getSelectionBackground());
                 setForeground(list.getSelectionForeground());
-            }
-            else
-            {
+            } else {
                 setBackground(list.getBackground());
                 setForeground(list.getForeground());
             }
@@ -2001,12 +1694,9 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             setEnabled(list.isEnabled());
             setFont(list.getFont());
 
-            if (cellHasFocus)
-            {
+            if (cellHasFocus) {
                 setBorder(UIManager.getBorder("List.focusCellHighlightBorder"));
-            }
-            else
-            {
+            } else {
                 setBorder(noFocusBorder);
             }
 
@@ -2014,37 +1704,32 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         }
     }
 
-    private class Handler implements MouseListener
-    {
+    private class Handler implements MouseListener {
+
         private MouseListener doubleClickListener;
 
-        public void mouseClicked(MouseEvent evt)
-        {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
             JComponent source = (JComponent) evt.getSource();
 
             int index;
 
-            if (source instanceof JList)
-            {
+            if (source instanceof JList) {
                 index = SwingCommonsUtilities.loc2IndexFileList(list,
                         evt.getPoint());
-            }
-            else if (source instanceof JTable)
-            {
+            } else if (source instanceof JTable) {
                 JTable table = (JTable) source;
                 Point p = evt.getPoint();
                 index = table.rowAtPoint(p);
 
                 if (SwingCommonsUtilities.pointOutsidePrefSize(table, index,
-                            table.columnAtPoint(p), p))
-                {
+                        table.columnAtPoint(p), p)) {
                     return;
                 }
 
                 // Translate point from table to list
-                if ((index >= 0) && (list != null) &&
-                        listSelectionModel.isSelectedIndex(index))
-                {
+                if ((index >= 0) && (list != null)
+                        && listSelectionModel.isSelectedIndex(index)) {
                     // Make a new event with the list as source, placing the
                     // click in the corresponding list cell. 
                     Rectangle r = list.getCellBounds(index, index);
@@ -2053,41 +1738,29 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                             evt.getClickCount(), evt.isPopupTrigger(),
                             evt.getButton());
                 }
-            }
-            else
-            {
+            } else {
                 return;
             }
 
-            if ((index >= 0) && SwingUtilities.isLeftMouseButton(evt))
-            {
+            if ((index >= 0) && SwingUtilities.isLeftMouseButton(evt)) {
                 VFSJFileChooser fc = getFileChooser();
 
                 // For single click, we handle editing file name
-                if ((evt.getClickCount() == 1) && source instanceof JList)
-                {
-                    if ((!fc.isMultiSelectionEnabled() ||
-                            (fc.getSelectedFiles().length <= 1)) &&
-                            (index >= 0) &&
-                            listSelectionModel.isSelectedIndex(index) &&
-                            (getEditIndex() == index) && (editFile == null))
-                    {
+                if ((evt.getClickCount() == 1) && source instanceof JList) {
+                    if ((!fc.isMultiSelectionEnabled()
+                            || (fc.getSelectedFiles().length <= 1))
+                            && (index >= 0)
+                            && listSelectionModel.isSelectedIndex(index)
+                            && (getEditIndex() == index) && (editFile == null)) {
                         editFileName(index);
-                    }
-                    else
-                    {
-                        if (index >= 0)
-                        {
+                    } else {
+                        if (index >= 0) {
                             setEditIndex(index);
-                        }
-                        else
-                        {
+                        } else {
                             resetEditIndex();
                         }
                     }
-                }
-                else if (evt.getClickCount() == 2)
-                {
+                } else if (evt.getClickCount() == 2) {
                     // System.out.println("double click");
 
                     // on double click (open or drill down one directory) be
@@ -2097,86 +1770,71 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             }
 
             // Forward event to Basic
-            if (getDoubleClickListener() != null)
-            {
+            if (getDoubleClickListener() != null) {
                 getDoubleClickListener().mouseClicked(evt);
             }
         }
 
-        public void mouseEntered(MouseEvent evt)
-        {
+        @Override
+        public void mouseEntered(MouseEvent evt) {
             JComponent source = (JComponent) evt.getSource();
 
-            if (source instanceof JTable)
-            {
+            if (source instanceof JTable) {
                 JTable table = (JTable) evt.getSource();
 
                 TransferHandler th1 = getFileChooser().getTransferHandler();
                 TransferHandler th2 = table.getTransferHandler();
 
-                if (th1 != th2)
-                {
+                if (th1 != th2) {
                     table.setTransferHandler(th1);
                 }
 
                 boolean dragEnabled = getFileChooser().getDragEnabled();
 
-                if (dragEnabled != table.getDragEnabled())
-                {
+                if (dragEnabled != table.getDragEnabled()) {
                     table.setDragEnabled(dragEnabled);
                 }
-            }
-            else if (source instanceof JList)
-            {
+            } else if (source instanceof JList) {
                 // Forward event to Basic
-                if (getDoubleClickListener() != null)
-                {
+                if (getDoubleClickListener() != null) {
                     getDoubleClickListener().mouseEntered(evt);
                 }
             }
         }
 
-        public void mouseExited(MouseEvent evt)
-        {
-            if (evt.getSource() instanceof JList)
-            {
+        @Override
+        public void mouseExited(MouseEvent evt) {
+            if (evt.getSource() instanceof JList) {
                 // Forward event to Basic
-                if (getDoubleClickListener() != null)
-                {
+                if (getDoubleClickListener() != null) {
                     getDoubleClickListener().mouseExited(evt);
                 }
             }
         }
 
-        public void mousePressed(MouseEvent evt)
-        {
-            if (evt.getSource() instanceof JList)
-            {
+        @Override
+        public void mousePressed(MouseEvent evt) {
+            if (evt.getSource() instanceof JList) {
                 // Forward event to Basic
-                if (getDoubleClickListener() != null)
-                {
+                if (getDoubleClickListener() != null) {
                     getDoubleClickListener().mousePressed(evt);
                 }
             }
         }
 
-        public void mouseReleased(MouseEvent evt)
-        {
-            if (evt.getSource() instanceof JList)
-            {
+        @Override
+        public void mouseReleased(MouseEvent evt) {
+            if (evt.getSource() instanceof JList) {
                 // Forward event to Basic
-                if (getDoubleClickListener() != null)
-                {
+                if (getDoubleClickListener() != null) {
                     getDoubleClickListener().mouseReleased(evt);
                 }
             }
         }
 
-        private MouseListener getDoubleClickListener()
-        {
+        private MouseListener getDoubleClickListener() {
             // Lazy creation of Basic's listener
-            if ((doubleClickListener == null) && (list != null))
-            {
+            if ((doubleClickListener == null) && (list != null)) {
                 doubleClickListener = fileChooserUIAccessor.createDoubleClickListener(list);
             }
 
@@ -2185,8 +1843,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     }
 
     class DetailsTableModel extends AbstractTableModel
-        implements ListDataListener
-    {
+            implements ListDataListener {
+
         public static final long ONE_KB = 1024;
         public static final long ONE_MB = ONE_KB * ONE_KB;
         public static final long ONE_GB = ONE_KB * ONE_MB;
@@ -2198,13 +1856,12 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         private final int columnsCount = 3;
         int[] columnMap;
         DateFormat df;
-        final String[] headers = 
-            {
-                fileNameHeaderText, fileSizeHeaderText, fileDateHeaderText
-            };
+        final String[] headers
+                = {
+                    fileNameHeaderText, fileSizeHeaderText, fileDateHeaderText
+                };
 
-        DetailsTableModel(VFSJFileChooser fc)
-        {
+        DetailsTableModel(VFSJFileChooser fc) {
             this.chooser = fc;
             directoryModel = getModel();
             directoryModel.addListDataListener(this);
@@ -2212,30 +1869,28 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
                     DateFormat.SHORT, chooser.getLocale());
 
-            for (String header : headers)
-            {
+            for (String header : headers) {
                 columns.add(header);
             }
 
             updateColumnInfo();
         }
 
-        void updateColumnInfo()
-        {
+        void updateColumnInfo() {
         }
 
-        public int getRowCount()
-        {
+        @Override
+        public int getRowCount() {
             return directoryModel.getSize();
         }
 
-        public int getColumnCount()
-        {
+        @Override
+        public int getColumnCount() {
             return this.columnsCount;
         }
 
-        public Object getValueAt(int row, int col)
-        {
+        @Override
+        public Object getValueAt(int row, int col) {
             // Note: It is very important to avoid getting info on drives, as
             // this will trigger "No disk in A:" and similar dialogs.
             //
@@ -2245,91 +1900,73 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                     row), col);
         }
 
-        private Object getFileColumnValue(FileObject f, int col)
-        {
+        private Object getFileColumnValue(FileObject f, int col) {
             Object o = f;
 
-            try
-            {
-                switch (col)
-                {
-                case COLUMN_FILENAME:
-                    o = f;
+            try {
+                switch (col) {
+                    case COLUMN_FILENAME:
+                        o = f;
 
-                    break;
+                        break;
 
-                case COLUMN_SIZE:
+                    case COLUMN_SIZE:
 
-                    if (VFSUtils.isDirectory(f))
-                    {
-                        o = null;
-                    }
-                    else
-                    {
-                        o = Long.parseLong("" + f.getContent().getSize());
-                    }
+                        if (VFSUtils.isDirectory(f)) {
+                            o = null;
+                        } else {
+                            o = Long.parseLong("" + f.getContent().getSize());
+                        }
 
-                    break;
+                        break;
 
-                case COLUMN_DATE:
-                    o = f.getContent().getLastModifiedTime() + "";
-                    o = new Date(Long.parseLong(o.toString()));
+                    case COLUMN_DATE:
+                        o = f.getContent().getLastModifiedTime() + "";
+                        o = new Date(Long.parseLong(o.toString()));
 
-                    break;
+                        break;
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
             }
 
             return o;
         }
 
         @Override
-        public void setValueAt(Object value, int row, int col)
-        {
-            if (col == COLUMN_FILENAME)
-            {
+        public void setValueAt(Object value, int row, int col) {
+            if (col == COLUMN_FILENAME) {
                 VFSJFileChooser chooser = getFileChooser();
                 FileObject f = (FileObject) getValueAt(row, col);
 
-                if (f != null)
-                {
+                if (f != null) {
                     String oldDisplayName = chooser.getName(f);
                     String oldFileName = f.getName().getBaseName();
                     String newDisplayName = ((String) value).trim();
                     String newFileName;
 
-                    if (!newDisplayName.equals(oldDisplayName))
-                    {
+                    if (!newDisplayName.equals(oldDisplayName)) {
                         newFileName = newDisplayName;
 
                         //Check if extension is hidden from user
                         int i1 = oldFileName.length();
                         int i2 = oldDisplayName.length();
 
-                        if ((i1 > i2) && (oldFileName.charAt(i2) == '.'))
-                        {
-                            newFileName = newDisplayName +
-                                oldFileName.substring(i2);
+                        if ((i1 > i2) && (oldFileName.charAt(i2) == '.')) {
+                            newFileName = newDisplayName
+                                    + oldFileName.substring(i2);
                         }
 
                         // rename
                         AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
                         FileObject f2 = fsv.createFileObject(VFSUtils.getParentDirectory(
-                                    f), newFileName);
+                                f), newFileName);
 
-                        if (!VFSUtils.exists(f2) &&
-                                VFSFilePane.this.getModel().renameFile(f, f2))
-                        {
-                            if (fsv.isParent(chooser.getCurrentDirectory(), f2))
-                            {
-                                if (chooser.isMultiSelectionEnabled())
-                                {
-                                    chooser.setSelectedFiles(new FileObject[] { f2 });
-                                }
-                                else
-                                {
+                        if (!VFSUtils.exists(f2)
+                                && VFSFilePane.this.getModel().renameFile(f, f2)) {
+                            if (fsv.isParent(chooser.getCurrentDirectory(), f2)) {
+                                if (chooser.isMultiSelectionEnabled()) {
+                                    chooser.setSelectedFiles(new FileObject[]{f2});
+                                } else {
                                     chooser.setSelectedFile(f2);
                                 }
                             }
@@ -2340,92 +1977,79 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         }
 
         @Override
-        public boolean isCellEditable(int row, int column)
-        {
+        public boolean isCellEditable(int row, int column) {
             FileObject currentDirectory = getFileChooser().getCurrentDirectory();
 
-            return (!readOnly && (column == COLUMN_FILENAME) &&
-            canWrite(currentDirectory));
+            return (!readOnly && (column == COLUMN_FILENAME)
+                    && canWrite(currentDirectory));
         }
 
-        public void contentsChanged(ListDataEvent e)
-        {
+        @Override
+        public void contentsChanged(ListDataEvent e) {
             // Update the selection after the model has been updated
             new DelayedSelectionUpdater();
             fireTableDataChanged();
         }
 
-        public void intervalAdded(ListDataEvent e)
-        {
+        @Override
+        public void intervalAdded(ListDataEvent e) {
             int i0 = e.getIndex0();
             int i1 = e.getIndex1();
 
-            if (i0 == i1)
-            {
+            if (i0 == i1) {
                 FileObject file = (FileObject) getModel().getElementAt(i0);
-                
-                if ((file != null) && (newFolderFile != null))
-                {
-                  if (file.getName().equals(newFolderFile.getName()))
-                  {
-                      new DelayedSelectionUpdater(file);
-                      newFolderFile = null;
-                  }
+
+                if ((file != null) && (newFolderFile != null)) {
+                    if (file.getName().equals(newFolderFile.getName())) {
+                        new DelayedSelectionUpdater(file);
+                        newFolderFile = null;
+                    }
                 }
             }
 
             fireTableRowsInserted(e.getIndex0(), e.getIndex1());
         }
 
-        public void intervalRemoved(ListDataEvent e)
-        {
+        @Override
+        public void intervalRemoved(ListDataEvent e) {
             fireTableRowsDeleted(e.getIndex0(), e.getIndex1());
         }
 
         @Override
-        public String getColumnName(int column)
-        {
+        public String getColumnName(int column) {
             String str = columns.get(column);
 
-            if (column == sortCol)
-            {
+            if (column == sortCol) {
                 str += (isSortAsc ? " >>" : " <<");
             }
 
             return str;
         }
 
-        public List<String> getColumns()
-        {
+        public List<String> getColumns() {
             return columns;
         }
 
-        class ColumnListener extends MouseAdapter
-        {
+        class ColumnListener extends MouseAdapter {
+
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
                 TableColumnModel colModel = detailsTable.getColumnModel();
                 int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
                 int modelIndex = colModel.getColumn(columnModelIndex)
-                                         .getModelIndex();
+                        .getModelIndex();
 
-                if (modelIndex < 0)
-                {
+                if (modelIndex < 0) {
                     return;
                 }
 
-                if (sortCol == modelIndex)
-                {
+                if (sortCol == modelIndex) {
                     isSortAsc = !isSortAsc;
-                }
-                else
-                {
+                } else {
                     sortCol = modelIndex;
                 }
 
-                for (int i = 0; i < columnsCount; i++)
-                {
+                for (int i = 0; i < columnsCount; i++) {
                     TableColumn column = colModel.getColumn(i);
                     column.setHeaderValue(getColumnName(column.getModelIndex()));
                 }
@@ -2434,12 +2058,9 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
 
                 Comparator<FileObject> cpt = FileObjectComparatorFactory.newFileNameComparator(isSortAsc);
 
-                if (modelIndex == 1)
-                {
+                if (modelIndex == 1) {
                     cpt = FileObjectComparatorFactory.newSizeComparator(isSortAsc);
-                }
-                else if (modelIndex == 2)
-                {
+                } else if (modelIndex == 2) {
                     cpt = FileObjectComparatorFactory.newDateComparator(isSortAsc);
                 }
 
@@ -2454,24 +2075,22 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     }
 
     private static class AlignableTableHeaderRenderer
-        implements TableCellRenderer
-    {
+            implements TableCellRenderer {
+
         TableCellRenderer wrappedRenderer;
 
-        public AlignableTableHeaderRenderer(TableCellRenderer wrappedRenderer)
-        {
+        public AlignableTableHeaderRenderer(TableCellRenderer wrappedRenderer) {
             this.wrappedRenderer = wrappedRenderer;
         }
 
+        @Override
         public Component getTableCellRendererComponent(JTable table,
-            Object value, boolean isSelected, boolean hasFocus, int row,
-            int column)
-        {
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
             Component c = wrappedRenderer.getTableCellRendererComponent(table,
                     value, isSelected, hasFocus, row, column);
 
-            if (c instanceof JLabel)
-            {
+            if (c instanceof JLabel) {
                 ((JLabel) c).setHorizontalAlignment(SwingConstants.CENTER);
             }
 

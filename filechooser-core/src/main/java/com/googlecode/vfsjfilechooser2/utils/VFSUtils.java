@@ -46,8 +46,8 @@ import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version 0.0.5
  */
-public final class VFSUtils
-{
+public final class VFSUtils {
+
     /**
      * The number of bytes in a kilobyte.
      */
@@ -67,10 +67,10 @@ public final class VFSUtils
     private static FileSystemManager fileSystemManager;
     private static FileSystemOptions opts = new FileSystemOptions();
     private static final String OS_NAME = System.getProperty("os.name")
-                                                .toLowerCase();
+            .toLowerCase();
     private static final String PROTO_PREFIX = "://";
     private static final String FILE_PREFIX = OS_NAME.startsWith("windows")
-        ? "file:///" : "file://";
+            ? "file:///" : "file://";
     private static final int FILE_PREFIX_LEN = FILE_PREFIX.length();
     private static ReadWriteLock aLock = new ReentrantReadWriteLock(true);
 
@@ -83,21 +83,16 @@ public final class VFSUtils
             "VFSJFileChooser.fileSizeGigaBytes");
 
     // prevent unnecessary calls
-    private VFSUtils()
-    {
+    private VFSUtils() {
         throw new AssertionError("Trying to create a VFSUtils object");
     }
 
-    public static void setFileSystemOptions(FileSystemOptions fileSystemOptions)
-    {
+    public static void setFileSystemOptions(FileSystemOptions fileSystemOptions) {
         aLock.writeLock().lock();
 
-        try
-        {
+        try {
             opts = fileSystemOptions;
-        }
-        finally
-        {
+        } finally {
             aLock.writeLock().unlock();
         }
     }
@@ -106,31 +101,23 @@ public final class VFSUtils
      * Returns the global filesystem manager
      * @return the global filesystem manager
      */
-    public static FileSystemManager getFileSystemManager()
-    {
+    public static FileSystemManager getFileSystemManager() {
         aLock.readLock().lock();
 
-        try
-        {
-            if (fileSystemManager == null)
-            {
-                try
-                {
+        try {
+            if (fileSystemManager == null) {
+                try {
                     StandardFileSystemManager fm = new StandardFileSystemManager();
                     fm.setCacheStrategy(CacheStrategy.MANUAL);
                     fm.init();
                     fileSystemManager = fm;
-                }
-                catch (Exception exc)
-                {
+                } catch (Exception exc) {
                     throw new RuntimeException(exc);
                 }
             }
 
             return fileSystemManager;
-        }
-        finally
-        {
+        } finally {
             aLock.readLock().unlock();
         }
     }
@@ -140,16 +127,12 @@ public final class VFSUtils
      * @param aFileSystemManager the global filesystem manager
      */
     public static void setFileSystemManager(
-        FileSystemManager aFileSystemManager)
-    {
+            FileSystemManager aFileSystemManager) {
         aLock.writeLock().lock();
 
-        try
-        {
+        try {
             fileSystemManager = aFileSystemManager;
-        }
-        finally
-        {
+        } finally {
             aLock.writeLock().unlock();
         }
     }
@@ -162,29 +145,21 @@ public final class VFSUtils
      * @param size  the number of bytes
      * @return a human-readable display value (includes units)
      */
-    public static String byteCountToDisplaySize(long size)
-    {
-        if ((size / ONE_GB) > 0)
-        {
+    public static String byteCountToDisplaySize(long size) {
+        if ((size / ONE_GB) > 0) {
             //            displaySize = String.valueOf(size / ONE_GB) + " GB";
             return MessageFormat.format(gigaByteString,
-                String.valueOf(size / ONE_GB));
-        }
-        else if ((size / ONE_MB) > 0)
-        {
+                    String.valueOf(size / ONE_GB));
+        } else if ((size / ONE_MB) > 0) {
             //            displaySize = String.valueOf(size / ONE_MB) + " MB";
             return MessageFormat.format(megaByteString,
-                String.valueOf(size / ONE_MB));
-        }
-        else if ((size / ONE_KB) > 0)
-        {
+                    String.valueOf(size / ONE_MB));
+        } else if ((size / ONE_KB) > 0) {
             return MessageFormat.format(kiloByteString,
-                String.valueOf(size / ONE_KB));
+                    String.valueOf(size / ONE_KB));
 
             //String.valueOf(size / ONE_KB) + " KB";
-        }
-        else
-        {
+        } else {
             return String.valueOf(size);
         }
     }
@@ -196,8 +171,7 @@ public final class VFSUtils
      * @throws FileSystemException An exception while getting the file
      */
     public static InputStream getInputStream(FileObject fileObject)
-        throws FileSystemException
-    {
+            throws FileSystemException {
         return new BufferedInputStream(fileObject.getContent().getInputStream());
     }
 
@@ -208,8 +182,7 @@ public final class VFSUtils
      * @throws FileSystemException An exception while getting the file
      */
     public static OutputStream getOutputStream(FileObject fileObject)
-        throws FileSystemException
-    {
+            throws FileSystemException {
         return new BufferedOutputStream(fileObject.getContent().getOutputStream());
     }
 
@@ -218,14 +191,10 @@ public final class VFSUtils
      * @param fileObject
      * @return whether a file is writable
      */
-    public static boolean canWrite(FileObject fileObject)
-    {
-        try
-        {
+    public static boolean canWrite(FileObject fileObject) {
+        try {
             return fileObject.isWriteable();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return false;
         }
     }
@@ -235,14 +204,10 @@ public final class VFSUtils
      * @param filePath The file path
      * @return a file representation
      */
-    public static FileObject createFileObject(String filePath)
-    {
-        try
-        {
+    public static FileObject createFileObject(String filePath) {
+        try {
             return getFileSystemManager().resolveFile(filePath, opts);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -252,31 +217,23 @@ public final class VFSUtils
      * @param fileName The file name
      * @return The "safe" display name without username and password information
      */
-    public static final String getFriendlyName(String fileName)
-    {
-    	return getFriendlyName(fileName, true);
+    public static final String getFriendlyName(String fileName) {
+        return getFriendlyName(fileName, true);
     }
-    
-    public static final String getFriendlyName(String fileName, boolean excludeLocalFilePrefix)
-    {
+
+    public static final String getFriendlyName(String fileName, boolean excludeLocalFilePrefix) {
         StringBuilder filePath = new StringBuilder();
 
         int pos = fileName.lastIndexOf('@');
 
-        if (pos == -1)
-        {
+        if (pos == -1) {
             filePath.append(fileName);
-        }
-        else
-        {
+        } else {
             int pos2 = fileName.indexOf(PROTO_PREFIX);
 
-            if (pos2 == -1)
-            {
+            if (pos2 == -1) {
                 filePath.append(fileName);
-            }
-            else
-            {
+            } else {
                 String protocol = fileName.substring(0, pos2);
 
                 filePath.append(protocol).append(PROTO_PREFIX)
@@ -286,8 +243,7 @@ public final class VFSUtils
 
         String returnedString = filePath.toString();
 
-        if (excludeLocalFilePrefix && returnedString.startsWith(FILE_PREFIX))
-        {
+        if (excludeLocalFilePrefix && returnedString.startsWith(FILE_PREFIX)) {
             return filePath.substring(FILE_PREFIX_LEN);
         }
 
@@ -299,14 +255,10 @@ public final class VFSUtils
      * @param fileObject A file
      * @return the root filesystem of a given file
      */
-    public static FileObject createFileSystemRoot(FileObject fileObject)
-    {
-        try
-        {
+    public static FileObject createFileSystemRoot(FileObject fileObject) {
+        try {
             return fileObject.getFileSystem().getRoot();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -316,14 +268,10 @@ public final class VFSUtils
      * @param folder A folder
      * @return the files of a folder
      */
-    public static FileObject[] getFiles(FileObject folder)
-    {
-        try
-        {
+    public static FileObject[] getFiles(FileObject folder) {
+        try {
             return folder.getChildren();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return new FileObject[0];
         }
     }
@@ -334,23 +282,17 @@ public final class VFSUtils
      * @param useFileHiding flag to include hidden files
      * @return a folder's files
      */
-    public static FileObject[] getFiles(FileObject folder, boolean useFileHiding)
-    {
+    public static FileObject[] getFiles(FileObject folder, boolean useFileHiding) {
         final FileObject[] fileList = getFiles(folder);
 
-        if (useFileHiding)
-        {
+        if (useFileHiding) {
             return fileList;
-        }
-        else
-        {
+        } else {
             List<FileObject> files = new ArrayList<FileObject>(fileList.length);
 
             // iterate over the file list
-            for (FileObject file : fileList)
-            {
-                if (!isHiddenFile(file))
-                {
+            for (FileObject file : fileList) {
+                if (!isHiddenFile(file)) {
                     files.add(file); // add the file
                 }
             }
@@ -364,19 +306,14 @@ public final class VFSUtils
      * @param fileObject A file abstraction
      * @return the root file system of a file representation
      */
-    public static FileObject getRootFileSystem(FileObject fileObject)
-    {
-        try
-        {
-            if ((fileObject == null) || !fileObject.exists())
-            {
+    public static FileObject getRootFileSystem(FileObject fileObject) {
+        try {
+            if ((fileObject == null) || !fileObject.exists()) {
                 return null;
             }
 
             return fileObject.getFileSystem().getRoot();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -386,14 +323,10 @@ public final class VFSUtils
      * @param fileObject a file representation
      * @return whether a file is hidden
      */
-    public static boolean isHiddenFile(FileObject fileObject)
-    {
-        try
-        {
+    public static boolean isHiddenFile(FileObject fileObject) {
+        try {
             return fileObject.getName().getBaseName().charAt(0) == '.';
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -403,14 +336,10 @@ public final class VFSUtils
      * @param fileObject A file representation
      * @return whether a file is the root file system
      */
-    public static boolean isRoot(FileObject fileObject)
-    {
-        try
-        {
+    public static boolean isRoot(FileObject fileObject) {
+        try {
             return fileObject.getParent() == null;
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return false;
         }
     }
@@ -420,14 +349,10 @@ public final class VFSUtils
      * @param file a local file
      * @return a file representation of a local file
      */
-    public static FileObject toFileObject(File file)
-    {
-        try
-        {
+    public static FileObject toFileObject(File file) {
+        try {
             return getFileSystemManager().toFileObject(file);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -437,17 +362,13 @@ public final class VFSUtils
      * @param fileObject A file representation
      * @return the parent directory of a file object
      */
-    public static FileObject getParentDirectory(FileObject fileObject)
-    {
+    public static FileObject getParentDirectory(FileObject fileObject) {
         if (fileObject == null)
             return fileObject;
-        
-        try
-        {
+
+        try {
             return fileObject.getParent();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return fileObject;
         }
     }
@@ -457,20 +378,15 @@ public final class VFSUtils
      * @param filePath The file path
      * @return a file representation
      */
-    public static FileObject resolveFileObject(String filePath)
-    {
-        try
-        {
-            if (filePath.startsWith("sftp://"))
-            {
+    public static FileObject resolveFileObject(String filePath) {
+        try {
+            if (filePath.startsWith("sftp://")) {
                 SftpFileSystemConfigBuilder.getInstance()
-                                           .setStrictHostKeyChecking(opts, "no");
+                        .setStrictHostKeyChecking(opts, "no");
             }
 
             return getFileSystemManager().resolveFile(filePath, opts);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -482,14 +398,10 @@ public final class VFSUtils
      * @return a file representation
      */
     public static FileObject resolveFileObject(String filePath,
-        FileSystemOptions options)
-    {
-        try
-        {
+            FileSystemOptions options) {
+        try {
             return getFileSystemManager().resolveFile(filePath, options);
-        }
-        catch (FileSystemException fse)
-        {
+        } catch (FileSystemException fse) {
             return null;
         }
     }
@@ -501,14 +413,10 @@ public final class VFSUtils
      * @return a file contained in a given folder
      */
     public static FileObject resolveFileObject(FileObject folder,
-        String filename)
-    {
-        try
-        {
+            String filename) {
+        try {
             return folder.resolveFile(filename);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return null;
         }
     }
@@ -518,19 +426,14 @@ public final class VFSUtils
      * @param fileObject A file representation
      * @return whether a file exists
      */
-    public static boolean exists(FileObject fileObject)
-    {
-        if (fileObject == null)
-        {
+    public static boolean exists(FileObject fileObject) {
+        if (fileObject == null) {
             return false;
         }
 
-        try
-        {
+        try {
             return fileObject.exists();
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return false;
         }
     }
@@ -540,14 +443,10 @@ public final class VFSUtils
      * @param fileObject A file object representation
      * @return whether a file object is a directory
      */
-    public static boolean isDirectory(FileObject fileObject)
-    {
-        try
-        {
+    public static boolean isDirectory(FileObject fileObject) {
+        try {
             return fileObject.getType().equals(FileType.FOLDER);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return false;
         }
     }
@@ -557,8 +456,7 @@ public final class VFSUtils
      * @param folder A folder
      * @return whether a folder is the root filesystem
      */
-    public static boolean isFileSystemRoot(FileObject folder)
-    {
+    public static boolean isFileSystemRoot(FileObject folder) {
         return isRoot(folder);
     }
 
@@ -568,21 +466,16 @@ public final class VFSUtils
      * @param file A file
      * @return whether a folder contains a given file
      */
-    public static boolean isParent(FileObject folder, FileObject file)
-    {
-        try
-        {
+    public static boolean isParent(FileObject folder, FileObject file) {
+        try {
             FileObject parent = file.getParent();
 
-            if (parent == null)
-            {
+            if (parent == null) {
                 return false;
             }
 
             return parent.equals(folder);
-        }
-        catch (FileSystemException ex)
-        {
+        } catch (FileSystemException ex) {
             return false;
         }
     }

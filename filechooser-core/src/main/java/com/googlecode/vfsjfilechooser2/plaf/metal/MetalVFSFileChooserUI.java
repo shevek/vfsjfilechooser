@@ -66,7 +66,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
 
-
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 
@@ -91,8 +90,8 @@ import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
  * @author Stephan Schuster <stephanschuster at users.sourceforge.net>
  * @version 0.0.1
  */
-public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
-{
+public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
+
     private static final Dimension hstrut5 = new Dimension(5, 1);
 
     // private static final Dimension hstrut11 = new Dimension(11, 1);
@@ -149,20 +148,15 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     private JButton homeFolderButton;
     private JButton newFolderButton;
 
-    public MetalVFSFileChooserUI(VFSJFileChooser filechooser)
-    {
+    public MetalVFSFileChooserUI(VFSJFileChooser filechooser) {
         super(filechooser);
         this.chooser = filechooser;
     }
 
-    private void populateFileNameLabel()
-    {
-        if (getFileChooser().getFileSelectionMode() == SELECTION_MODE.DIRECTORIES_ONLY)
-        {
+    private void populateFileNameLabel() {
+        if (getFileChooser().getFileSelectionMode() == SELECTION_MODE.DIRECTORIES_ONLY) {
             fileNameLabel.setText(folderNameLabelText);
-        }
-        else
-        {
+        } else {
             fileNameLabel.setText(fileNameLabelText);
         }
     }
@@ -170,51 +164,43 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     //
     // ComponentUI Interface Implementation methods
     //
-    public static ComponentUI createUI(JComponent c)
-    {
+    public static ComponentUI createUI(JComponent c) {
         ComponentUI mui = new MetalVFSFileChooserUI((VFSJFileChooser) c);
 
         return mui;
     }
 
     @Override
-    public void installUI(JComponent c)
-    {
+    public void installUI(JComponent c) {
         super.installUI(c);
     }
 
     @Override
-    public void uninstallComponents(VFSJFileChooser fc)
-    {
+    public void uninstallComponents(VFSJFileChooser fc) {
         fc.removeAll();
         bottomPanel = null;
         buttonPanel = null;
     }
 
-    public JPanel getNavigationButtonsPanel()
-    {
+    public JPanel getNavigationButtonsPanel() {
         return topButtonPanel;
     }
 
-    public JButton getUpFolderButton()
-    {
+    public JButton getUpFolderButton() {
         return upFolderButton;
     }
 
-    public JButton getHomeFolderButton()
-    {
+    public JButton getHomeFolderButton() {
         return homeFolderButton;
     }
 
-    public JButton getNewFolderButton()
-    {
+    public JButton getNewFolderButton() {
         return newFolderButton;
     }
 
     @SuppressWarnings("serial")
     @Override
-    public void installComponents(VFSJFileChooser fc)
-    {
+    public void installComponents(VFSJFileChooser fc) {
         AbstractVFSFileSystemView fsv = fc.getFileSystemView();
 
         fc.setBorder(new EmptyBorder(12, 12, 11, 11));
@@ -228,7 +214,6 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         // ********************************* //
         // **** Construct the top panel **** //
         // ********************************* //
-
         // Directory manipulation buttons
         JPanel topPanel = new JPanel(new BorderLayout(11, 0));
         topButtonPanel = new JPanel();
@@ -244,22 +229,20 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         topPanel.add(lookInLabel, BorderLayout.BEFORE_LINE_BEGINS);
 
         // CurrentDir ComboBox
-        directoryComboBox = new JComboBox()
-                {
-                    @Override
-                    public Dimension getPreferredSize()
-                    {
-                        Dimension d = super.getPreferredSize();
-                        // Must be small enough to not affect total width.
-                        d.width = 150;
+        directoryComboBox = new JComboBox() {
+            @Override
+            public Dimension getPreferredSize() {
+                Dimension d = super.getPreferredSize();
+                // Must be small enough to not affect total width.
+                d.width = 150;
 
-                        return d;
-                    }
-                };
+                return d;
+            }
+        };
         directoryComboBox.putClientProperty(AccessibleContext.ACCESSIBLE_DESCRIPTION_PROPERTY,
-            lookInLabelText);
+                lookInLabelText);
         directoryComboBox.putClientProperty("JComboBox.isTableCellEditor",
-            Boolean.TRUE);
+                Boolean.TRUE);
         lookInLabel.setLabelFor(directoryComboBox);
         directoryComboBoxModel = createDirectoryComboBoxModel(fc);
         directoryComboBox.setModel(directoryComboBoxModel);
@@ -277,7 +260,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         upFolderButton.setIcon(upFolderIcon);
         upFolderButton.setToolTipText(upFolderToolTipText);
         upFolderButton.putClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY,
-            upFolderAccessibleName);
+                upFolderAccessibleName);
         upFolderButton.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         upFolderButton.setAlignmentY(JComponent.CENTER_ALIGNMENT);
         upFolderButton.setMargin(shrinkwrap);
@@ -289,15 +272,14 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         FileObject homeDir = fsv.getHomeDirectory();
         String toolTipText = homeFolderToolTipText;
 
-        if (fsv.isRoot(homeDir))
-        {
+        if (fsv.isRoot(homeDir)) {
             toolTipText = getFileView(fc).getName(homeDir); // Probably "Desktop".
         }
 
         JButton b = new JButton(homeFolderIcon);
         b.setToolTipText(toolTipText);
         b.putClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY,
-            homeFolderAccessibleName);
+                homeFolderAccessibleName);
         b.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         b.setAlignmentY(JComponent.CENTER_ALIGNMENT);
         b.setMargin(shrinkwrap);
@@ -307,14 +289,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         topButtonPanel.add(Box.createRigidArea(hstrut5));
 
         // New Directory Button
-        if (!UIManager.getBoolean("FileChooser.readOnly"))
-        {
+        if (!UIManager.getBoolean("FileChooser.readOnly")) {
             b = new JButton(filePane.getNewFolderAction());
             b.setText(null);
             b.setIcon(newFolderIcon);
             b.setToolTipText(newFolderToolTipText);
             b.putClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY,
-                newFolderAccessibleName);
+                    newFolderAccessibleName);
             b.setAlignmentX(JComponent.LEFT_ALIGNMENT);
             b.setAlignmentY(JComponent.CENTER_ALIGNMENT);
             b.setMargin(shrinkwrap);
@@ -330,7 +311,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         listViewButton = new JToggleButton(listViewIcon);
         listViewButton.setToolTipText(listViewButtonToolTipText);
         listViewButton.putClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY,
-            listViewButtonAccessibleName);
+                listViewButtonAccessibleName);
         listViewButton.setSelected(true);
         listViewButton.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         listViewButton.setAlignmentY(JComponent.CENTER_ALIGNMENT);
@@ -344,7 +325,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         detailsViewButton = new JToggleButton(detailsViewIcon);
         detailsViewButton.setToolTipText(detailsViewButtonToolTipText);
         detailsViewButton.putClientProperty(AccessibleContext.ACCESSIBLE_NAME_PROPERTY,
-            detailsViewButtonAccessibleName);
+                detailsViewButtonAccessibleName);
         detailsViewButton.setAlignmentX(JComponent.LEFT_ALIGNMENT);
         detailsViewButton.setAlignmentY(JComponent.CENTER_ALIGNMENT);
         detailsViewButton.setMargin(shrinkwrap);
@@ -352,25 +333,20 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
                 VFSFilePane.VIEWTYPE_DETAILS));
         topButtonPanel.add(detailsViewButton);
         viewButtonGroup.add(detailsViewButton);
-        filePane.addPropertyChangeListener(new PropertyChangeListener()
-            {
-                public void propertyChange(PropertyChangeEvent e)
-                {
-                    if ("viewType".equals(e.getPropertyName()))
-                    {
-                        final int viewType = filePane.getViewType();
+        filePane.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                if ("viewType".equals(e.getPropertyName())) {
+                    final int viewType = filePane.getViewType();
 
-                        if (viewType == VFSFilePane.VIEWTYPE_LIST)
-                        {
-                            listViewButton.setSelected(true);
-                        }
-                        else if (viewType == VFSFilePane.VIEWTYPE_DETAILS)
-                        {
-                            detailsViewButton.setSelected(true);
-                        }
+                    if (viewType == VFSFilePane.VIEWTYPE_LIST) {
+                        listViewButton.setSelected(true);
+                    } else if (viewType == VFSFilePane.VIEWTYPE_DETAILS) {
+                        detailsViewButton.setSelected(true);
                     }
                 }
-            });
+            }
+        });
 
         // ************************************** //
         // ******* Add the directory pane ******* //
@@ -379,8 +355,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
         JComponent accessory = fc.getAccessory();
 
-        if (accessory != null)
-        {
+        if (accessory != null) {
             getAccessoryPanel().add(accessory);
         }
 
@@ -404,38 +379,30 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         populateFileNameLabel();
         fileNamePanel.add(fileNameLabel);
 
-        fileNameTextField = new JTextField(35)
-                {
-                    @Override
-                    public Dimension getMaximumSize()
-                    {
-                        return new Dimension(Short.MAX_VALUE,
-                            super.getPreferredSize().height);
-                    }
-                };
+        fileNameTextField = new JTextField(35) {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(Short.MAX_VALUE,
+                        super.getPreferredSize().height);
+            }
+        };
 
         PopupHandler.installDefaultMouseListener(fileNameTextField);
 
         fileNamePanel.add(fileNameTextField);
         fileNameLabel.setLabelFor(fileNameTextField);
-        fileNameTextField.addFocusListener(new FocusAdapter()
-            {
-                @Override
-                public void focusGained(FocusEvent e)
-                {
-                    if (!getFileChooser().isMultiSelectionEnabled())
-                    {
-                        filePane.clearSelection();
-                    }
+        fileNameTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (!getFileChooser().isMultiSelectionEnabled()) {
+                    filePane.clearSelection();
                 }
-            });
+            }
+        });
 
-        if (fc.isMultiSelectionEnabled())
-        {
+        if (fc.isMultiSelectionEnabled()) {
             setFileName(fileNameString(fc.getSelectedFiles()));
-        }
-        else
-        {
+        } else {
             setFileName(fileNameString(fc.getSelectedFile()));
         }
 
@@ -452,7 +419,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         fc.addPropertyChangeListener(filterComboBoxModel);
         filterComboBox = new JComboBox(filterComboBoxModel);
         filterComboBox.putClientProperty(AccessibleContext.ACCESSIBLE_DESCRIPTION_PROPERTY,
-            filesOfTypeLabelText);
+                filesOfTypeLabelText);
         filesOfTypeLabel.setLabelFor(filterComboBox);
         filterComboBox.setRenderer(createFilterComboBoxRenderer());
         filesOfTypePanel.add(filterComboBox);
@@ -463,21 +430,16 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         approveButton = new JButton(getApproveButtonText(fc));
         // Note: Metal does not use mnemonics for approve and cancel
         approveButton.addActionListener(getApproveSelectionAction());
-        fileNameTextField.addKeyListener(new KeyAdapter()
-            {
-                @Override
-                public void keyPressed(KeyEvent e)
-                {
-                    if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                    {
-                        getApproveSelectionAction().actionPerformed(null);
-                    }
-                    else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-                    {
-                        getFileChooser().cancelSelection();
-                    }
+        fileNameTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    getApproveSelectionAction().actionPerformed(null);
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    getFileChooser().cancelSelection();
                 }
-            });
+            }
+        });
         approveButton.setToolTipText(getApproveButtonToolTipText(fc));
         getButtonPanel().add(approveButton);
 
@@ -486,47 +448,38 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         cancelButton.addActionListener(getCancelSelectionAction());
         getButtonPanel().add(cancelButton);
 
-        if (fc.getControlButtonsAreShown())
-        {
+        if (fc.getControlButtonsAreShown()) {
             addControlButtons();
         }
 
-        groupLabels(new AlignedLabel[] { fileNameLabel, filesOfTypeLabel });
+        groupLabels(new AlignedLabel[]{fileNameLabel, filesOfTypeLabel});
     }
 
-    private void updateUseShellFolder()
-    {
+    private void updateUseShellFolder() {
         // Decide whether to use the ShellFolder class to populate shortcut
         // panel and combobox.
         VFSJFileChooser fc = getFileChooser();
         Boolean prop = (Boolean) fc.getClientProperty(
                 "FileChooser.useShellFolder");
 
-        if (prop != null)
-        {
+        if (prop != null) {
             useShellFolder = prop.booleanValue();
-        }
-        else
-        {
+        } else {
             useShellFolder = fc.getFileSystemView()
-                               .equals(AbstractVFSFileSystemView.getFileSystemView());
+                    .equals(AbstractVFSFileSystemView.getFileSystemView());
         }
     }
 
-    protected JPanel getButtonPanel()
-    {
-        if (buttonPanel == null)
-        {
+    protected JPanel getButtonPanel() {
+        if (buttonPanel == null) {
             buttonPanel = new JPanel();
         }
 
         return buttonPanel;
     }
 
-    protected JPanel getBottomPanel()
-    {
-        if (bottomPanel == null)
-        {
+    protected JPanel getBottomPanel() {
+        if (bottomPanel == null) {
             bottomPanel = new JPanel();
         }
 
@@ -534,8 +487,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     }
 
     @Override
-    protected void installStrings(VFSJFileChooser fc)
-    {
+    protected void installStrings(VFSJFileChooser fc) {
         super.installStrings(fc);
 
         lookInLabelText = VFSResources.getMessage(
@@ -578,8 +530,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     }
 
     @Override
-    protected void installListeners(VFSJFileChooser fc)
-    {
+    protected void installListeners(VFSJFileChooser fc) {
         super.installListeners(fc);
 
         ActionMap actionMap = getActionMap();
@@ -587,27 +538,23 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     }
 
     @Override
-    protected ActionMap getActionMap()
-    {
+    protected ActionMap getActionMap() {
         return createActionMap();
     }
 
     @Override
-    protected ActionMap createActionMap()
-    {
+    protected ActionMap createActionMap() {
         ActionMap map = new ActionMapUIResource();
         VFSFilePane.addActionsToMap(map, filePane.getActions());
 
         return map;
     }
 
-    protected JPanel createList(VFSJFileChooser fc)
-    {
+    protected JPanel createList(VFSJFileChooser fc) {
         return filePane.createList();
     }
 
-    protected JPanel createDetailsView(VFSJFileChooser fc)
-    {
+    protected JPanel createDetailsView(VFSJFileChooser fc) {
         return filePane.createDetailsView();
     }
 
@@ -618,14 +565,12 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      * @return a <code>ListSelectionListener</code>
      */
     @Override
-    public ListSelectionListener createListSelectionListener(VFSJFileChooser fc)
-    {
+    public ListSelectionListener createListSelectionListener(VFSJFileChooser fc) {
         return super.createListSelectionListener(fc);
     }
 
     @Override
-    public void uninstallUI(JComponent c)
-    {
+    public void uninstallUI(JComponent c) {
         // Remove listeners
         c.removePropertyChangeListener(filterComboBoxModel);
         c.removePropertyChangeListener(filePane);
@@ -633,8 +578,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         approveButton.removeActionListener(getApproveSelectionAction());
         fileNameTextField.removeActionListener(getApproveSelectionAction());
 
-        if (filePane != null)
-        {
+        if (filePane != null) {
             filePane.uninstallUI();
             filePane = null;
         }
@@ -655,18 +599,14 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      *           width and height of the file chooser
      */
     @Override
-    public Dimension getPreferredSize(JComponent c)
-    {
+    public Dimension getPreferredSize(JComponent c) {
         int prefWidth = PREF_SIZE.width;
         Dimension d = c.getLayout().preferredLayoutSize(c);
 
-        if (d != null)
-        {
+        if (d != null) {
             return new Dimension((d.width < prefWidth) ? prefWidth : d.width,
-                (d.height < PREF_SIZE.height) ? PREF_SIZE.height : d.height);
-        }
-        else
-        {
+                    (d.height < PREF_SIZE.height) ? PREF_SIZE.height : d.height);
+        } else {
             return new Dimension(prefWidth, PREF_SIZE.height);
         }
     }
@@ -679,8 +619,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      *           width and height of the file chooser
      */
     @Override
-    public Dimension getMinimumSize(JComponent c)
-    {
+    public Dimension getMinimumSize(JComponent c) {
         return MIN_SIZE;
     }
 
@@ -692,69 +631,53 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      *           width and height of the file chooser
      */
     @Override
-    public Dimension getMaximumSize(JComponent c)
-    {
+    public Dimension getMaximumSize(JComponent c) {
         return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
-    private String fileNameString(FileObject fileObject)
-    {
-        if (fileObject == null)
-        {
+    private String fileNameString(FileObject fileObject) {
+        if (fileObject == null) {
             return null;
-        }
-        else
-        {
+        } else {
             VFSJFileChooser fc = getFileChooser();
 
-            if ((fc.isDirectorySelectionEnabled() &&
-                    !fc.isFileSelectionEnabled()) ||
-                    (fc.isDirectorySelectionEnabled() &&
-                    fc.isFileSelectionEnabled() &&
-                    fc.getFileSystemView().isFileSystemRoot(fileObject)))
-            {
+            if ((fc.isDirectorySelectionEnabled()
+                    && !fc.isFileSelectionEnabled())
+                    || (fc.isDirectorySelectionEnabled()
+                    && fc.isFileSelectionEnabled()
+                    && fc.getFileSystemView().isFileSystemRoot(fileObject))) {
                 String url = null;
 
-                try
-                {
+                try {
                     url = fileObject.getURL().toExternalForm();
-                }
-                catch (FileSystemException ex)
-                {
+                } catch (FileSystemException ex) {
                     ex.printStackTrace();
                 }
 
                 return url;
-            }
-            else
-            {
+            } else {
                 return fileObject.getName().getBaseName();
             }
         }
     }
 
-    private String fileNameString(FileObject[] files)
-    {
+    private String fileNameString(FileObject[] files) {
         StringBuilder buf = new StringBuilder();
 
         final int fileCount = files.length;
 
-        for (int i = 0; (files != null) && (i < fileCount); i++)
-        {
-            if (i > 0)
-            {
+        for (int i = 0; (files != null) && (i < fileCount); i++) {
+            if (i > 0) {
                 buf.append(" ");
             }
 
-            if (fileCount > 1)
-            {
+            if (fileCount > 1) {
                 buf.append("\"");
             }
 
             buf.append(fileNameString(files[i]));
 
-            if (fileCount > 1)
-            {
+            if (fileCount > 1) {
                 buf.append("\"");
             }
         }
@@ -763,34 +686,29 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     }
 
     /* The following methods are used by the PropertyChange Listener */
-    private void doSelectedFileChanged(PropertyChangeEvent e)
-    {
+    private void doSelectedFileChanged(PropertyChangeEvent e) {
         FileObject f = (FileObject) e.getNewValue();
         VFSJFileChooser fc = getFileChooser();
 
-        if ((f != null) &&
-                ((fc.isFileSelectionEnabled() && !VFSUtils.isDirectory(f)) ||
-                (VFSUtils.isDirectory(f) && fc.isDirectorySelectionEnabled())))
-        {
+        if ((f != null)
+                && ((fc.isFileSelectionEnabled() && !VFSUtils.isDirectory(f))
+                || (VFSUtils.isDirectory(f) && fc.isDirectorySelectionEnabled()))) {
             setFileName(fileNameString(f));
         }
     }
 
-    private void doSelectedFilesChanged(PropertyChangeEvent e)
-    {
+    private void doSelectedFilesChanged(PropertyChangeEvent e) {
         FileObject[] files = (FileObject[]) e.getNewValue();
         VFSJFileChooser fc = getFileChooser();
 
-        if ((files != null) && (files.length > 0) &&
-                ((files.length > 1) || fc.isDirectorySelectionEnabled() ||
-                !VFSUtils.isDirectory(files[0])))
-        {
+        if ((files != null) && (files.length > 0)
+                && ((files.length > 1) || fc.isDirectorySelectionEnabled()
+                || !VFSUtils.isDirectory(files[0]))) {
             setFileName(fileNameString(files));
         }
     }
 
-    private void doDirectoryChanged(PropertyChangeEvent e)
-    {
+    private void doDirectoryChanged(PropertyChangeEvent e) {
         VFSJFileChooser fc = getFileChooser();
         AbstractVFSFileSystemView fsv = fc.getFileSystemView();
 
@@ -798,47 +716,36 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
         FileObject currentDirectory = fc.getCurrentDirectory();
 
-        if (currentDirectory != null)
-        {
+        if (currentDirectory != null) {
             directoryComboBoxModel.addItem(currentDirectory);
             directoryComboBox.setSelectedItem(currentDirectory);
             fc.setCurrentDirectory(currentDirectory);
 
-            if (fc.isDirectorySelectionEnabled() &&
-                    !fc.isFileSelectionEnabled())
-            {
-                if (fsv.isFileSystem(currentDirectory))
-                {
+            if (fc.isDirectorySelectionEnabled()
+                    && !fc.isFileSelectionEnabled()) {
+                if (fsv.isFileSystem(currentDirectory)) {
                     String url = null;
 
-                    try
-                    {
+                    try {
                         url = currentDirectory.getURL().toExternalForm();
-                    }
-                    catch (FileSystemException e1)
-                    {
+                    } catch (FileSystemException e1) {
                         e1.printStackTrace();
                     }
 
                     setFileName(url);
-                }
-                else
-                {
+                } else {
                     setFileName(null);
                 }
             }
         }
     }
 
-    private void doFilterChanged(PropertyChangeEvent e)
-    {
+    private void doFilterChanged(PropertyChangeEvent e) {
         clearIconCache();
     }
 
-    private void doFileSelectionModeChanged(PropertyChangeEvent e)
-    {
-        if (fileNameLabel != null)
-        {
+    private void doFileSelectionModeChanged(PropertyChangeEvent e) {
+        if (fileNameLabel != null) {
             populateFileNameLabel();
         }
 
@@ -847,83 +754,63 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         VFSJFileChooser fc = getFileChooser();
         FileObject currentDirectory = fc.getCurrentDirectory();
 
-        if ((currentDirectory != null) && fc.isDirectorySelectionEnabled() &&
-                !fc.isFileSelectionEnabled() &&
-                fc.getFileSystemView().isFileSystem(currentDirectory))
-        {
+        if ((currentDirectory != null) && fc.isDirectorySelectionEnabled()
+                && !fc.isFileSelectionEnabled()
+                && fc.getFileSystemView().isFileSystem(currentDirectory)) {
             String url = null;
 
-            try
-            {
+            try {
                 url = currentDirectory.getURL().toExternalForm();
-            }
-            catch (FileSystemException e1)
-            {
+            } catch (FileSystemException e1) {
                 e1.printStackTrace();
             }
 
             setFileName(url);
-        }
-        else
-        {
+        } else {
             setFileName(null);
         }
     }
 
-    private void doAccessoryChanged(PropertyChangeEvent e)
-    {
-        if (getAccessoryPanel() != null)
-        {
-            if (e.getOldValue() != null)
-            {
+    private void doAccessoryChanged(PropertyChangeEvent e) {
+        if (getAccessoryPanel() != null) {
+            if (e.getOldValue() != null) {
                 getAccessoryPanel().remove((JComponent) e.getOldValue());
             }
 
             JComponent accessory = (JComponent) e.getNewValue();
 
-            if (accessory != null)
-            {
+            if (accessory != null) {
                 getAccessoryPanel().add(accessory, BorderLayout.CENTER);
             }
         }
     }
 
-    private void doApproveButtonTextChanged(PropertyChangeEvent e)
-    {
+    private void doApproveButtonTextChanged(PropertyChangeEvent e) {
         VFSJFileChooser m_chooser = getFileChooser();
         approveButton.setText(getApproveButtonText(m_chooser));
         approveButton.setToolTipText(getApproveButtonToolTipText(m_chooser));
     }
 
-    private void doDialogTypeChanged(PropertyChangeEvent e)
-    {
+    private void doDialogTypeChanged(PropertyChangeEvent e) {
         VFSJFileChooser m_chooser = getFileChooser();
         approveButton.setText(getApproveButtonText(m_chooser));
         approveButton.setToolTipText(getApproveButtonToolTipText(m_chooser));
 
-        if (m_chooser.getDialogType() == DIALOG_TYPE.SAVE)
-        {
+        if (m_chooser.getDialogType() == DIALOG_TYPE.SAVE) {
             lookInLabel.setText(saveInLabelText);
-        }
-        else
-        {
+        } else {
             lookInLabel.setText(lookInLabelText);
         }
     }
 
-    private void doApproveButtonMnemonicChanged(PropertyChangeEvent e)
-    {
+    private void doApproveButtonMnemonicChanged(PropertyChangeEvent e) {
         // Note: Metal does not use mnemonics for approve and cancel
     }
 
-    private void doControlButtonsChanged(PropertyChangeEvent e)
-    {
-        if (getFileChooser().getControlButtonsAreShown())
-        {
+    private void doControlButtonsChanged(PropertyChangeEvent e) {
+        if (getFileChooser().getControlButtonsAreShown()) {
             addControlButtons();
-        }
-        else
-        {
+        } else {
             removeControlButtons();
         }
     }
@@ -934,141 +821,102 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      */
     @Override
     public PropertyChangeListener createPropertyChangeListener(
-        VFSJFileChooser fc)
-    {
-        return new PropertyChangeListener()
-            {
-                public void propertyChange(PropertyChangeEvent e)
-                {
-                    String s = e.getPropertyName();
+            VFSJFileChooser fc) {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                String s = e.getPropertyName();
 
-                    if (s.equals(
-                                VFSJFileChooserConstants.SELECTED_FILE_CHANGED_PROPERTY))
-                    {
-                        doSelectedFileChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.SELECTED_FILES_CHANGED_PROPERTY))
-                    {
-                        doSelectedFilesChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.DIRECTORY_CHANGED_PROPERTY))
-                    {
-                        doDirectoryChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY))
-                    {
-                        doFilterChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.FILE_SELECTION_MODE_CHANGED_PROPERTY))
-                    {
-                        doFileSelectionModeChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.ACCESSORY_CHANGED_PROPERTY))
-                    {
-                        doAccessoryChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.APPROVE_BUTTON_TEXT_CHANGED_PROPERTY) ||
-                            s.equals(
-                                VFSJFileChooserConstants.APPROVE_BUTTON_TOOL_TIP_TEXT_CHANGED_PROPERTY))
-                    {
-                        doApproveButtonTextChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.DIALOG_TYPE_CHANGED_PROPERTY))
-                    {
-                        doDialogTypeChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.APPROVE_BUTTON_MNEMONIC_CHANGED_PROPERTY))
-                    {
-                        doApproveButtonMnemonicChanged(e);
-                    }
-                    else if (s.equals(
-                                VFSJFileChooserConstants.CONTROL_BUTTONS_ARE_SHOWN_CHANGED_PROPERTY))
-                    {
-                        doControlButtonsChanged(e);
-                    }
-                    else if (s.equals("componentOrientation"))
-                    {
-                        ComponentOrientation o = (ComponentOrientation) e.getNewValue();
-                        VFSJFileChooser cc = (VFSJFileChooser) e.getSource();
+                if (s.equals(
+                        VFSJFileChooserConstants.SELECTED_FILE_CHANGED_PROPERTY)) {
+                    doSelectedFileChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.SELECTED_FILES_CHANGED_PROPERTY)) {
+                    doSelectedFilesChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.DIRECTORY_CHANGED_PROPERTY)) {
+                    doDirectoryChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY)) {
+                    doFilterChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.FILE_SELECTION_MODE_CHANGED_PROPERTY)) {
+                    doFileSelectionModeChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.ACCESSORY_CHANGED_PROPERTY)) {
+                    doAccessoryChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.APPROVE_BUTTON_TEXT_CHANGED_PROPERTY)
+                        || s.equals(
+                                VFSJFileChooserConstants.APPROVE_BUTTON_TOOL_TIP_TEXT_CHANGED_PROPERTY)) {
+                    doApproveButtonTextChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.DIALOG_TYPE_CHANGED_PROPERTY)) {
+                    doDialogTypeChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.APPROVE_BUTTON_MNEMONIC_CHANGED_PROPERTY)) {
+                    doApproveButtonMnemonicChanged(e);
+                } else if (s.equals(
+                        VFSJFileChooserConstants.CONTROL_BUTTONS_ARE_SHOWN_CHANGED_PROPERTY)) {
+                    doControlButtonsChanged(e);
+                } else if (s.equals("componentOrientation")) {
+                    ComponentOrientation o = (ComponentOrientation) e.getNewValue();
+                    VFSJFileChooser cc = (VFSJFileChooser) e.getSource();
 
-                        if (o != (ComponentOrientation) e.getOldValue())
-                        {
-                            cc.applyComponentOrientation(o);
-                        }
+                    if (o != (ComponentOrientation) e.getOldValue()) {
+                        cc.applyComponentOrientation(o);
                     }
-                    else if (s.equals("FileChooser.useShellFolder"))
-                    {
-                        updateUseShellFolder();
-                        doDirectoryChanged(e);
-                    }
-                    else if (s.equals("ancestor"))
-                    {
-                        if ((e.getOldValue() == null) &&
-                                (e.getNewValue() != null))
-                        {
-                            // Ancestor was added, set initial focus
-                            fileNameTextField.selectAll();
-                            fileNameTextField.requestFocus();
-                        }
+                } else if (s.equals("FileChooser.useShellFolder")) {
+                    updateUseShellFolder();
+                    doDirectoryChanged(e);
+                } else if (s.equals("ancestor")) {
+                    if ((e.getOldValue() == null)
+                            && (e.getNewValue() != null)) {
+                        // Ancestor was added, set initial focus
+                        fileNameTextField.selectAll();
+                        fileNameTextField.requestFocus();
                     }
                 }
-            };
+            }
+        };
     }
 
     /**
      *
      */
-    protected void removeControlButtons()
-    {
+    protected void removeControlButtons() {
         getBottomPanel().remove(getButtonPanel());
     }
 
     /**
      *
      */
-    protected void addControlButtons()
-    {
+    protected void addControlButtons() {
         getBottomPanel().add(getButtonPanel());
     }
 
     @Override
-    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f)
-    {
+    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f) {
         filePane.ensureFileIsVisible(fc, f);
     }
 
     @Override
-    public void rescanCurrentDirectory(VFSJFileChooser fc)
-    {
+    public void rescanCurrentDirectory(VFSJFileChooser fc) {
         filePane.rescanCurrentDirectory();
     }
 
     @Override
-    public String getFileName()
-    {
-        if (fileNameTextField != null)
-        {
+    public String getFileName() {
+        if (fileNameTextField != null) {
             return fileNameTextField.getText();
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
 
     @Override
-    public void setFileName(String filename)
-    {
-        if (fileNameTextField != null)
-        {
+    public void setFileName(String filename) {
+        if (fileNameTextField != null) {
             fileNameTextField.setText(filename);
         }
     }
@@ -1081,22 +929,16 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      * @since 1.4
      */
     @Override
-    protected void setDirectorySelected(boolean directorySelected)
-    {
+    protected void setDirectorySelected(boolean directorySelected) {
         super.setDirectorySelected(directorySelected);
 
-        if (directorySelected)
-        {
-            if (approveButton != null)
-            {
+        if (directorySelected) {
+            if (approveButton != null) {
                 approveButton.setText(directoryOpenButtonText);
                 approveButton.setToolTipText(directoryOpenButtonToolTipText);
             }
-        }
-        else
-        {
-            if (approveButton != null)
-            {
+        } else {
+            if (approveButton != null) {
                 approveButton.setText(getApproveButtonText(chooser));
                 approveButton.setToolTipText(getApproveButtonToolTipText(
                         chooser));
@@ -1105,15 +947,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     }
 
     @Override
-    public String getDirectoryName()
-    {
+    public String getDirectoryName() {
         // PENDING(jeff) - get the name from the directory combobox
         return null;
     }
 
     @Override
-    public void setDirectoryName(String dirname)
-    {
+    public void setDirectoryName(String dirname) {
         // PENDING(jeff) - set the name in the directory combobox
     }
 
@@ -1122,8 +962,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      * @return
      */
     protected ListCellRenderer createDirectoryComboBoxRenderer(
-        VFSJFileChooser fc)
-    {
+            VFSJFileChooser fc) {
         return new DirectoryComboBoxRenderer();
     }
 
@@ -1135,52 +974,44 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      * @return
      */
     protected DirectoryComboBoxModel createDirectoryComboBoxModel(
-        VFSJFileChooser fc)
-    {
+            VFSJFileChooser fc) {
         return new DirectoryComboBoxModel();
     }
 
     //
     // Renderer for Types ComboBox
     //
-    protected ListCellRenderer createFilterComboBoxRenderer()
-    {
+    protected ListCellRenderer createFilterComboBoxRenderer() {
         return new FilterComboBoxRenderer();
     }
 
     //
     // DataModel for Types Comboxbox
     //
-    protected FilterComboBoxModel createFilterComboBoxModel()
-    {
+    protected FilterComboBoxModel createFilterComboBoxModel() {
         return new FilterComboBoxModel();
     }
 
     /**
      * @param e
      */
-    public void valueChanged(ListSelectionEvent e)
-    {
+    public void valueChanged(ListSelectionEvent e) {
         VFSJFileChooser fc = getFileChooser();
         FileObject f = fc.getSelectedFile();
 
-        if (!e.getValueIsAdjusting() && (f != null) &&
-                !getFileChooser().isTraversable(f))
-        {
+        if (!e.getValueIsAdjusting() && (f != null)
+                && !getFileChooser().isTraversable(f)) {
             setFileName(fileNameString(f));
         }
     }
 
     @Override
-    protected JButton getApproveButton(VFSJFileChooser fc)
-    {
+    protected JButton getApproveButton(VFSJFileChooser fc) {
         return approveButton;
     }
 
-    private static void groupLabels(AlignedLabel[] group)
-    {
-        for (AlignedLabel grp : group)
-        {
+    private static void groupLabels(AlignedLabel[] group) {
+        for (AlignedLabel grp : group) {
             grp.group = group;
         }
     }
@@ -1188,72 +1019,71 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     /**
      * @return
      */
-    public ComboBoxModel getCombo()
-    {
+    public ComboBoxModel getCombo() {
         return directoryComboBoxModel;
     }
 
     final class MetalVFSFileChooserUIAccessor
-        implements VFSFileChooserUIAccessorIF
-    {
-        public VFSJFileChooser getFileChooser()
-        {
+            implements VFSFileChooserUIAccessorIF {
+
+        @Override
+        public VFSJFileChooser getFileChooser() {
             return chooser;
         }
 
-        public BasicVFSDirectoryModel getModel()
-        {
+        @Override
+        public BasicVFSDirectoryModel getModel() {
             return MetalVFSFileChooserUI.this.getModel();
         }
 
-        public JPanel createList()
-        {
+        @Override
+        public JPanel createList() {
             return MetalVFSFileChooserUI.this.createList(getFileChooser());
         }
 
-        public JPanel createDetailsView()
-        {
+        @Override
+        public JPanel createDetailsView() {
             return MetalVFSFileChooserUI.this.createDetailsView(getFileChooser());
         }
 
-        public boolean isDirectorySelected()
-        {
+        @Override
+        public boolean isDirectorySelected() {
             return MetalVFSFileChooserUI.this.isDirectorySelected();
         }
 
-        public FileObject getDirectory()
-        {
+        @Override
+        public FileObject getDirectory() {
             return MetalVFSFileChooserUI.this.getDirectory();
         }
 
-        public Action getChangeToParentDirectoryAction()
-        {
+        @Override
+        public Action getChangeToParentDirectoryAction() {
             return MetalVFSFileChooserUI.this.getChangeToParentDirectoryAction();
         }
 
-        public Action getApproveSelectionAction()
-        {
+        @Override
+        public Action getApproveSelectionAction() {
             return MetalVFSFileChooserUI.this.getApproveSelectionAction();
         }
 
-        public Action getNewFolderAction()
-        {
+        @Override
+        public Action getNewFolderAction() {
             return MetalVFSFileChooserUI.this.getNewFolderAction();
         }
 
-        public MouseListener createDoubleClickListener(JList list)
-        {
+        @Override
+        public MouseListener createDoubleClickListener(JList list) {
             return MetalVFSFileChooserUI.this.createDoubleClickListener(getFileChooser(),
-                list);
+                    list);
         }
 
-        public ListSelectionListener createListSelectionListener()
-        {
+        @Override
+        public ListSelectionListener createListSelectionListener() {
             return MetalVFSFileChooserUI.this.createListSelectionListener(getFileChooser());
         }
 
-        public boolean usesShellFolder()
-        {
+        @Override
+        public boolean usesShellFolder() {
             return useShellFolder;
         }
     }
@@ -1263,19 +1093,17 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     //
     @SuppressWarnings("serial")
     private final class DirectoryComboBoxRenderer
-        extends DefaultListCellRenderer
-    {
+            extends DefaultListCellRenderer {
+
         IndentIcon ii = null; //new IndentIcon();
 
         @Override
         public Component getListCellRendererComponent(JList list, Object value,
-            int index, boolean isSelected, boolean cellHasFocus)
-        {
+                int index, boolean isSelected, boolean cellHasFocus) {
             super.getListCellRendererComponent(list, value, index, isSelected,
-                cellHasFocus);
+                    cellHasFocus);
 
-            if (value == null)
-            {
+            if (value == null) {
                 setText("");
 
                 return this;
@@ -1283,7 +1111,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
             FileObject directory = (FileObject) value;
             String texte = VFSUtils.getFriendlyName(getFileChooser()
-                                                        .getName(directory));
+                    .getName(directory));
             setText(texte);
 
             Icon icon = getFileChooser().getIcon(directory);
@@ -1302,22 +1130,20 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      */
     @SuppressWarnings("serial")
     public final class DirectoryComboBoxModel extends AbstractListModel
-        implements ComboBoxModel
-    {
+            implements ComboBoxModel {
+
         List<FileObject> directories = new CopyOnWriteArrayList<FileObject>();
         int[] depths = null;
         FileObject selectedDirectory = null;
         VFSJFileChooser chooser = getFileChooser();
         AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
 
-        public DirectoryComboBoxModel()
-        {
+        public DirectoryComboBoxModel() {
             // Add the current directory to the model, and make it the
             // selectedDirectory
             FileObject dir = getFileChooser().getCurrentDirectory();
 
-            if (dir != null)
-            {
+            if (dir != null) {
                 addItem(dir);
             }
         }
@@ -1327,10 +1153,8 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
          * additionally clears out the previous selected directory and
          * the paths leading up to it, if any.
          */
-        private void addItem(FileObject directory)
-        {
-            if (directory == null)
-            {
+        private void addItem(FileObject directory) {
+            if (directory == null) {
                 return;
             }
 
@@ -1346,32 +1170,25 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
             // benefit of removing extraneous chars from the path,
             // for example /foo/bar/ becomes /foo/bar
             //            FileObject canonical =   directory; 
-
             // create FileObject instances of each directory leading up to the top
-            try
-            {
+            try {
                 FileObject f = directory;
                 List<FileObject> path = new ArrayList<FileObject>(10);
 
-                do
-                {
+                do {
                     path.add(f);
-                }
-                while ((f = VFSUtils.getParentDirectory(f)) != null);
+                } while ((f = VFSUtils.getParentDirectory(f)) != null);
 
                 int pathCount = path.size();
 
                 // Insert chain at appropriate place in vector
-                for (int i = 0; i < pathCount; i++)
-                {
+                for (int i = 0; i < pathCount; i++) {
                     f = path.get(i);
 
                     int topIndex = directories.indexOf(f);
 
-                    if (topIndex != -1)
-                    {
-                        for (int j = i - 1; j >= 0; j--)
-                        {
+                    if (topIndex != -1) {
+                        for (int j = i - 1; j >= 0; j--) {
                             directories.add((topIndex + i) - j, path.get(j));
                         }
 
@@ -1380,31 +1197,24 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
                 }
 
                 calculateDepths();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 calculateDepths();
             }
         }
 
-        private void calculateDepths()
-        {
+        private void calculateDepths() {
             depths = new int[directories.size()];
 
             final int count = depths.length;
 
-            for (int i = 0; i < count; i++)
-            {
+            for (int i = 0; i < count; i++) {
                 FileObject dir = (FileObject) directories.get(i);
                 FileObject parent = VFSUtils.getParentDirectory(dir);
                 depths[i] = 0;
 
-                if (parent != null)
-                {
-                    for (int j = i - 1; j >= 0; j--)
-                    {
-                        if (parent.equals((FileObject) directories.get(j)))
-                        {
+                if (parent != null) {
+                    for (int j = i - 1; j >= 0; j--) {
+                        if (parent.equals((FileObject) directories.get(j))) {
                             depths[i] = depths[j] + 1;
 
                             break;
@@ -1414,16 +1224,14 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
             }
         }
 
-        public int getDepth(int i)
-        {
+        public int getDepth(int i) {
             return ((depths != null) && (i >= 0) && (i < depths.length))
-            ? depths[i] : 0;
+                    ? depths[i] : 0;
         }
 
-        public void setSelectedItem(Object selectedDirectory)
-        {
-            if (selectedDirectory.equals(this.selectedDirectory))
-            {
+        @Override
+        public void setSelectedItem(Object selectedDirectory) {
+            if (selectedDirectory.equals(this.selectedDirectory)) {
                 return;
             }
 
@@ -1431,18 +1239,18 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
             fireContentsChanged(this, -1, -1);
         }
 
-        public Object getSelectedItem()
-        {
+        @Override
+        public Object getSelectedItem() {
             return selectedDirectory;
         }
 
-        public int getSize()
-        {
+        @Override
+        public int getSize() {
             return directories.size();
         }
 
-        public Object getElementAt(int index)
-        {
+        @Override
+        public Object getElementAt(int index) {
             return directories.get(index);
         }
     }
@@ -1452,65 +1260,56 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      */
     @SuppressWarnings("serial")
     public final class FilterComboBoxModel extends AbstractListModel
-        implements ComboBoxModel, PropertyChangeListener
-    {
+            implements ComboBoxModel, PropertyChangeListener {
+
         protected AbstractVFSFileFilter[] filters;
 
-        protected FilterComboBoxModel()
-        {
+        protected FilterComboBoxModel() {
             super();
             filters = getFileChooser().getChoosableFileFilters();
         }
 
-        public void propertyChange(PropertyChangeEvent e)
-        {
+        @Override
+        public void propertyChange(PropertyChangeEvent e) {
             String prop = e.getPropertyName();
 
             if (prop.equals(
-                        VFSJFileChooserConstants.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY))
-            {
+                    VFSJFileChooserConstants.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
                 filters = (AbstractVFSFileFilter[]) e.getNewValue();
                 fireContentsChanged(this, -1, -1);
-            }
-            else if (prop.equals(
-                        VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY))
-            {
+            } else if (prop.equals(
+                    VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY)) {
                 fireContentsChanged(this, -1, -1);
             }
         }
 
-        public void setSelectedItem(Object filter)
-        {
-            if (filter != null)
-            {
+        @Override
+        public void setSelectedItem(Object filter) {
+            if (filter != null) {
                 getFileChooser().setFileFilter((AbstractVFSFileFilter) filter);
                 fireContentsChanged(this, -1, -1);
             }
         }
 
-        public Object getSelectedItem()
-        {
+        @Override
+        public Object getSelectedItem() {
             // Ensure that the current filter is in the list.
             // NOTE: we shouldnt' have to do this, since VFSJFileChooser adds
             // the filter to the choosable filters list when the filter
             // is set. Lets be paranoid just in case someone overrides
             // setFileFilter in VFSJFileChooser.
             AbstractVFSFileFilter currentFilter = getFileChooser()
-                                                      .getFileFilter();
+                    .getFileFilter();
             boolean found = false;
 
-            if (currentFilter != null)
-            {
-                for (AbstractVFSFileFilter aFilter : filters)
-                {
-                    if (aFilter == currentFilter)
-                    {
+            if (currentFilter != null) {
+                for (AbstractVFSFileFilter aFilter : filters) {
+                    if (aFilter == currentFilter) {
                         found = true;
                     }
                 }
 
-                if (found == false)
-                {
+                if (found == false) {
                     getFileChooser().addChoosableFileFilter(currentFilter);
                 }
             }
@@ -1518,32 +1317,25 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
             return getFileChooser().getFileFilter();
         }
 
-        public int getSize()
-        {
-            if (filters != null)
-            {
+        @Override
+        public int getSize() {
+            if (filters != null) {
                 return filters.length;
-            }
-            else
-            {
+            } else {
                 return 0;
             }
         }
 
-        public Object getElementAt(int index)
-        {
-            if (index > (getSize() - 1))
-            {
+        @Override
+        public Object getElementAt(int index) {
+            if (index > (getSize() - 1)) {
                 // This shouldn't happen. Try to recover gracefully.
                 return getFileChooser().getFileFilter();
             }
 
-            if (filters != null)
-            {
+            if (filters != null) {
                 return filters[index];
-            }
-            else
-            {
+            } else {
                 return null;
             }
         }
@@ -1553,21 +1345,19 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
      * Acts when DirectoryComboBox has changed the selected item.
      */
     @SuppressWarnings("serial")
-    final class DirectoryComboBoxAction extends AbstractAction
-    {
-        protected DirectoryComboBoxAction()
-        {
+    final class DirectoryComboBoxAction extends AbstractAction {
+
+        protected DirectoryComboBoxAction() {
             super("DirectoryComboBoxAction");
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             directoryComboBox.hidePopup();
 
             FileObject folder = (FileObject) directoryComboBox.getSelectedItem();
 
-            if (!getFileChooser().getCurrentDirectory().equals(folder))
-            {
+            if (!getFileChooser().getCurrentDirectory().equals(folder)) {
                 getFileChooser().setCurrentDirectory(folder);
             }
         }

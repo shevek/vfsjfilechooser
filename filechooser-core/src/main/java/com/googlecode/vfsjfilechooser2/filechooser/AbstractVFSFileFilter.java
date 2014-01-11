@@ -26,8 +26,8 @@ import org.apache.commons.vfs2.FileObject;
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSFileFilter
-{
+public abstract class AbstractVFSFileFilter {
+
     /**
      * Whether the given file is accepted by this filter.
      * @param f

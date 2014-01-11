@@ -12,7 +12,6 @@
  * limitations under the License.
  * under the License.
  */
-
 /**
  * DefaultFileObjectConverter.java
  * Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
@@ -32,29 +31,28 @@ import org.apache.commons.vfs2.FileObject;
  * @version $Revision$
  */
 public class DefaultFileObjectConverter
-  implements Serializable, FileObjectConverter<File> {
+        implements Serializable, FileObjectConverter<File> {
 
-  /** for serialization. */
-  private static final long serialVersionUID = 5113461292255671412L;
+    /** for serialization. */
+    private static final long serialVersionUID = 5113461292255671412L;
 
-  /**
-   * Converts the {@link FileObject} object into a Java file object.
-   * 
-   * @param file	the object to convert
-   * @return		the generated object, or null if failed to convert
-   */
-  @Override
-  public File convertFileObject(FileObject file) {
-    if (file == null)
-	return null;
-    try {
-      return new File(new URI(file.getName().getURI().replace(" ", "%20")));
+    /**
+     * Converts the {@link FileObject} object into a Java file object.
+     * 
+     * @param file	the object to convert
+     * @return		the generated object, or null if failed to convert
+     */
+    @Override
+    public File convertFileObject(FileObject file) {
+        if (file == null)
+            return null;
+        try {
+            return new File(new URI(file.getName().getURI().replace(" ", "%20")));
+        } catch (Exception e) {
+            System.err.println("Failed to convert '" + file + "' into file!");
+            e.printStackTrace();
+            return null;
+        }
     }
-    catch (Exception e) {
-      System.err.println("Failed to convert '" + file + "' into file!");
-      e.printStackTrace();
-      return null;
-    }
-  }
 
 }

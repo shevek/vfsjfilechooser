@@ -18,7 +18,6 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.connection;
 
-
 /**
  * <p>
  * TODO Disable the SSL port option when not supported in the connection dialog
@@ -30,8 +29,8 @@ package com.googlecode.vfsjfilechooser2.accessories.connection;
  * @author Yves Zoundi<yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public enum Protocol
-{ // Protocol constants
+public enum Protocol { // Protocol constants
+
     SMB("SMB", 445, "Connect to windows LAN or SAMBA"),
     SFTP("SFTP", 22, "Connect to a SSH server"),
     FTP("FTP", 21, "Connect to a FTP server"),
@@ -49,8 +48,7 @@ public enum Protocol
      * @param name The name of the protocol
      * @param port The port used by the protocol
      */
-    Protocol(final String name, final int port, final String description)
-    {
+    Protocol(final String name, final int port, final String description) {
         this.name = name;
         this.port = port;
         this.description = description;
@@ -60,8 +58,7 @@ public enum Protocol
      * Returns the protocol name
      * @return the protocol name
      */
-    public final String getName()
-    {
+    public final String getName() {
         return name;
     }
 
@@ -69,8 +66,7 @@ public enum Protocol
      * Returns the protocol port number
      * @return the protocol port number
      */
-    public final int getPort()
-    {
+    public final int getPort() {
         return port;
     }
 
@@ -78,14 +74,12 @@ public enum Protocol
      * Returns the protocol description
      * @return the protocol description
      */
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return this.name;
     }
 }

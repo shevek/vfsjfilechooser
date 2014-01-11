@@ -23,39 +23,36 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 
-
 /**
  * <code>ButtonAreaLayout</code> behaves in a similar manner to
  * <code>FlowLayout</code>. It lays out all components from left to
  * right, flushed right. The widths of all components will be set
-   * to the largest preferred size width.
+ * to the largest preferred size width.
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-final class ButtonAreaLayout implements LayoutManager
-{
+final class ButtonAreaLayout implements LayoutManager {
+
     private int hGap = 5;
     private int topMargin = 17;
     private final Dimension dummyDimension = new Dimension(0, 0);
 
-    public void addLayoutComponent(String string, Component comp)
-    {
+    @Override
+    public void addLayoutComponent(String string, Component comp) {
     }
 
-    public void layoutContainer(Container container)
-    {
+    @Override
+    public void layoutContainer(Container container) {
         Component[] children = container.getComponents();
 
-        if ((children != null) && (children.length > 0))
-        {
+        if ((children != null) && (children.length > 0)) {
             final int numChildren = children.length;
             Dimension[] sizes = new Dimension[numChildren];
             Insets insets = container.getInsets();
             int yLocation = insets.top + topMargin;
             int maxWidth = 0;
 
-            for (int counter = 0; counter < numChildren; counter++)
-            {
+            for (int counter = 0; counter < numChildren; counter++) {
                 sizes[counter] = children[counter].getPreferredSize();
                 maxWidth = Math.max(maxWidth, sizes[counter].width);
             }
@@ -63,34 +60,28 @@ final class ButtonAreaLayout implements LayoutManager
             int xLocation;
             int xOffset;
 
-            if (container.getComponentOrientation().isLeftToRight())
-            {
+            if (container.getComponentOrientation().isLeftToRight()) {
                 xLocation = container.getSize().width - insets.left - maxWidth;
                 xOffset = hGap + maxWidth;
-            }
-            else
-            {
+            } else {
                 xLocation = insets.left;
                 xOffset = -(hGap + maxWidth);
             }
 
-            for (int counter = numChildren - 1; counter >= 0; counter--)
-            {
+            for (int counter = numChildren - 1; counter >= 0; counter--) {
                 children[counter].setBounds(xLocation, yLocation, maxWidth,
-                    sizes[counter].height);
+                        sizes[counter].height);
                 xLocation -= xOffset;
             }
         }
     }
 
-    public Dimension minimumLayoutSize(Container c)
-    {
-        if (c != null)
-        {
+    @Override
+    public Dimension minimumLayoutSize(Container c) {
+        if (c != null) {
             Component[] children = c.getComponents();
 
-            if ((children != null) && (children.length > 0))
-            {
+            if ((children != null) && (children.length > 0)) {
                 final int numChildren = children.length;
                 int height = 0;
                 Insets cInsets = c.getInsets();
@@ -98,27 +89,26 @@ final class ButtonAreaLayout implements LayoutManager
                 int extraWidth = cInsets.left + cInsets.right;
                 int maxWidth = 0;
 
-                for (Component comp : children)
-                {
+                for (Component comp : children) {
                     Dimension aSize = comp.getPreferredSize();
                     height = Math.max(height, aSize.height);
                     maxWidth = Math.max(maxWidth, aSize.width);
                 }
 
-                return new Dimension(extraWidth + (numChildren * maxWidth) +
-                    ((numChildren - 1) * hGap), extraHeight + height);
+                return new Dimension(extraWidth + (numChildren * maxWidth)
+                        + ((numChildren - 1) * hGap), extraHeight + height);
             }
         }
 
         return dummyDimension;
     }
 
-    public Dimension preferredLayoutSize(Container c)
-    {
+    @Override
+    public Dimension preferredLayoutSize(Container c) {
         return minimumLayoutSize(c);
     }
 
-    public void removeLayoutComponent(Component c)
-    {
+    @Override
+    public void removeLayoutComponent(Component c) {
     }
 }

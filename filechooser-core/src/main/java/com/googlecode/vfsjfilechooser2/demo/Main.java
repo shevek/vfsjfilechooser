@@ -18,7 +18,6 @@
  */
 package com.googlecode.vfsjfilechooser2.demo;
 
-
 import org.apache.commons.vfs2.FileObject;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
@@ -37,15 +36,14 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 
-
 /**
  * VFSJFileChooser demo
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class Main extends JFrame implements Runnable
-{
+public final class Main extends JFrame implements Runnable {
+
     // private members
     private VFSJFileChooser fileChooser;
     private JTextField filenameTextField;
@@ -53,8 +51,7 @@ public final class Main extends JFrame implements Runnable
     private String buttonText;
 
     /** Create a new instance of this class */
-    public Main()
-    {
+    public Main() {
         // create the frame with a default title
         super("VFSJFileChooser Demo");
 
@@ -67,8 +64,7 @@ public final class Main extends JFrame implements Runnable
     /**
      * Setup the GUI components
      */
-    private void createGUI()
-    {
+    private void createGUI() {
         fileChooser = new VFSJFileChooser(); // create a file dialog
 
         // configure the file dialog
@@ -96,8 +92,8 @@ public final class Main extends JFrame implements Runnable
     } // end createGUI method
 
     /** display the frame and center it on the screen */
-    public void run()
-    {
+    @Override
+    public void run() {
         setLocationRelativeTo(getOwner());
         setVisible(true);
         toFront();
@@ -107,8 +103,7 @@ public final class Main extends JFrame implements Runnable
      * Entry point
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws Exception
-    {
+    public static void main(String[] args) throws Exception {
         // show the window in the event dispatching thread
         EventQueue.invokeLater(new Main());
     } // end main method
@@ -118,28 +113,26 @@ public final class Main extends JFrame implements Runnable
      * @author Yves Zoundi <yveszoundi at users dot sf dot net>
      * @version 0.0.1
      */
-    private class OpenAction extends AbstractAction
-    {
+    private class OpenAction extends AbstractAction {
+
         /**
          * Create the action with a name
          * @param name The action's name
          */
-        public OpenAction(String name)
-        {
+        public OpenAction(String name) {
             super(name);
         }
 
         /* (non-Javadoc)
          * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
          */
-        public void actionPerformed(ActionEvent actionEvent)
-        {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
             // show the file dialog
             RETURN_TYPE answer = fileChooser.showOpenDialog(Main.this);
 
             // check if a file was selected
-            if (answer == RETURN_TYPE.APPROVE)
-            {
+            if (answer == RETURN_TYPE.APPROVE) {
                 // retrieve the selected file
                 final FileObject aFileObject = fileChooser.getSelectedFile();
 

@@ -12,7 +12,6 @@
  * limitations under the License.
  * under the License.
  */
-
 /**
  * FileObjectConverter.java
  * Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
@@ -32,11 +31,11 @@ import org.apache.commons.vfs2.FileObject;
  */
 public interface FileObjectConverter<T extends File> {
 
-  /**
-   * Converts the {@link FileObject} object into a Java file object.
-   * 
-   * @param file	the object to convert
-   * @return		the generated object or null if failed to convert
-   */
-  public T convertFileObject(FileObject file);
+    /**
+     * Converts the {@link FileObject} object into a Java file object.
+     * 
+     * @param file	the object to convert
+     * @return		the generated object or null if failed to convert
+     */
+    public T convertFileObject(FileObject file);
 }

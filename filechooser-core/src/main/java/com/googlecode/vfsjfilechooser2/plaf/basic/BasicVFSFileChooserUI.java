@@ -56,7 +56,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
 
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -79,9 +78,9 @@ import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
-{
+public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     /* FileView icons */
+
     protected Icon directoryIcon = null;
     protected Icon fileIcon = null;
     protected Icon computerIcon = null;
@@ -164,8 +163,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     private JPanel accessoryPanel = null;
     private Handler handler;
 
-    public BasicVFSFileChooserUI(VFSJFileChooser b)
-    {
+    public BasicVFSFileChooserUI(VFSJFileChooser b) {
         this.filechooser = b;
     }
 
@@ -174,8 +172,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * @param c
      */
     @Override
-    public void installUI(JComponent c)
-    {
+    public void installUI(JComponent c) {
         accessoryPanel = new JPanel(new BorderLayout());
         filechooser = (VFSJFileChooser) c;
 
@@ -195,14 +192,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * @param c
      */
     @Override
-    public void uninstallUI(JComponent c)
-    {
+    public void uninstallUI(JComponent c) {
         uninstallListeners((VFSJFileChooser) filechooser);
         uninstallComponents((VFSJFileChooser) filechooser);
         uninstallDefaults((VFSJFileChooser) filechooser);
 
-        if (accessoryPanel != null)
-        {
+        if (accessoryPanel != null) {
             accessoryPanel.removeAll();
         }
 
@@ -216,24 +211,20 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      *
      * @param fc
      */
-    public void installComponents(VFSJFileChooser fc)
-    {
+    public void installComponents(VFSJFileChooser fc) {
     }
 
     /**
      *
      * @param fc
      */
-    public void uninstallComponents(VFSJFileChooser fc)
-    {
+    public void uninstallComponents(VFSJFileChooser fc) {
     }
 
-    protected void installListeners(VFSJFileChooser fc)
-    {
+    protected void installListeners(VFSJFileChooser fc) {
         propertyChangeListener = createPropertyChangeListener(fc);
 
-        if (propertyChangeListener != null)
-        {
+        if (propertyChangeListener != null) {
             fc.addPropertyChangeListener(propertyChangeListener);
         }
 
@@ -243,48 +234,42 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         SwingUtilities.replaceUIActionMap(fc, actionMap);
     }
 
-    protected ActionMap getActionMap()
-    {
+    protected ActionMap getActionMap() {
         return createActionMap();
     }
 
-    protected ActionMap createActionMap()
-    {
+    protected ActionMap createActionMap() {
         ActionMap map = new ActionMapUIResource();
 
-        Action refreshAction = new AbstractVFSUIAction(VFSFilePane.ACTION_REFRESH)
-            {
-                public void actionPerformed(ActionEvent evt)
-                {
-                    getFileChooser().rescanCurrentDirectory();
-                }
-            };
+        Action refreshAction = new AbstractVFSUIAction(VFSFilePane.ACTION_REFRESH) {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                getFileChooser().rescanCurrentDirectory();
+            }
+        };
 
         map.put(VFSFilePane.ACTION_APPROVE_SELECTION,
-            getApproveSelectionAction());
+                getApproveSelectionAction());
         map.put(VFSFilePane.ACTION_CANCEL, getCancelSelectionAction());
         map.put(VFSFilePane.ACTION_REFRESH, refreshAction);
         map.put(VFSFilePane.ACTION_CHANGE_TO_PARENT_DIRECTORY,
-            getChangeToParentDirectoryAction());
+                getChangeToParentDirectoryAction());
 
         return map;
     }
 
-    protected void uninstallListeners(VFSJFileChooser fc)
-    {
-        if (propertyChangeListener != null)
-        {
+    protected void uninstallListeners(VFSJFileChooser fc) {
+        if (propertyChangeListener != null) {
             fc.removePropertyChangeListener(propertyChangeListener);
         }
 
         fc.removePropertyChangeListener(getModel());
         SwingUtilities.replaceUIInputMap(fc,
-            JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
         SwingUtilities.replaceUIActionMap(fc, null);
     }
 
-    protected void installDefaults(VFSJFileChooser fc)
-    {
+    protected void installDefaults(VFSJFileChooser fc) {
         installIcons(fc);
         installStrings(fc);
         usesSingleFilePane = UIManager.getBoolean(
@@ -293,8 +278,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         LookAndFeel.installProperty(fc, "opaque", Boolean.FALSE);
     }
 
-    protected void installIcons(VFSJFileChooser fc)
-    {
+    protected void installIcons(VFSJFileChooser fc) {
         UIDefaults defaults = UIManager.getLookAndFeel().getDefaults();
         directoryIcon = lookupIcon("folder.png");
         fileIcon = lookupIcon("file.png");
@@ -311,15 +295,13 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
 
     // Hardcoded path until we get the possibility to have themes
     // or to use the default laf icons
-    private Icon lookupIcon(String path)
-    {
+    private Icon lookupIcon(String path) {
         return new ImageIcon(getClass()
-                                 .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/" +
-                path));
+                .getResource("/com/googlecode/vfsjfilechooser2/plaf/icons/"
+                        + path));
     }
 
-    protected void installStrings(VFSJFileChooser fc)
-    {
+    protected void installStrings(VFSJFileChooser fc) {
         Locale l = fc.getLocale();
         newFolderErrorText = VFSResources.getMessage("VFSJFileChooser.newFolderErrorText");
         newFolderErrorSeparator = VFSResources.getMessage("VFSJFileChooser.newFolderErrorSeparator");
@@ -355,14 +337,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         directoryOpenButtonToolTipText = VFSResources.getMessage("VFSJFileChooser.directoryOpenButtonToolTipText");
     }
 
-    protected void uninstallDefaults(VFSJFileChooser fc)
-    {
+    protected void uninstallDefaults(VFSJFileChooser fc) {
         uninstallIcons(fc);
         uninstallStrings(fc);
     }
 
-    protected void uninstallIcons(VFSJFileChooser fc)
-    {
+    protected void uninstallIcons(VFSJFileChooser fc) {
         directoryIcon = null;
         fileIcon = null;
         computerIcon = null;
@@ -377,8 +357,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         viewMenuIcon = null;
     }
 
-    protected void uninstallStrings(VFSJFileChooser fc)
-    {
+    protected void uninstallStrings(VFSJFileChooser fc) {
         saveButtonText = null;
         openButtonText = null;
         cancelButtonText = null;
@@ -394,101 +373,82 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         directoryOpenButtonToolTipText = null;
     }
 
-    protected void createModel()
-    {
-        if (model != null)
-        {
+    protected void createModel() {
+        if (model != null) {
             model.invalidateFileCache();
         }
 
         model = new BasicVFSDirectoryModel(getFileChooser());
     }
 
-    public BasicVFSDirectoryModel getModel()
-    {
+    public BasicVFSDirectoryModel getModel() {
         return model;
     }
 
     public PropertyChangeListener createPropertyChangeListener(
-        VFSJFileChooser fc)
-    {
+            VFSJFileChooser fc) {
         return null;
     }
 
-    public String getFileName()
-    {
+    public String getFileName() {
         return null;
     }
 
-    public String getDirectoryName()
-    {
+    public String getDirectoryName() {
         return null;
     }
 
-    public void setFileName(String filename)
-    {
+    public void setFileName(String filename) {
     }
 
-    public void setDirectoryName(String dirname)
-    {
+    public void setDirectoryName(String dirname) {
     }
 
-    public void rescanCurrentDirectory(VFSJFileChooser fc)
-    {
+    @Override
+    public void rescanCurrentDirectory(VFSJFileChooser fc) {
     }
 
-    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f)
-    {
+    @Override
+    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f) {
     }
 
-    public VFSJFileChooser getFileChooser()
-    {
+    public VFSJFileChooser getFileChooser() {
         return filechooser;
     }
 
-    public JPanel getAccessoryPanel()
-    {
+    public JPanel getAccessoryPanel() {
         return accessoryPanel;
     }
 
-    protected JButton getApproveButton(VFSJFileChooser fc)
-    {
+    protected JButton getApproveButton(VFSJFileChooser fc) {
         return null;
     }
 
-    public String getApproveButtonToolTipText(VFSJFileChooser fc)
-    {
+    public String getApproveButtonToolTipText(VFSJFileChooser fc) {
         String tooltipText = fc.getApproveButtonToolTipText();
 
-        if (tooltipText != null)
-        {
+        if (tooltipText != null) {
             return tooltipText;
         }
 
-        if (fc.getDialogType() == DIALOG_TYPE.OPEN)
-        {
+        if (fc.getDialogType() == DIALOG_TYPE.OPEN) {
             return openButtonToolTipText;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.SAVE)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.SAVE) {
             return saveButtonToolTipText;
         }
 
         return null;
     }
 
-    public void clearIconCache()
-    {
+    public void clearIconCache() {
         fileView.clearIconCache();
     }
 
     // ********************************************
     // ************ Create Listeners **************
     // ********************************************
-    private Handler getHandler()
-    {
-        if (handler == null)
-        {
+    private Handler getHandler() {
+        if (handler == null) {
             handler = new Handler();
         }
 
@@ -496,13 +456,11 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     }
 
     protected MouseListener createDoubleClickListener(VFSJFileChooser fc,
-        JList list)
-    {
+            JList list) {
         return new Handler(list);
     }
 
-    public ListSelectionListener createListSelectionListener(VFSJFileChooser fc)
-    {
+    public ListSelectionListener createListSelectionListener(VFSJFileChooser fc) {
         return getHandler();
     }
 
@@ -512,8 +470,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * @return <code>true</code> iff a directory is currently selected.
      * @since 1.4
      */
-    protected boolean isDirectorySelected()
-    {
+    protected boolean isDirectorySelected() {
         return directorySelected;
     }
 
@@ -524,8 +481,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * @param b iff a directory is currently selected.
      * @since 1.4
      */
-    protected void setDirectorySelected(boolean b)
-    {
+    protected void setDirectorySelected(boolean b) {
         directorySelected = b;
     }
 
@@ -536,8 +492,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * @see #setDirectory
      * @since 1.4
      */
-    protected FileObject getDirectory()
-    {
+    protected FileObject getDirectory() {
         return directory;
     }
 
@@ -549,28 +504,21 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      *          currently selected
      * @since 1.4
      */
-    protected void setDirectory(FileObject f)
-    {
+    protected void setDirectory(FileObject f) {
         directory = f;
     }
 
-    public static int getUIDefaultsInt(Object key, Locale l, int defaultValue)
-    {
+    public static int getUIDefaultsInt(Object key, Locale l, int defaultValue) {
         Object value = UIManager.get(key, l);
 
-        if (value instanceof Integer)
-        {
+        if (value instanceof Integer) {
             return ((Integer) value).intValue();
         }
 
-        if (value instanceof String)
-        {
-            try
-            {
+        if (value instanceof String) {
+            try {
                 return Integer.parseInt((String) value);
-            }
-            catch (NumberFormatException nfe)
-            {
+            } catch (NumberFormatException nfe) {
             }
         }
 
@@ -580,8 +528,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     /**
      * Returns the mnemonic for the given key.
      */
-    private int getMnemonic(String key, Locale l)
-    {
+    private int getMnemonic(String key, Locale l) {
         return getUIDefaultsInt(key, l, 0);
     }
 
@@ -591,81 +538,59 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     /**
      * Returns the default accept all file filter
      */
-    public AbstractVFSFileFilter getAcceptAllFileFilter(VFSJFileChooser fc)
-    {
+    @Override
+    public AbstractVFSFileFilter getAcceptAllFileFilter(VFSJFileChooser fc) {
         return acceptAllFileFilter;
     }
 
-    public AbstractVFSFileView getFileView(VFSJFileChooser fc)
-    {
+    @Override
+    public AbstractVFSFileView getFileView(VFSJFileChooser fc) {
         return fileView;
     }
 
     /**
      * Returns the title of this dialog
      */
-    public String getDialogTitle(VFSJFileChooser fc)
-    {
+    @Override
+    public String getDialogTitle(VFSJFileChooser fc) {
         String dialogTitle = fc.getDialogTitle();
 
-        if (dialogTitle != null)
-        {
+        if (dialogTitle != null) {
             return dialogTitle;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.OPEN)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.OPEN) {
             return openDialogTitleText;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.SAVE)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.SAVE) {
             return saveDialogTitleText;
-        }
-        else
-        {
+        } else {
             return getApproveButtonText(fc);
         }
     }
 
-    public int getApproveButtonMnemonic(VFSJFileChooser fc)
-    {
+    public int getApproveButtonMnemonic(VFSJFileChooser fc) {
         int mnemonic = fc.getApproveButtonMnemonic();
 
-        if (mnemonic > 0)
-        {
+        if (mnemonic > 0) {
             return mnemonic;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.OPEN)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.OPEN) {
             return openButtonMnemonic;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.SAVE)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.SAVE) {
             return saveButtonMnemonic;
-        }
-        else
-        {
+        } else {
             return mnemonic;
         }
     }
 
-    public String getApproveButtonText(VFSJFileChooser fc)
-    {
+    @Override
+    public String getApproveButtonText(VFSJFileChooser fc) {
         String buttonText = fc.getApproveButtonText();
 
-        if (buttonText != null)
-        {
+        if (buttonText != null) {
             return buttonText;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.OPEN)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.OPEN) {
             return openButtonText;
-        }
-        else if (fc.getDialogType() == DIALOG_TYPE.SAVE)
-        {
+        } else if (fc.getDialogType() == DIALOG_TYPE.SAVE) {
             return saveButtonText;
-        }
-        else
-        {
+        } else {
             return null;
         }
     }
@@ -673,16 +598,13 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     // *****************************
     // ***** Directory Actions *****
     // *****************************
-    public Action getNewFolderAction()
-    {
-        if (newFolderAction == null)
-        {
+    public Action getNewFolderAction() {
+        if (newFolderAction == null) {
             newFolderAction = new NewFolderAction();
 
             // Note: Don't return null for readOnly, it might
             // break older apps.
-            if (readOnly)
-            {
+            if (readOnly) {
                 newFolderAction.setEnabled(false);
             }
         }
@@ -690,40 +612,32 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         return newFolderAction;
     }
 
-    public Action getGoHomeAction()
-    {
+    public Action getGoHomeAction() {
         return goHomeAction;
     }
 
-    public Action getChangeToParentDirectoryAction()
-    {
+    public Action getChangeToParentDirectoryAction() {
         return changeToParentDirectoryAction;
     }
 
-    public Action getApproveSelectionAction()
-    {
+    public Action getApproveSelectionAction() {
         return approveSelectionAction;
     }
 
-    public Action getCancelSelectionAction()
-    {
+    public Action getCancelSelectionAction() {
         return cancelSelectionAction;
     }
 
-    public Action getUpdateAction()
-    {
+    public Action getUpdateAction() {
         return updateAction;
     }
 
-    private void resetGlobFilter()
-    {
-        if (actualFileFilter != null)
-        {
+    private void resetGlobFilter() {
+        if (actualFileFilter != null) {
             VFSJFileChooser chooser = getFileChooser();
             AbstractVFSFileFilter currentFilter = chooser.getFileFilter();
 
-            if ((currentFilter != null) && currentFilter.equals(globFilter))
-            {
+            if ((currentFilter != null) && currentFilter.equals(globFilter)) {
                 chooser.setFileFilter(actualFileFilter);
                 chooser.removeChoosableFileFilter(globFilter);
             }
@@ -732,153 +646,131 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         }
     }
 
-    private static boolean isGlobPattern(String filename)
-    {
-        return (((File.separatorChar == '\\') &&
-        ((filename.indexOf('*') >= 0) || (filename.indexOf('?') >= 0))) ||
-        ((File.separatorChar == '/') &&
-        ((filename.indexOf('*') >= 0) || (filename.indexOf('?') >= 0) ||
-        (filename.indexOf('[') >= 0))));
+    private static boolean isGlobPattern(String filename) {
+        return (((File.separatorChar == '\\')
+                && ((filename.indexOf('*') >= 0) || (filename.indexOf('?') >= 0)))
+                || ((File.separatorChar == '/')
+                && ((filename.indexOf('*') >= 0) || (filename.indexOf('?') >= 0)
+                || (filename.indexOf('[') >= 0))));
     }
 
-    public void changeDirectory(FileObject dir)
-    {
+    public void changeDirectory(FileObject dir) {
         VFSJFileChooser fc = getFileChooser();
 
         fc.setCurrentDirectory(dir);
 
-        if ((fc.getFileSelectionMode() == SELECTION_MODE.FILES_AND_DIRECTORIES) &&
-                fc.getFileSystemView().isFileSystem(dir))
-        {
+        if ((fc.getFileSelectionMode() == SELECTION_MODE.FILES_AND_DIRECTORIES)
+                && fc.getFileSystemView().isFileSystem(dir)) {
             setFileName(dir.getName().getBaseName());
         }
     }
 
-    private class Handler implements MouseListener, ListSelectionListener
-    {
+    private class Handler implements MouseListener, ListSelectionListener {
+
         JList list;
 
-        Handler()
-        {
+        Handler() {
         }
 
-        Handler(JList list)
-        {
+        Handler(JList list) {
             this.list = list;
         }
 
-        public void mouseClicked(MouseEvent evt)
-        {
+        @Override
+        public void mouseClicked(MouseEvent evt) {
             // System.out.println("count2:" + evt.getClickCount());
 
             // Note: we can't depend on evt.getSource() because of backward
             // compatability
-            if ((list != null) && SwingUtilities.isLeftMouseButton(evt) &&
-                    (evt.getClickCount() == 2))
-            {
+            if ((list != null) && SwingUtilities.isLeftMouseButton(evt)
+                    && (evt.getClickCount() == 2)) {
                 int index = SwingCommonsUtilities.loc2IndexFileList(list,
                         evt.getPoint());
 
-                if (index >= 0)
-                {
+                if (index >= 0) {
                     FileObject f = (FileObject) list.getModel()
-                                                    .getElementAt(index);
+                            .getElementAt(index);
 
-                    if (getFileChooser().isTraversable(f))
-                    {
+                    if (getFileChooser().isTraversable(f)) {
                         list.clearSelection();
                         changeDirectory(f);
-                    }
-                    else
-                    {
+                    } else {
                         getFileChooser().approveSelection();
                     }
                 }
             }
         }
 
-        public void mouseEntered(MouseEvent evt)
-        {
-            if (list != null)
-            {
+        @Override
+        public void mouseEntered(MouseEvent evt) {
+            if (list != null) {
                 TransferHandler th1 = getFileChooser().getTransferHandler();
                 TransferHandler th2 = list.getTransferHandler();
 
-                if (th1 != th2)
-                {
+                if (th1 != th2) {
                     list.setTransferHandler(th1);
                 }
 
-                if (getFileChooser().getDragEnabled() != list.getDragEnabled())
-                {
+                if (getFileChooser().getDragEnabled() != list.getDragEnabled()) {
                     list.setDragEnabled(getFileChooser().getDragEnabled());
                 }
             }
         }
 
-        public void mouseExited(MouseEvent evt)
-        {
+        @Override
+        public void mouseExited(MouseEvent evt) {
         }
 
-        public void mousePressed(MouseEvent evt)
-        {
+        @Override
+        public void mousePressed(MouseEvent evt) {
         }
 
-        public void mouseReleased(MouseEvent evt)
-        {
+        @Override
+        public void mouseReleased(MouseEvent evt) {
         }
 
-        public void valueChanged(ListSelectionEvent evt)
-        {
-            if (!evt.getValueIsAdjusting())
-            {
+        @Override
+        public void valueChanged(ListSelectionEvent evt) {
+            if (!evt.getValueIsAdjusting()) {
                 VFSJFileChooser chooser = getFileChooser();
                 AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
                 JList list = (JList) evt.getSource();
 
                 SELECTION_MODE fsm = chooser.getFileSelectionMode();
-                boolean useSetDirectory = usesSingleFilePane &&
-                    (fsm == SELECTION_MODE.FILES_ONLY);
+                boolean useSetDirectory = usesSingleFilePane
+                        && (fsm == SELECTION_MODE.FILES_ONLY);
 
-                if (chooser.isMultiSelectionEnabled())
-                {
+                if (chooser.isMultiSelectionEnabled()) {
                     FileObject[] files = new FileObject[0];
 
                     Object[] objects = list.getSelectedValues();
 
-                    if (objects != null)
-                    {
+                    if (objects != null) {
                         final int count = objects.length;
 
-                        if ((count == 1) &&
-                                (VFSUtils.isDirectory((FileObject) objects[0]) &&
-                                chooser.isTraversable(((FileObject) objects[0])) &&
-                                (useSetDirectory ||
-                                !fsv.isFileSystem(((FileObject) objects[0])))))
-                        {
+                        if ((count == 1)
+                                && (VFSUtils.isDirectory((FileObject) objects[0])
+                                && chooser.isTraversable(((FileObject) objects[0]))
+                                && (useSetDirectory
+                                || !fsv.isFileSystem(((FileObject) objects[0]))))) {
                             setDirectorySelected(true);
                             setDirectory(((FileObject) objects[0]));
-                        }
-                        else
-                        {
+                        } else {
                             List<FileObject> fList = new ArrayList<FileObject>(count);
 
-                            for (int i = 0; i < count; i++)
-                            {
+                            for (int i = 0; i < count; i++) {
                                 FileObject f = (FileObject) objects[i];
                                 boolean isDir = VFSUtils.isDirectory(f);
 
-                                if ((chooser.isFileSelectionEnabled() &&
-                                        !isDir) ||
-                                        (chooser.isDirectorySelectionEnabled() &&
-                                        fsv.isFileSystem(f) && isDir))
-                                {
+                                if ((chooser.isFileSelectionEnabled()
+                                        && !isDir)
+                                        || (chooser.isDirectorySelectionEnabled()
+                                        && fsv.isFileSystem(f) && isDir)) {
                                     fList.add(f);
                                 }
                             }
 
-                            if (!fList.isEmpty())
-                            {
+                            if (!fList.isEmpty()) {
                                 files = fList.toArray(new FileObject[fList.size()]);
                             }
 
@@ -887,28 +779,21 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
                     }
 
                     chooser.setSelectedFiles(files);
-                }
-                else
-                {
+                } else {
                     FileObject file = (FileObject) list.getSelectedValue();
 
-                    if ((file != null) && chooser.isTraversable(file) &&
-                            (useSetDirectory || !fsv.isFileSystem(file)))
-                    {
+                    if ((file != null) && chooser.isTraversable(file)
+                            && (useSetDirectory || !fsv.isFileSystem(file))) {
                         setDirectorySelected(true);
                         setDirectory(file);
 
-                        if (usesSingleFilePane)
-                        {
+                        if (usesSingleFilePane) {
                             chooser.setSelectedFile(null);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         setDirectorySelected(false);
 
-                        if (file != null)
-                        {
+                        if (file != null) {
                             chooser.setSelectedFile(file);
                         }
                     }
@@ -917,16 +802,15 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         }
     }
 
-    protected class DoubleClickListener extends MouseAdapter
-    {
+    protected class DoubleClickListener extends MouseAdapter {
+
         // NOTE: This class exists only for backward compatability. All
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
         Handler handler;
 
-        public DoubleClickListener(JList list)
-        {
+        public DoubleClickListener(JList list) {
             handler = new Handler(list);
         }
 
@@ -938,26 +822,24 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
          * data transfer state of the file chooser.
          */
         @Override
-        public void mouseEntered(MouseEvent e)
-        {
+        public void mouseEntered(MouseEvent e) {
             handler.mouseEntered(e);
         }
 
         @Override
-        public void mouseClicked(MouseEvent e)
-        {
+        public void mouseClicked(MouseEvent e) {
             handler.mouseClicked(e);
         }
     }
 
-    protected class SelectionListener implements ListSelectionListener
-    {
+    protected class SelectionListener implements ListSelectionListener {
+
         // NOTE: This class exists only for backward compatability. All
         // its functionality has been moved into Handler. If you need to add
         // new functionality add it to the Handler, but make sure this
         // class calls into the Handler.
-        public void valueChanged(ListSelectionEvent e)
-        {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
             getHandler().valueChanged(e);
         }
     }
@@ -966,54 +848,45 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * Creates a new folder.
      */
     @SuppressWarnings("serial")
-    protected class NewFolderAction extends AbstractAction
-    {
-        protected NewFolderAction()
-        {
+    protected class NewFolderAction extends AbstractAction {
+
+        protected NewFolderAction() {
             super(VFSFilePane.ACTION_NEW_FOLDER);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
-            if (readOnly)
-            {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (readOnly) {
                 return;
             }
 
             VFSJFileChooser fc = getFileChooser();
             FileObject currentDirectory = fc.getCurrentDirectory();
 
-            if (!VFSUtils.exists(currentDirectory))
-            {
+            if (!VFSUtils.exists(currentDirectory)) {
                 JOptionPane.showMessageDialog(fc,
-                    newFolderParentDoesntExistText,
-                    newFolderParentDoesntExistTitleText,
-                    JOptionPane.WARNING_MESSAGE);
+                        newFolderParentDoesntExistText,
+                        newFolderParentDoesntExistTitleText,
+                        JOptionPane.WARNING_MESSAGE);
 
                 return;
             }
 
             FileObject newFolder;
 
-            try
-            {
+            try {
                 newFolder = fc.getFileSystemView()
-                              .createNewFolder(currentDirectory);
+                        .createNewFolder(currentDirectory);
 
-                if (fc.isMultiSelectionEnabled())
-                {
-                    fc.setSelectedFiles(new FileObject[] { newFolder });
-                }
-                else
-                {
+                if (fc.isMultiSelectionEnabled()) {
+                    fc.setSelectedFiles(new FileObject[]{newFolder});
+                } else {
                     fc.setSelectedFile(newFolder);
                 }
-            }
-            catch (IOException exc)
-            {
+            } catch (IOException exc) {
                 JOptionPane.showMessageDialog(fc,
-                    newFolderErrorText + newFolderErrorSeparator + exc,
-                    newFolderErrorText, JOptionPane.ERROR_MESSAGE);
+                        newFolderErrorText + newFolderErrorSeparator + exc,
+                        newFolderErrorText, JOptionPane.ERROR_MESSAGE);
 
                 return;
             }
@@ -1026,56 +899,47 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * Acts on the "home" key event or equivalent event.
      */
     @SuppressWarnings("serial")
-    protected class GoHomeAction extends AbstractAction
-    {
-        protected GoHomeAction()
-        {
+    protected class GoHomeAction extends AbstractAction {
+
+        protected GoHomeAction() {
             super("Go Home");
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             VFSJFileChooser fc = getFileChooser();
             FileObject currentDir = fc.getCurrentDirectory();
 
-            if (currentDir instanceof LocalFile)
-            {
+            if (currentDir instanceof LocalFile) {
                 changeDirectory(fc.getFileSystemView().getHomeDirectory());
-            }
-            else
-            {
-                try
-                {
+            } else {
+                try {
                     changeDirectory(fc.getCurrentDirectory().getFileSystem()
-                                      .getRoot());
-                }
-                catch (FileSystemException ex)
-                {
+                            .getRoot());
+                } catch (FileSystemException ex) {
                     Logger.getLogger(BasicVFSFileChooserUI.class.getName())
-                          .log(Level.SEVERE, null, ex);
+                            .log(Level.SEVERE, null, ex);
                 }
             }
         }
     }
 
     @SuppressWarnings("serial")
-    protected class ChangeToParentDirectoryAction extends AbstractAction
-    {
-        protected ChangeToParentDirectoryAction()
-        {
+    protected class ChangeToParentDirectoryAction extends AbstractAction {
+
+        protected ChangeToParentDirectoryAction() {
             super("Go Up");
             putValue(Action.ACTION_COMMAND_KEY,
-                VFSFilePane.ACTION_CHANGE_TO_PARENT_DIRECTORY);
+                    VFSFilePane.ACTION_CHANGE_TO_PARENT_DIRECTORY);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager()
-                                                       .getFocusOwner();
+                    .getFocusOwner();
 
-            if ((focusOwner == null) ||
-                    !(focusOwner instanceof javax.swing.text.JTextComponent))
-            {
+            if ((focusOwner == null)
+                    || !(focusOwner instanceof javax.swing.text.JTextComponent)) {
                 getFileChooser().changeToParentDirectory();
             }
         }
@@ -1085,21 +949,18 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * Responds to an Open or Save request
      */
     @SuppressWarnings("serial")
-    protected class ApproveSelectionAction extends AbstractAction
-    {
-        protected ApproveSelectionAction()
-        {
+    protected class ApproveSelectionAction extends AbstractAction {
+
+        protected ApproveSelectionAction() {
             super(VFSFilePane.ACTION_APPROVE_SELECTION);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
-            if (isDirectorySelected())
-            {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (isDirectorySelected()) {
                 FileObject dir = getDirectory();
 
-                if (dir != null)
-                {
+                if (dir != null) {
                     changeDirectory(dir);
 
                     return;
@@ -1112,14 +973,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
             AbstractVFSFileSystemView fs = chooser.getFileSystemView();
             FileObject dir = chooser.getCurrentDirectory();
 
-            if (filename != null)
-            {
+            if (filename != null) {
                 // Remove whitespace from beginning and end of filename
                 filename = filename.trim();
             }
 
-            if ((filename == null) || filename.equals(""))
-            {
+            if ((filename == null) || filename.equals("")) {
                 // no file selected, multiple selection off, therefore cancel the approve action
                 resetGlobFilter();
 
@@ -1129,80 +988,62 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
             FileObject selectedFile = null;
             FileObject[] selectedFiles = null;
 
-            if ((filename != null) && !filename.equals(""))
-            {
+            if ((filename != null) && !filename.equals("")) {
                 // Unix: Resolve '~' to user's home directory
-                if (File.separatorChar == '/')
-                {
-                    if (filename.startsWith("~/"))
-                    {
-                        filename = System.getProperty("user.home") +
-                            filename.substring(1);
-                    }
-                    else if (filename.equals("~"))
-                    {
+                if (File.separatorChar == '/') {
+                    if (filename.startsWith("~/")) {
+                        filename = System.getProperty("user.home")
+                                + filename.substring(1);
+                    } else if (filename.equals("~")) {
                         filename = System.getProperty("user.home");
                     }
                 }
 
-                if (chooser.isMultiSelectionEnabled() &&
-                        (filename.charAt(0) == '\"'))
-                {
+                if (chooser.isMultiSelectionEnabled()
+                        && (filename.charAt(0) == '\"')) {
                     List<FileObject> fList = new ArrayList<FileObject>();
 
                     filename = filename.substring(1);
 
-                    if (filename.endsWith("\""))
-                    {
+                    if (filename.endsWith("\"")) {
                         filename = filename.substring(0, filename.length() - 1);
                     }
 
-                    do
-                    {
+                    do {
                         String str;
                         int i = filename.indexOf("\" \"");
 
-                        if (i > 0)
-                        {
+                        if (i > 0) {
                             str = filename.substring(0, i);
                             filename = filename.substring(i + 3);
-                        }
-                        else
-                        {
+                        } else {
                             str = filename;
                             filename = "";
                         }
 
                         FileObject file = fs.createFileObject(str);
 
-                        if (file == null)
-                        {
+                        if (file == null) {
                             file = fs.createFileObject(dir, str);
                         }
 
                         fList.add(file);
-                    }
-                    while (filename.length() > 0);
+                    } while (filename.length() > 0);
 
-                    if (!fList.isEmpty())
-                    {
+                    if (!fList.isEmpty()) {
                         selectedFiles = fList.toArray(new FileObject[fList.size()]);
                     }
 
                     resetGlobFilter();
-                }
-                else
-                {
+                } else {
                     /// ZOUNDI MARK
                     selectedFile = fs.createFileObject(filename);
 
-                    if (!VFSUtils.exists(selectedFile))
-                    {
+                    if (!VFSUtils.exists(selectedFile)) {
                         selectedFile = VFSUtils.resolveFileObject(getFileName());
 
-                        if ((selectedFile == null) ||
-                                !VFSUtils.exists(selectedFile))
-                        {
+                        if ((selectedFile == null)
+                                || !VFSUtils.exists(selectedFile)) {
                             selectedFile = fs.getChild(dir, filename);
                         }
                     }
@@ -1210,24 +1051,20 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
                     // check for wildcard pattern
                     AbstractVFSFileFilter currentFilter = chooser.getFileFilter();
 
-                    if (!VFSUtils.exists(selectedFile) &&
-                            isGlobPattern(filename))
-                    {
+                    if (!VFSUtils.exists(selectedFile)
+                            && isGlobPattern(filename)) {
                         changeDirectory(VFSUtils.getParentDirectory(
                                 selectedFile));
 
-                        if (globFilter == null)
-                        {
+                        if (globFilter == null) {
                             globFilter = new GlobFilter();
                         }
 
-                        try
-                        {
+                        try {
                             globFilter.setPattern(selectedFile.getName()
-                                                              .getBaseName());
+                                    .getBaseName());
 
-                            if (!(currentFilter instanceof GlobFilter))
-                            {
+                            if (!(currentFilter instanceof GlobFilter)) {
                                 actualFileFilter = currentFilter;
                             }
 
@@ -1235,9 +1072,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
                             chooser.setFileFilter(globFilter);
 
                             return;
-                        }
-                        catch (PatternSyntaxException pse)
-                        {
+                        } catch (PatternSyntaxException pse) {
                             // Not a valid glob pattern. Abandon filter.
                         }
                     }
@@ -1245,38 +1080,32 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
                     resetGlobFilter();
 
                     // Check for directory change action
-                    boolean isDir = ((selectedFile != null) &&
-                        VFSUtils.isDirectory(selectedFile));
-                    boolean isTrav = ((selectedFile != null) &&
-                        chooser.isTraversable(selectedFile));
+                    boolean isDir = ((selectedFile != null)
+                            && VFSUtils.isDirectory(selectedFile));
+                    boolean isTrav = ((selectedFile != null)
+                            && chooser.isTraversable(selectedFile));
                     boolean isDirSelEnabled = chooser.isDirectorySelectionEnabled();
                     boolean isFileSelEnabled = chooser.isFileSelectionEnabled();
-                    boolean isCtrl = ((e != null) &&
-                        ((e.getModifiers() & ActionEvent.CTRL_MASK) != 0));
+                    boolean isCtrl = ((e != null)
+                            && ((e.getModifiers() & ActionEvent.CTRL_MASK) != 0));
 
-                    if (isDir && isTrav && (isCtrl || !isDirSelEnabled))
-                    {
+                    if (isDir && isTrav && (isCtrl || !isDirSelEnabled)) {
                         changeDirectory(selectedFile);
 
                         return;
-                    }
-                    else if ((isDir || !isFileSelEnabled) &&
-                            (!isDir || !isDirSelEnabled) &&
-                            (!isDirSelEnabled || VFSUtils.exists(selectedFile)))
-                    {
+                    } else if ((isDir || !isFileSelEnabled)
+                            && (!isDir || !isDirSelEnabled)
+                            && (!isDirSelEnabled || VFSUtils.exists(selectedFile))) {
                         selectedFile = null;
                     }
                 }
             }
 
-            if ((selectedFiles != null) || (selectedFile != null))
-            {
-                if ((selectedFiles != null) ||
-                        chooser.isMultiSelectionEnabled())
-                {
-                    if (selectedFiles == null)
-                    {
-                        selectedFiles = new FileObject[] { selectedFile };
+            if ((selectedFiles != null) || (selectedFile != null)) {
+                if ((selectedFiles != null)
+                        || chooser.isMultiSelectionEnabled()) {
+                    if (selectedFiles == null) {
+                        selectedFiles = new FileObject[]{selectedFile};
                     }
 
                     chooser.setSelectedFiles(selectedFiles);
@@ -1284,22 +1113,15 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
                     // selected value in case the ListSelectionModel clears it
                     // for non-existing file names.
                     chooser.setSelectedFiles(selectedFiles);
-                }
-                else
-                {
+                } else {
                     chooser.setSelectedFile(selectedFile);
                 }
 
                 chooser.approveSelection();
-            }
-            else
-            {
-                if (chooser.isMultiSelectionEnabled())
-                {
+            } else {
+                if (chooser.isMultiSelectionEnabled()) {
                     chooser.setSelectedFiles(null);
-                }
-                else
-                {
+                } else {
                     chooser.setSelectedFile(null);
                 }
 
@@ -1311,28 +1133,27 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     /* A file filter which accepts file patterns containing
      * the special wildcards *? on Windows and *?[] on Unix.
      */
-    static class GlobFilter extends AbstractVFSFileFilter
-    {
+    static class GlobFilter extends AbstractVFSFileFilter {
+
         String globPattern;
 
-        public void setPattern(String globPattern)
-        {
+        public void setPattern(String globPattern) {
             this.globPattern = globPattern;
         }
 
-        public boolean accept(FileObject f)
-        {
-	    if (f == null) {
-		return false;
-	    }
-	    if (VFSUtils.isDirectory(f)) {
-		return true;
-	    }
-	    return FilenameUtils.wildcardMatch(f.getName().getBaseName(), globPattern);
+        @Override
+        public boolean accept(FileObject f) {
+            if (f == null) {
+                return false;
+            }
+            if (VFSUtils.isDirectory(f)) {
+                return true;
+            }
+            return FilenameUtils.wildcardMatch(f.getName().getBaseName(), globPattern);
         }
 
-        public String getDescription()
-        {
+        @Override
+        public String getDescription() {
             return globPattern;
         }
     }
@@ -1341,10 +1162,10 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * Responds to a cancel request.
      */
     @SuppressWarnings("serial")
-    protected class CancelSelectionAction extends AbstractAction
-    {
-        public void actionPerformed(ActionEvent e)
-        {
+    protected class CancelSelectionAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
             getFileChooser().cancelSelection();
         }
     }
@@ -1353,13 +1174,13 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
      * Rescans the files in the current directory
      */
     @SuppressWarnings("serial")
-    protected class UpdateAction extends AbstractAction
-    {
-        public void actionPerformed(ActionEvent e)
-        {
+    protected class UpdateAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
             VFSJFileChooser fc = getFileChooser();
             fc.setCurrentDirectory(fc.getFileSystemView()
-                                     .createFileObject(getDirectoryName()));
+                    .createFileObject(getDirectoryName()));
             fc.rescanCurrentDirectory();
         }
     }
@@ -1367,25 +1188,23 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     // *****************************************
     // ***** default AcceptAll file filter *****
     // *****************************************
-    protected static class AcceptAllFileFilter extends AbstractVFSFileFilter
-    {
-        public AcceptAllFileFilter()
-        {
+    protected static class AcceptAllFileFilter extends AbstractVFSFileFilter {
+
+        public AcceptAllFileFilter() {
         }
 
-        public boolean accept(FileObject f)
-        {
+        @Override
+        public boolean accept(FileObject f) {
             return true;
         }
 
-        public String getDescription()
-        {
+        @Override
+        public String getDescription() {
             return VFSResources.getMessage("VFSJFileChooser.acceptAllFileFilterText");
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return getDescription();
         }
     }
@@ -1393,37 +1212,31 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
     // ***********************
     // * FileView operations *
     // ***********************
-    public class BasicVFSFileView extends AbstractVFSFileView
-    {
+    public class BasicVFSFileView extends AbstractVFSFileView {
         /* FileView type descriptions */
+
         // PENDING(jeff) - pass in the icon cache size
         protected Map<FileObject, Icon> iconCache = new ConcurrentHashMap<FileObject, Icon>();
 
-        public BasicVFSFileView()
-        {
+        public BasicVFSFileView() {
         }
 
-        public void clearIconCache()
-        {
+        public void clearIconCache() {
             iconCache = null;
             iconCache = new ConcurrentHashMap<FileObject, Icon>();
         }
 
         @Override
-        public String getName(FileObject f)
-        {
+        public String getName(FileObject f) {
             // Note: Returns display name rather than file name
             String fileName = null;
 
-            if (f != null)
-            {
+            if (f != null) {
                 fileName = f.getName().getBaseName();
             }
 
-            if (fileName != null)
-            {
-                if (fileName.trim().equals(""))
-                {
+            if (fileName != null) {
+                if (fileName.trim().equals("")) {
                     fileName = f.getName().toString();
                 }
             }
@@ -1432,25 +1245,19 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         }
 
         @Override
-        public String getDescription(FileObject f)
-        {
+        public String getDescription(FileObject f) {
             return f.getName().getBaseName();
         }
 
         @Override
-        public String getTypeDescription(FileObject f)
-        {
+        public String getTypeDescription(FileObject f) {
             String type = getFileChooser().getFileSystemView()
-                              .getSystemTypeDescription(f);
+                    .getSystemTypeDescription(f);
 
-            if (type == null)
-            {
-                if (VFSUtils.isDirectory(f))
-                {
+            if (type == null) {
+                if (VFSUtils.isDirectory(f)) {
                     type = directoryDescriptionText;
-                }
-                else
-                {
+                } else {
                     type = fileDescriptionText;
                 }
             }
@@ -1458,15 +1265,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
             return type;
         }
 
-        public Icon getCachedIcon(FileObject f)
-        {
+        public Icon getCachedIcon(FileObject f) {
             return (Icon) iconCache.get(f);
         }
 
-        public void cacheIcon(FileObject f, Icon i)
-        {
-            if ((f == null) || (i == null))
-            {
+        public void cacheIcon(FileObject f, Icon i) {
+            if ((f == null) || (i == null)) {
                 return;
             }
 
@@ -1474,36 +1278,26 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
         }
 
         @Override
-        public Icon getIcon(FileObject f)
-        {
+        public Icon getIcon(FileObject f) {
             Icon icon = getCachedIcon(f);
 
-            if (icon != null)
-            {
+            if (icon != null) {
                 return icon;
             }
 
             icon = fileIcon;
 
-            if (f != null)
-            {
+            if (f != null) {
                 AbstractVFSFileSystemView fsv = getFileChooser()
-                                                    .getFileSystemView();
+                        .getFileSystemView();
 
-                if (fsv.isFloppyDrive(f))
-                {
+                if (fsv.isFloppyDrive(f)) {
                     icon = floppyDriveIcon;
-                }
-                else if (fsv.isDrive(f))
-                {
+                } else if (fsv.isDrive(f)) {
                     icon = hardDriveIcon;
-                }
-                else if (fsv.isComputerNode(f))
-                {
+                } else if (fsv.isComputerNode(f)) {
                     icon = computerIcon;
-                }
-                else if (VFSUtils.isDirectory(f))
-                {
+                } else if (VFSUtils.isDirectory(f)) {
                     icon = directoryIcon;
                 }
             }
@@ -1513,8 +1307,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI
             return icon;
         }
 
-        public Boolean isHidden(FileObject f)
-        {
+        public Boolean isHidden(FileObject f) {
             return VFSUtils.isHiddenFile(f);
         }
     }

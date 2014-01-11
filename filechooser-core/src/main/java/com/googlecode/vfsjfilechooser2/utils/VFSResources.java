@@ -22,40 +22,33 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * i18n messages
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.3
  */
-public final class VFSResources
-{
+public final class VFSResources {
+
     private static final String BUNDLE_BASENAME = "com.googlecode.vfsjfilechooser2.i18n.resources";
     private static ResourceBundle resourceBundle;
     private static final Logger LOG = Logger.getLogger(VFSResources.class.getName());
 
-    static
-    {
-        try
-        {
+    static {
+        try {
             loadResources();
             LOG.log(Level.INFO, "Loaded i18n resources");
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Unable to load i18n resources", ex);
         }
     }
 
     // no public constructor
-    private VFSResources()
-    {
+    private VFSResources() {
         throw new AssertionError("Cannot create a VFSResources object");
     }
 
     // load the default message translations
-    private static void loadResources() throws MissingResourceException
-    {
+    private static void loadResources() throws MissingResourceException {
         resourceBundle = ResourceBundle.getBundle(BUNDLE_BASENAME);
     }
 
@@ -63,12 +56,10 @@ public final class VFSResources
      * Sets the resource bundle to use
      * @param rb A resource bundle
      */
-    public static synchronized void setResourceBundle(ResourceBundle rb)
-    {
-        if (rb == null)
-        {
+    public static synchronized void setResourceBundle(ResourceBundle rb) {
+        if (rb == null) {
             throw new IllegalArgumentException(
-                "ResourceBundle object musn't be null!");
+                    "ResourceBundle object musn't be null!");
         }
 
         resourceBundle = rb;
@@ -79,23 +70,17 @@ public final class VFSResources
      * @param messageKey The key to translate
      * @return a translated message
      */
-    public static String getMessage(String messageKey)
-    {
-        if (messageKey == null)
-        {
+    public static String getMessage(String messageKey) {
+        if (messageKey == null) {
             return null;
         }
 
-        synchronized (resourceBundle)
-        {
+        synchronized (resourceBundle) {
             String msg = null;
 
-            try
-            {
+            try {
                 msg = resourceBundle.getString(messageKey);
-            }
-            catch (MissingResourceException ex)
-            {
+            } catch (MissingResourceException ex) {
                 msg = messageKey + " Untranslated";
                 LOG.log(Level.SEVERE, "Unable to retrieve i18n key", ex);
             }

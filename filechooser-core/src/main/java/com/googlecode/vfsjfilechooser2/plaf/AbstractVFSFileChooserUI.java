@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf;
 
-
 import org.apache.commons.vfs2.FileObject;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
@@ -26,21 +25,20 @@ import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
 
 import javax.swing.plaf.ComponentUI;
 
-
 /**
  * The FileChooserUI implementation using commons-vfs based on Swing FileChooserUI
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSFileChooserUI extends ComponentUI
-{
+public abstract class AbstractVFSFileChooserUI extends ComponentUI {
+
     /**
      *
      * @param fc
      * @return
      */
     public abstract AbstractVFSFileFilter getAcceptAllFileFilter(
-        VFSJFileChooser fc);
+            VFSJFileChooser fc);
 
     /**
      *

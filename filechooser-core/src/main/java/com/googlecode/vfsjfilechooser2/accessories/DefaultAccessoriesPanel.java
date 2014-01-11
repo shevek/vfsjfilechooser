@@ -17,7 +17,6 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories;
 
-
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
@@ -47,7 +46,6 @@ import com.googlecode.vfsjfilechooser2.accessories.connection.ConnectionDialog;
 import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 
-
 /**
  * <p>The default accessory panel you could add
  * It contains a bookmarks manager and the a connection dialog</p>
@@ -55,8 +53,8 @@ import com.googlecode.vfsjfilechooser2.utils.VFSResources;
  * @version 0.0.2
  */
 @SuppressWarnings("serial")
-public final class DefaultAccessoriesPanel extends JComponent
-{
+public final class DefaultAccessoriesPanel extends JComponent {
+
     private static final String RES_PATH = "/com/googlecode/vfsjfilechooser2/plaf/icons/";
     private JButton bookmarksButton;
     private JButton localFSButton;
@@ -70,8 +68,7 @@ public final class DefaultAccessoriesPanel extends JComponent
      * Create an accessory panel
      * @param fileChooser The file dialog
      */
-    public DefaultAccessoriesPanel(final VFSJFileChooser fileChooser)
-    {
+    public DefaultAccessoriesPanel(final VFSJFileChooser fileChooser) {
         setLayout(new BorderLayout());
 
         this.fileChooser = fileChooser;
@@ -80,8 +77,7 @@ public final class DefaultAccessoriesPanel extends JComponent
         initComponents();
     }
 
-    private void initBorder()
-    {
+    private void initBorder() {
         Border outsideBorder = new EtchedBorder();
         Border insideBorder = new EmptyBorder(2, 4, 0, 2);
 
@@ -91,33 +87,31 @@ public final class DefaultAccessoriesPanel extends JComponent
         setBorder(new CompoundBorder(outsideBorder1, insideBorder1));
     }
 
-    private Icon getIcon(String iconName)
-    {
+    private Icon getIcon(String iconName) {
         URL iconURL = getClass().getResource(RES_PATH + iconName);
 
         return new ImageIcon(iconURL);
     }
 
-    private void initComponents()
-    {
+    private void initComponents() {
         buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new GridLayout(0, 1, 3, 3));
 
         Action action;
 
         action = new ManageBookmarksAction(VFSResources.getMessage(
-                    "VFSJFileChooser.bookmarksLabelText"), getIcon("book.png"));
+                "VFSJFileChooser.bookmarksLabelText"), getIcon("book.png"));
         bookmarksButton = new JButton(action);
         bookmarksButton.setHorizontalAlignment(SwingConstants.LEFT);
 
         action = new ConnectionWizardAction(VFSResources.getMessage(
-                    "VFSJFileChooser.connectionButtonText"),
+                "VFSJFileChooser.connectionButtonText"),
                 getIcon("connect.png"));
         connectionsButton = new JButton(action);
         connectionsButton.setHorizontalAlignment(SwingConstants.LEFT);
 
         action = new LocalFilesAction(VFSResources.getMessage(
-                    "VFSJFileChooser.localFilesButtonText"),
+                "VFSJFileChooser.localFilesButtonText"),
                 getIcon("drive.png"));
         localFSButton = new JButton(action);
         localFSButton.setHorizontalAlignment(SwingConstants.LEFT);
@@ -141,15 +135,14 @@ public final class DefaultAccessoriesPanel extends JComponent
     /**
      * Action to display the connection wizard dialog
      */
-    private class ConnectionWizardAction extends AbstractAction
-    {
-        public ConnectionWizardAction(String name, Icon icon)
-        {
+    private class ConnectionWizardAction extends AbstractAction {
+
+        public ConnectionWizardAction(String name, Icon icon) {
             super(name, icon);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             connectionDialog.setLocationRelativeTo(connectionDialog.getOwner());
             connectionDialog.setVisible(true);
         }
@@ -158,15 +151,14 @@ public final class DefaultAccessoriesPanel extends JComponent
     /**
      * Action to show the local file system
      */
-    private class LocalFilesAction extends AbstractAction
-    {
-        public LocalFilesAction(String name, Icon icon)
-        {
+    private class LocalFilesAction extends AbstractAction {
+
+        public LocalFilesAction(String name, Icon icon) {
             super(name, icon);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             FileObject fo = SwingCommonsUtilities.getVFSFileChooserDefaultDirectory();
             fileChooser.setCurrentDirectory(fo);
         }
@@ -175,15 +167,14 @@ public final class DefaultAccessoriesPanel extends JComponent
     /**
      * Action to display the bookmarks manager dialog
      */
-    private class ManageBookmarksAction extends AbstractAction
-    {
-        public ManageBookmarksAction(String name, Icon icon)
-        {
+    private class ManageBookmarksAction extends AbstractAction {
+
+        public ManageBookmarksAction(String name, Icon icon) {
             super(name, icon);
         }
 
-        public void actionPerformed(ActionEvent e)
-        {
+        @Override
+        public void actionPerformed(ActionEvent e) {
             bookmarksDialog.setLocationRelativeTo(bookmarksDialog.getOwner());
             bookmarksDialog.setVisible(true);
         }

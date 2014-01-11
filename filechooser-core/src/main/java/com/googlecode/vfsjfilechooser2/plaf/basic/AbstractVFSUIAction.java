@@ -21,22 +21,20 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.Action;
 
-
 /**
  * That class is a clone of UIAction in some Sun's code
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSUIAction implements Action
-{
+public abstract class AbstractVFSUIAction implements Action {
+
     private String name;
 
     /**
      *
      * @param name
      */
-    public AbstractVFSUIAction(String name)
-    {
+    public AbstractVFSUIAction(String name) {
         this.name = name;
     }
 
@@ -44,15 +42,13 @@ public abstract class AbstractVFSUIAction implements Action
      *
      * @return
      */
-    public final String getName()
-    {
+    public final String getName() {
         return name;
     }
 
-    public Object getValue(String key)
-    {
-        if (key.equals(NAME))
-        {
+    @Override
+    public Object getValue(String key) {
+        if (key.equals(NAME)) {
             return name;
         }
 
@@ -60,20 +56,20 @@ public abstract class AbstractVFSUIAction implements Action
     }
 
     // UIAction is not mutable, this does nothing.
-    public void putValue(String key, Object value)
-    {
+    @Override
+    public void putValue(String key, Object value) {
     }
 
     // UIAction is not mutable, this does nothing.
-    public void setEnabled(boolean b)
-    {
+    @Override
+    public void setEnabled(boolean b) {
     }
 
     /**
      * Cover method for <code>isEnabled(null)</code>.
      */
-    public final boolean isEnabled()
-    {
+    @Override
+    public final boolean isEnabled() {
         return isEnabled(null);
     }
 
@@ -84,18 +80,17 @@ public abstract class AbstractVFSUIAction implements Action
      * @param sender Widget enabled state is being asked for, may be null.
      * @return
      */
-    public boolean isEnabled(Object sender)
-    {
+    public boolean isEnabled(Object sender) {
         return true;
     }
 
     // UIAction is not mutable, this does nothing.
-    public void addPropertyChangeListener(PropertyChangeListener listener)
-    {
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
     }
 
     // UIAction is not mutable, this does nothing.
-    public void removePropertyChangeListener(PropertyChangeListener listener)
-    {
+    @Override
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
     }
 }

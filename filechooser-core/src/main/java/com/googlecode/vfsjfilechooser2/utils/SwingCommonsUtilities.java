@@ -30,36 +30,29 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.table.TableCellRenderer;
 
-
 /**
  * Copy of some functions in SwingUtilities2
  * to avoid using sun proprietary classes
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  */
-public final class SwingCommonsUtilities
-{
+public final class SwingCommonsUtilities {
+
     private final static javax.swing.JFileChooser fr = new javax.swing.JFileChooser();
     private final static javax.swing.filechooser.FileSystemView fw = fr.getFileSystemView();
     private static FileObject defaultDir;
 
-    private SwingCommonsUtilities()
-    {
+    private SwingCommonsUtilities() {
         throw new AssertionError("Trying to instanciate SwingCommonsUtilities");
     }
 
-    public static FileObject getVFSFileChooserDefaultDirectory()
-    {
-        if (defaultDir == null)
-        {
-            try
-            {
+    public static FileObject getVFSFileChooserDefaultDirectory() {
+        if (defaultDir == null) {
+            try {
                 defaultDir = VFSUtils.getFileSystemManager()
-                                     .toFileObject(fw.getDefaultDirectory());
-            }
-            catch (Exception e)
-            {
+                        .toFileObject(fw.getDefaultDirectory());
+            } catch (Exception e) {
                 defaultDir = VFSUtils.resolveFileObject(System.getProperty(
-                            "user.home"));
+                        "user.home"));
             }
         }
 
@@ -75,10 +68,8 @@ public final class SwingCommonsUtilities
      * @return
      */
     public static boolean pointOutsidePrefSize(JTable table, int row,
-        int column, Point p)
-    {
-        if ((table.convertColumnIndexToModel(column) != 0) || (row == -1))
-        {
+            int column, Point p) {
+        if ((table.convertColumnIndexToModel(column) != 0) || (row == -1)) {
             return true;
         }
 
@@ -95,9 +86,8 @@ public final class SwingCommonsUtilities
         // ASSUME: mouse x,y will never be < cell's x,y
         assert ((p.x >= cellBounds.x) && (p.y >= cellBounds.y));
 
-        if ((p.x > (cellBounds.x + cellBounds.width)) ||
-                (p.y > (cellBounds.y + cellBounds.height)))
-        {
+        if ((p.x > (cellBounds.x + cellBounds.width))
+                || (p.y > (cellBounds.y + cellBounds.height))) {
             return true;
         }
 
@@ -112,8 +102,7 @@ public final class SwingCommonsUtilities
      * @return
      */
     public static boolean pointIsInActualBounds(JList list, int index,
-        Point point)
-    {
+            Point point) {
         ListCellRenderer renderer = list.getCellRenderer();
         ListModel dataModel = list.getModel();
         Object value = dataModel.getElementAt(index);
@@ -122,8 +111,7 @@ public final class SwingCommonsUtilities
         Dimension itemSize = item.getPreferredSize();
         Rectangle cellBounds = list.getCellBounds(index, index);
 
-        if (!item.getComponentOrientation().isLeftToRight())
-        {
+        if (!item.getComponentOrientation().isLeftToRight()) {
             cellBounds.x += (cellBounds.width - itemSize.width);
         }
 
@@ -138,17 +126,14 @@ public final class SwingCommonsUtilities
      * @param point
      * @return
      */
-    public static int loc2IndexFileList(JList list, Point point)
-    {
+    public static int loc2IndexFileList(JList list, Point point) {
         int index = list.locationToIndex(point);
 
-        if (index != -1)
-        {
+        if (index != -1) {
             Object bySize = list.getClientProperty("List.isFileList");
 
-            if (bySize instanceof Boolean && ((Boolean) bySize).booleanValue() &&
-                    !pointIsInActualBounds(list, index, point))
-            {
+            if (bySize instanceof Boolean && ((Boolean) bySize).booleanValue()
+                    && !pointIsInActualBounds(list, index, point)) {
                 index = -1;
             }
         }
