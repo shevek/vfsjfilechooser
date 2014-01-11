@@ -1,0 +1,9 @@
+build
+
+.*.swp
+*~
+hs_err_pid*
+
+.nb-gradle
+.gradle
+
