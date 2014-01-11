@@ -356,7 +356,7 @@ public final class ConnectionDialog extends JDialog
                                         return;
                                     }
 
-                                    fileChooser.setCurrentDirectoryObject(fo);
+                                    fileChooser.setCurrentDirectory(fo);
 
                                     setCursor(Cursor.getDefaultCursor());
 

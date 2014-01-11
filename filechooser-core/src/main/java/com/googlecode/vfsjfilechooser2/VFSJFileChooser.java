@@ -59,7 +59,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
@@ -95,6 +94,7 @@ import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.utils.DefaultFileObjectConverter;
 import com.googlecode.vfsjfilechooser2.utils.FileObjectConverter;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
+import java.io.File;
 
 /**
  * The filechooser class with commons-VFS abstraction layer based on JFileChooser
@@ -226,7 +226,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
         AbstractVFSFileSystemView fsv)
     {
         setup(fsv);
-        setCurrentDirectoryObject(currentDirectory);
+        setCurrentDirectory(currentDirectory);
     }
 
     /**
@@ -246,7 +246,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
         }
         else
         {
-            setCurrentDirectoryObject(fileSystemView.createFileObject(
+            setCurrentDirectory(fileSystemView.createFileObject(
                     currentDirectoryPath));
         }
     }
@@ -384,21 +384,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @see #setSelectedFile
      * @return the selected file
      */
-    public File getSelectedFile()
-    {
-        return fileObjectConverter.convertFileObject(selectedFile);
-    }
-
-    /**
-     * Returns the selected file. This can be set either by the
-     * programmer via <code>setSelectedFile</code> or by a user action, such as
-     * either typing the filename into the UI or selecting the
-     * file from a list in the UI.
-     *
-     * @see #setSelectedFileObject
-     * @return the selected file
-     */
-    public FileObject getSelectedFileObject()
+    public FileObject getSelectedFile()
     {
         return selectedFile;
     }
@@ -416,34 +402,16 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *
      * @param file the selected file
      */
-    public void setSelectedFile(File file)
-    {
-      setSelectedFileObject(VFSUtils.toFileObject(file));
-    }
-
-    /**
-     * Sets the selected file. If the file's parent directory is
-     * not the current directory, changes the current directory
-     * to be the file's parent directory.
-     *
-     * @beaninfo
-     *   preferred: true
-     *       bound: true
-     *
-     * @see #getSelectedFileObject
-     *
-     * @param file the selected file
-     */
-    public void setSelectedFileObject(FileObject file)
+    public void setSelectedFile(FileObject file)
     {
         FileObject oldValue = selectedFile;
         selectedFile = file;
 
         if (selectedFile != null)
         {
-            if (!getFileSystemView().isParent(getCurrentDirectoryObject(), selectedFile))
+            if (!getFileSystemView().isParent(getCurrentDirectory(), selectedFile))
             {
-                setCurrentDirectoryObject(VFSUtils.getParentDirectory(selectedFile));
+                setCurrentDirectory(VFSUtils.getParentDirectory(selectedFile));
             }
 
             if (!isMultiSelectionEnabled() || (selectedFiles == null) ||
@@ -461,20 +429,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * Returns a list of selected files if the file chooser is
      * set to allow multiple selection.
      */
-    public File[] getSelectedFiles()
-    {
-      FileObject[] objects = getSelectedFileObjects();
-      File[] files = new File[objects.length];
-      for (int i = 0; i < objects.length; i++)
-	files[i] = fileObjectConverter.convertFileObject(objects[i]);
-      return files;
-    }
-
-    /**
-     * Returns a list of selected files if the file chooser is
-     * set to allow multiple selection.
-     */
-    public FileObject[] getSelectedFileObjects()
+    public FileObject[] getSelectedFiles()
     {
         if (selectedFiles == null)
         {
@@ -494,23 +449,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      *       bound: true
      * description: The list of selected files if the chooser is in multiple selection mode.
      */
-    public void setSelectedFiles(File[] selectedFiles)
-    {
-      FileObject[] objects = new FileObject[selectedFiles.length];
-      for (int i = 0; i < selectedFiles.length; i++)
-	objects[i] = VFSUtils.toFileObject(selectedFiles[i]);
-      setSelectedFileObjects(objects);
-    }
-
-    /**
-     * Sets the list of selected files if the file chooser is
-     * set to allow multiple selection.
-     *
-     * @beaninfo
-     *       bound: true
-     * description: The list of selected files if the chooser is in multiple selection mode.
-     */
-    public void setSelectedFileObjects(FileObject[] selectedFiles)
+    public void setSelectedFiles(FileObject[] selectedFiles)
     {
         FileObject[] oldValue = this.selectedFiles;
 
@@ -518,12 +457,12 @@ public class VFSJFileChooser extends JComponent implements Accessible
         {
             selectedFiles = null;
             this.selectedFiles = null;
-            setSelectedFileObject(null);
+            setSelectedFile(null);
         }
         else
         {
             this.selectedFiles = selectedFiles.clone();
-            setSelectedFileObject(this.selectedFiles[0]);
+            setSelectedFile(this.selectedFiles[0]);
         }
 
         firePropertyChange(SELECTED_FILES_CHANGED_PROPERTY, oldValue,
@@ -536,18 +475,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @return the current directory
      * @see #setCurrentDirectory
      */
-    public File getCurrentDirectory()
-    {
-      return fileObjectConverter.convertFileObject(currentDirectory);
-    }
-
-    /**
-     * Returns the current directory.
-     *
-     * @return the current directory
-     * @see #setCurrentDirectoryObject
-     */
-    public FileObject getCurrentDirectoryObject()
+    public FileObject getCurrentDirectory()
     {
         return currentDirectory;
     }
@@ -573,33 +501,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
      * @param dir the current directory to point to
      * @see #getCurrentDirectory
      */
-    public void setCurrentDirectory(File dir)
-    {
-      setCurrentDirectoryObject(VFSUtils.toFileObject(dir));
-    }
-
-    /**
-     * Sets the current directory. Passing in <code>null</code> sets the
-     * file chooser to point to the user's default directory.
-     * This default depends on the operating system. It is
-     * typically the "My Documents" folder on Windows, and the user's
-     * home directory on Unix.
-     *
-     * If the file passed in as <code>currentDirectory</code> is not a
-     * directory, the parent of the file will be used as the currentDirectory.
-     * If the parent is not traversable, then it will walk up the parent tree
-     * until it finds a traversable directory, or hits the root of the
-     * file system.
-     *
-     * @beaninfo
-     *   preferred: true
-     *       bound: true
-     * description: The directory that the VFSJFileChooser is showing files of.
-     *
-     * @param dir the current directory to point to
-     * @see #getCurrentDirectoryObject
-     */
-    public void setCurrentDirectoryObject(FileObject dir)
+    public void setCurrentDirectory(FileObject dir)
     {
         FileObject oldValue = currentDirectory;
 
@@ -646,8 +548,8 @@ public class VFSJFileChooser extends JComponent implements Accessible
     {
         selectedFile = null;
 
-        FileObject oldValue = getCurrentDirectoryObject();
-        setCurrentDirectoryObject(getFileSystemView().getParentDirectory(oldValue));
+        FileObject oldValue = getCurrentDirectory();
+        setCurrentDirectory(getFileSystemView().getParentDirectory(oldValue));
     }
 
     /**
@@ -1613,12 +1515,12 @@ public class VFSJFileChooser extends JComponent implements Accessible
 
                 if (failed)
                 {
-                    setSelectedFileObjects(EMPTY_FILEOBJECT_ARRAY);
+                    setSelectedFiles(EMPTY_FILEOBJECT_ARRAY);
                 }
             }
             else if ((selectedFile != null) && !filter.accept(selectedFile))
             {
-                setSelectedFileObject(null);
+                setSelectedFile(null);
             }
         }
 
@@ -1684,7 +1586,7 @@ public class VFSJFileChooser extends JComponent implements Accessible
     {
       	return fileObjectConverter;
     }
-    
+
     /**
       * Returns the filename.
       * @param fileObject the <code>File</code>

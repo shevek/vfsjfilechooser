@@ -168,7 +168,7 @@ public final class DefaultAccessoriesPanel extends JComponent
         public void actionPerformed(ActionEvent e)
         {
             FileObject fo = SwingCommonsUtilities.getVFSFileChooserDefaultDirectory();
-            fileChooser.setCurrentDirectoryObject(fo);
+            fileChooser.setCurrentDirectory(fo);
         }
     }
 

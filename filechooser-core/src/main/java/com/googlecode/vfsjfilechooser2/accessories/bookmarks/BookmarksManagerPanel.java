@@ -244,7 +244,7 @@ public class BookmarksManagerPanel extends JPanel
                                 }
                                 else
                                 {
-                                    chooser.setCurrentDirectoryObject(fo);
+                                    chooser.setCurrentDirectory(fo);
                                     parentDialog.setVisible(false);
                                 }
                             }

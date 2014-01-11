@@ -432,11 +432,11 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
         if (fc.isMultiSelectionEnabled())
         {
-            setFileName(fileNameString(fc.getSelectedFileObjects()));
+            setFileName(fileNameString(fc.getSelectedFiles()));
         }
         else
         {
-            setFileName(fileNameString(fc.getSelectedFileObject()));
+            setFileName(fileNameString(fc.getSelectedFile()));
         }
 
         // Filetype label and combobox
@@ -796,13 +796,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
         clearIconCache();
 
-        FileObject currentDirectory = fc.getCurrentDirectoryObject();
+        FileObject currentDirectory = fc.getCurrentDirectory();
 
         if (currentDirectory != null)
         {
             directoryComboBoxModel.addItem(currentDirectory);
             directoryComboBox.setSelectedItem(currentDirectory);
-            fc.setCurrentDirectoryObject(currentDirectory);
+            fc.setCurrentDirectory(currentDirectory);
 
             if (fc.isDirectorySelectionEnabled() &&
                     !fc.isFileSelectionEnabled())
@@ -845,7 +845,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         clearIconCache();
 
         VFSJFileChooser fc = getFileChooser();
-        FileObject currentDirectory = fc.getCurrentDirectoryObject();
+        FileObject currentDirectory = fc.getCurrentDirectory();
 
         if ((currentDirectory != null) && fc.isDirectorySelectionEnabled() &&
                 !fc.isFileSelectionEnabled() &&
@@ -1162,7 +1162,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
     public void valueChanged(ListSelectionEvent e)
     {
         VFSJFileChooser fc = getFileChooser();
-        FileObject f = fc.getSelectedFileObject();
+        FileObject f = fc.getSelectedFile();
 
         if (!e.getValueIsAdjusting() && (f != null) &&
                 !getFileChooser().isTraversable(f))
@@ -1314,7 +1314,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
         {
             // Add the current directory to the model, and make it the
             // selectedDirectory
-            FileObject dir = getFileChooser().getCurrentDirectoryObject();
+            FileObject dir = getFileChooser().getCurrentDirectory();
 
             if (dir != null)
             {
@@ -1568,7 +1568,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI
 
             if (!getFileChooser().getCurrentDirectory().equals(folder))
             {
-                getFileChooser().setCurrentDirectoryObject(folder);
+                getFileChooser().setCurrentDirectory(folder);
             }
         }
     }

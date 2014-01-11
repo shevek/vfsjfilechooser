@@ -151,7 +151,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
             files = new CopyOnWriteArrayList<FileObject>();
             directories = new CopyOnWriteArrayList<FileObject>();
 
-            FileObject currentDir = filechooser.getCurrentDirectoryObject();
+            FileObject currentDir = filechooser.getCurrentDirectory();
             AbstractVFSFileSystemView v = filechooser.getFileSystemView();
             directories.add(v.createFileObject(currentDir, ".."));
 
@@ -180,7 +180,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
      */
     public void validateFileCache()
     {
-        FileObject currentDirectory = filechooser.getCurrentDirectoryObject();
+        FileObject currentDirectory = filechooser.getCurrentDirectory();
 
         if (currentDirectory == null)
         {
@@ -461,7 +461,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
         {
             AbstractVFSFileSystemView fileSystem = filechooser.getFileSystemView();
 
-            FileObject cwd = filechooser.getCurrentDirectoryObject();
+            FileObject cwd = filechooser.getCurrentDirectory();
 
             // fix a bug here when the filesystem changes, the directories list needs to be notified
             if (!contains(cwd))

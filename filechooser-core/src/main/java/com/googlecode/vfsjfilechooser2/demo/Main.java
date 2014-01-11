@@ -141,7 +141,7 @@ public final class Main extends JFrame implements Runnable
             if (answer == RETURN_TYPE.APPROVE)
             {
                 // retrieve the selected file
-                final FileObject aFileObject = fileChooser.getSelectedFileObject();
+                final FileObject aFileObject = fileChooser.getSelectedFile();
 
                 // remove authentication credentials from the file path
                 final String safeName = VFSUtils.getFriendlyName(aFileObject.toString());

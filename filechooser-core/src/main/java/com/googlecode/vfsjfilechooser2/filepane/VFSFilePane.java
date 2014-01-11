@@ -902,7 +902,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
     @SuppressWarnings("deprecation")
     private void editFileName(int index)
     {
-        FileObject currentDirectory = getFileChooser().getCurrentDirectoryObject();
+        FileObject currentDirectory = getFileChooser().getCurrentDirectory();
 
         if (readOnly || !canWrite(currentDirectory))
         {
@@ -993,15 +993,15 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                 {
                     if (getModel().renameFile(editFile, f2))
                     {
-                        if (fsv.isParent(chooser.getCurrentDirectoryObject(), f2))
+                        if (fsv.isParent(chooser.getCurrentDirectory(), f2))
                         {
                             if (chooser.isMultiSelectionEnabled())
                             {
-                                chooser.setSelectedFileObjects(new FileObject[] { f2 });
+                                chooser.setSelectedFiles(new FileObject[] { f2 });
                             }
                             else
                             {
-                                chooser.setSelectedFileObject(f2);
+                                chooser.setSelectedFile(f2);
                             }
                         }
                         else
@@ -1041,7 +1041,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                                 VFSFilePane.ACTION_NEW_FOLDER);
 
                             FileObject currentDirectory = getFileChooser()
-                                                              .getCurrentDirectoryObject();
+                                                              .getCurrentDirectory();
 
                             if (currentDirectory != null)
                             {
@@ -1057,10 +1057,10 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                             }
 
                             VFSJFileChooser fc = getFileChooser();
-                            FileObject oldFile = fc.getSelectedFileObject();
+                            FileObject oldFile = fc.getSelectedFile();
                             basicNewFolderAction.actionPerformed(ev);
 
-                            FileObject newFile = fc.getSelectedFileObject();
+                            FileObject newFile = fc.getSelectedFile();
 
                             if ((newFile != null) && !newFile.equals(oldFile) &&
                                     VFSUtils.isDirectory(newFile))
@@ -1079,7 +1079,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         if (getFileChooser().isMultiSelectionEnabled() &&
                 !isDirectorySelected())
         {
-            FileObject[] files = getFileChooser().getSelectedFileObjects(); // Should be selected
+            FileObject[] files = getFileChooser().getSelectedFiles(); // Should be selected
 
             Object[] selectedObjects = list.getSelectedValues(); // Are actually selected
 
@@ -1140,7 +1140,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
             }
             else
             {
-                f = chooser.getSelectedFileObject();
+                f = chooser.getSelectedFile();
             }
 
             int i;
@@ -1218,7 +1218,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
           // ignored, TODO race condition?
         }
 
-        FileObject currentDirectory = fc.getCurrentDirectoryObject();
+        FileObject currentDirectory = fc.getCurrentDirectory();
 
         if (currentDirectory != null)
         {
@@ -2322,15 +2322,15 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
                         if (!VFSUtils.exists(f2) &&
                                 VFSFilePane.this.getModel().renameFile(f, f2))
                         {
-                            if (fsv.isParent(chooser.getCurrentDirectoryObject(), f2))
+                            if (fsv.isParent(chooser.getCurrentDirectory(), f2))
                             {
                                 if (chooser.isMultiSelectionEnabled())
                                 {
-                                    chooser.setSelectedFileObjects(new FileObject[] { f2 });
+                                    chooser.setSelectedFiles(new FileObject[] { f2 });
                                 }
                                 else
                                 {
-                                    chooser.setSelectedFileObject(f2);
+                                    chooser.setSelectedFile(f2);
                                 }
                             }
                         }
@@ -2342,7 +2342,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener
         @Override
         public boolean isCellEditable(int row, int column)
         {
-            FileObject currentDirectory = getFileChooser().getCurrentDirectoryObject();
+            FileObject currentDirectory = getFileChooser().getCurrentDirectory();
 
             return (!readOnly && (column == COLUMN_FILENAME) &&
             canWrite(currentDirectory));
