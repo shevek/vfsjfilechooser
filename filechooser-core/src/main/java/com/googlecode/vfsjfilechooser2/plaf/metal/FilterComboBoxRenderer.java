@@ -17,12 +17,10 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.metal;
 
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
 import java.awt.Component;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
-
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
 
 /**
  * Renderer for the file filters drop down list

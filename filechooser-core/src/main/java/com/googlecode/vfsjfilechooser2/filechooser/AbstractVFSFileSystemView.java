@@ -18,26 +18,21 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.impl.DecoratedFileObject;
-import org.apache.commons.vfs2.provider.local.LocalFile;
-
 import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.File;
-
 import java.text.MessageFormat;
-
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileView;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.impl.DecoratedFileObject;
+import org.apache.commons.vfs2.provider.local.LocalFile;
 
 /**
  * The implementation using commons-vfs based on Swing FileSystemView

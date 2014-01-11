@@ -23,14 +23,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.io.StringWriter;
-
+import java.io.Writer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
-import java.security.*;
-import javax.crypto.*;
-import javax.crypto.spec.*;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Utility class to save bookmarks

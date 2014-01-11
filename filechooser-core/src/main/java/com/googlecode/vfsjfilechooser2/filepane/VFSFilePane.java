@@ -18,6 +18,15 @@
  */
 package com.googlecode.vfsjfilechooser2.filepane;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
+import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
+import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
+import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
+import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -52,7 +61,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EventObject;
 import java.util.List;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -95,18 +103,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.Position;
-
 import org.apache.commons.vfs2.FileObject;
-
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
-import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
-import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
-import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
-import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * This class is based on sun.swing.FilePane

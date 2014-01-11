@@ -17,11 +17,9 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import org.apache.commons.vfs2.FileObject;
-
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
-
 import javax.swing.Icon;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * The fileview implementation using commons-vfs based on Swing FileView

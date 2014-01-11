@@ -18,7 +18,6 @@
 package com.googlecode.vfsjfilechooser2.plaf.basic;
 
 import java.beans.PropertyChangeListener;
-
 import javax.swing.Action;
 
 /**

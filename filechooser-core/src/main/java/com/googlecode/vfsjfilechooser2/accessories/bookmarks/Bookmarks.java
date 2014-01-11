@@ -18,20 +18,17 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
+import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
+import com.googlecode.vfsjfilechooser2.utils.VFSURIValidator;
 import java.io.File;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.table.AbstractTableModel;
 import javax.swing.JOptionPane;
-
-import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSURIValidator;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * The bookmarks table model

@@ -18,6 +18,13 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
+import com.googlecode.vfsjfilechooser2.accessories.connection.Credentials;
+import com.googlecode.vfsjfilechooser2.accessories.connection.Credentials.Builder;
+import com.googlecode.vfsjfilechooser2.accessories.connection.Protocol;
+import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
+import com.googlecode.vfsjfilechooser2.utils.VFSURIParser;
+import com.googlecode.vfsjfilechooser2.utils.VFSURIValidator;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -35,7 +42,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.NumberFormat;
 import java.text.ParseException;
-
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -49,14 +55,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-import com.googlecode.vfsjfilechooser2.accessories.connection.Credentials;
-import com.googlecode.vfsjfilechooser2.accessories.connection.Protocol;
-import com.googlecode.vfsjfilechooser2.accessories.connection.Credentials.Builder;
-import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSURIParser;
-import com.googlecode.vfsjfilechooser2.utils.VFSURIValidator;
 
 /**
  * The connection dialog

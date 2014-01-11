@@ -17,16 +17,14 @@
  */
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import java.awt.CardLayout;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 
 /**
  * The bookmarks dialog

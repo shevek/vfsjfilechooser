@@ -20,7 +20,6 @@ package com.googlecode.vfsjfilechooser2.plaf.metal;
 
 import java.awt.Component;
 import java.awt.Graphics;
-
 import javax.swing.Icon;
 
 /**

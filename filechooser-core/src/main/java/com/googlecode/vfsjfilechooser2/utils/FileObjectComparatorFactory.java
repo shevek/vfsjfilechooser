@@ -19,7 +19,6 @@
 package com.googlecode.vfsjfilechooser2.utils;
 
 import java.util.Comparator;
-
 import org.apache.commons.vfs2.FileObject;
 
 /**

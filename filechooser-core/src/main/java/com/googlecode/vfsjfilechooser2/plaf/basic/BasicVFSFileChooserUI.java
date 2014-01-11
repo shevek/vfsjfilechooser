@@ -18,6 +18,17 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.basic;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
+import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
+import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
+import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
+import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
@@ -36,7 +47,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
-
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -55,23 +65,10 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.provider.local.LocalFile;
-
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
-import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
-import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
-import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * The BasicFileChooserUI implementation using commons-vfs based on Swing BasicFileChooserUI

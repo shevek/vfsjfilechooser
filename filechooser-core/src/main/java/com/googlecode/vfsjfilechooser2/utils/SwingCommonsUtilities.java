@@ -17,18 +17,16 @@
  */
 package com.googlecode.vfsjfilechooser2.utils;
 
-import org.apache.commons.vfs2.FileObject;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.table.TableCellRenderer;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * Copy of some functions in SwingUtilities2

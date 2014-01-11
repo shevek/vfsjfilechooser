@@ -18,7 +18,6 @@
 package com.googlecode.vfsjfilechooser2.filechooser;
 
 import javax.swing.filechooser.FileView;
-
 import org.apache.commons.vfs2.FileObject;
 
 /**

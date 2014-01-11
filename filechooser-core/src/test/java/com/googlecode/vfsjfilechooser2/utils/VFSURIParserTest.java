@@ -18,12 +18,9 @@
  */
 package com.googlecode.vfsjfilechooser2.utils;
 
-import junit.framework.TestCase;
-
-import java.util.logging.Logger;
-
 import com.googlecode.vfsjfilechooser2.accessories.connection.Protocol;
-import com.googlecode.vfsjfilechooser2.utils.VFSURIParser;
+import java.util.logging.Logger;
+import junit.framework.TestCase;
 
 /**
  * Unit test for the VFS URI parser

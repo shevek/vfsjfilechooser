@@ -20,6 +20,19 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.metal;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
+import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
+import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
+import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
+import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
+import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSFileChooserUI;
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
+import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -37,7 +50,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.accessibility.AccessibleContext;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractListModel;
@@ -65,23 +77,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
-
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
-
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
-import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
-import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
-import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
-import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
-import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
-import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSFileChooserUI;
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * <p>The MetalFileChooserUI implementation using commons-VFS

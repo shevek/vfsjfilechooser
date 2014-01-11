@@ -17,19 +17,14 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.basic;
 
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -42,9 +37,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.swing.AbstractListModel;
 import javax.swing.SwingUtilities;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 
 /**
  * The DirectoryModel implementation based on Swing BasicDirectoryModel

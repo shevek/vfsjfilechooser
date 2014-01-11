@@ -17,17 +17,14 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf;
 
-import org.apache.commons.vfs2.FileObject;
-
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
-
 import java.awt.event.MouseListener;
-
 import javax.swing.Action;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionListener;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * Interface for a delegate class of the FileChooserUI

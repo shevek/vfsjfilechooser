@@ -21,7 +21,6 @@ package com.googlecode.vfsjfilechooser2.utils;
 import java.io.File;
 import java.io.Serializable;
 import java.net.URI;
-
 import org.apache.commons.vfs2.FileObject;
 
 /**

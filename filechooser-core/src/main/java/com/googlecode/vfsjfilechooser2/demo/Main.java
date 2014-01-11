@@ -18,23 +18,20 @@
  */
 package com.googlecode.vfsjfilechooser2.demo;
 
-import org.apache.commons.vfs2.FileObject;
-
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
 import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
-
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * VFSJFileChooser demo

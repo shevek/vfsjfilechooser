@@ -17,13 +17,11 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf;
 
-import org.apache.commons.vfs2.FileObject;
-
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
-
 import javax.swing.plaf.ComponentUI;
+import org.apache.commons.vfs2.FileObject;
 
 /**
  * The FileChooserUI implementation using commons-vfs based on Swing FileChooserUI

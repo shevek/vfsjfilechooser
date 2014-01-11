@@ -18,17 +18,15 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
+import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
-
-import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 
 /**
  * Right click popup menu handler
