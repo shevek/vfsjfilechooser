@@ -23,8 +23,6 @@ import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
 import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
-import com.googlecode.vfsjfilechooser2.utils.DefaultFileObjectConverter;
-import com.googlecode.vfsjfilechooser2.utils.FileObjectConverter;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -136,9 +134,6 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     private FileObject currentDirectory = null;
     private FileObject selectedFile = null;
     private FileObject[] selectedFiles;
-
-    // for converting files
-    protected FileObjectConverter fileObjectConverter = new DefaultFileObjectConverter();
 
     // Accessibility support 
     protected AccessibleContext m_accessibleContext = null;
@@ -1424,24 +1419,6 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      */
     public AbstractVFSFileView getFileView() {
         return fileView;
-    }
-
-    /**
-     * Sets the converter for {@link FileObject} objects.
-     * 
-     * @param value the converter
-     */
-    public void setFileObjectConverter(FileObjectConverter value) {
-        fileObjectConverter = value;
-    }
-
-    /**
-     * Returns the current converter for {@link FileObject} objects.
-     * 
-     * @return the converter
-     */
-    public FileObjectConverter getFileObjectConverter() {
-        return fileObjectConverter;
     }
 
     /**
