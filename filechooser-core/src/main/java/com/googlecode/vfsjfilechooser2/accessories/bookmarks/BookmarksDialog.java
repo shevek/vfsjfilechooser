@@ -40,10 +40,10 @@ public class BookmarksDialog extends JDialog {
             "VFSJFileChooser.bookmarksManagerDialogTitle");
     private static final String EDITOR_DIALOG_TITLE = VFSResources.getMessage(
             "VFSJFileChooser.bookmarksEditorDialogTitle");
-    private BookmarksManagerPanel managerPanel;
-    private BookmarksEditorPanel editorPanel;
-    private CardLayout layout = new CardLayout();
-    private JPanel cards = new JPanel(layout);
+    private final BookmarksManagerPanel managerPanel;
+    private final BookmarksEditorPanel editorPanel;
+    private final CardLayout layout = new CardLayout();
+    private final JPanel cards = new JPanel(layout);
     private boolean defaultViewVisible = true;
 
     /**

@@ -83,9 +83,9 @@ public final class BookmarksEditorPanel extends JPanel {
     private JButton okButton;
     private JButton cancelButton;
     private JComponent centerPanel;
-    private Bookmarks bookmarks;
+    private final Bookmarks bookmarks;
     private int editIndex = -1;
-    private BookmarksDialog parentDialog;
+    private final BookmarksDialog parentDialog;
 
     /**
      * Default constructor

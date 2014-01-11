@@ -27,7 +27,7 @@ import javax.swing.Action;
  */
 public abstract class AbstractVFSUIAction implements Action {
 
-    private String name;
+    private final String name;
 
     /**
      *

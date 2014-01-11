@@ -49,8 +49,8 @@ public class Bookmarks extends AbstractTableModel {
     private static final int COLUMN_URL_INDEX = 1;
     private static final int NB_COLUMNS = 2;
     private final List<TitledURLEntry> entries = new ArrayList<TitledURLEntry>();
-    private File favorites = VFSJFileChooserConstants.BOOKMARKS_FILE;
-    private Logger logger = Logger.getLogger(Bookmarks.class.getName());
+    private final File favorites = VFSJFileChooserConstants.BOOKMARKS_FILE;
+    private final Logger logger = Logger.getLogger(Bookmarks.class.getName());
     private transient final BookmarksWriter writer = new BookmarksWriter();
 
     /**

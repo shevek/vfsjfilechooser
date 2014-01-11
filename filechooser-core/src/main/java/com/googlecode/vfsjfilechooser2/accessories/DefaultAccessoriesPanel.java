@@ -59,7 +59,7 @@ public final class DefaultAccessoriesPanel extends JComponent {
     private BookmarksDialog bookmarksDialog;
     private ConnectionDialog connectionDialog;
     private JComponent buttonsPanel;
-    private VFSJFileChooser fileChooser;
+    private final VFSJFileChooser fileChooser;
 
     /**
      * Create an accessory panel

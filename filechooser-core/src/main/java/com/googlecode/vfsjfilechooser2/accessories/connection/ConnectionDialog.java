@@ -88,8 +88,8 @@ public final class ConnectionDialog extends JDialog {
     private DefaultComboBoxModel protocolModel;
     private JButton cancelButton;
     private JComponent centerPanel;
-    private VFSJFileChooser fileChooser;
-    private BookmarksDialog bookmarksDialog;
+    private final VFSJFileChooser fileChooser;
+    private final BookmarksDialog bookmarksDialog;
     private Thread currentWorker;
 
     /**

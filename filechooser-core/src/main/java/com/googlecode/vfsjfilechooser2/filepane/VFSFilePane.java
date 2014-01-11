@@ -1847,9 +1847,9 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
         public static final long ONE_GB = ONE_KB * ONE_MB;
         protected int sortCol = 0;
         protected boolean isSortAsc = true;
-        private VFSJFileChooser chooser;
-        private BasicVFSDirectoryModel directoryModel;
-        private List<String> columns;
+        private final VFSJFileChooser chooser;
+        private final BasicVFSDirectoryModel directoryModel;
+        private final List<String> columns;
         private final int columnsCount = 3;
         int[] columnMap;
         DateFormat df;

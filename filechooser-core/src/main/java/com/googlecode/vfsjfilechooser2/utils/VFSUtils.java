@@ -71,7 +71,7 @@ public final class VFSUtils {
     private static final String FILE_PREFIX = OS_NAME.startsWith("windows")
             ? "file:///" : "file://";
     private static final int FILE_PREFIX_LEN = FILE_PREFIX.length();
-    private static ReadWriteLock aLock = new ReentrantReadWriteLock(true);
+    private static final ReadWriteLock aLock = new ReentrantReadWriteLock(true);
 
     // File size localized strings
     private static final String kiloByteString = VFSResources.getMessage(

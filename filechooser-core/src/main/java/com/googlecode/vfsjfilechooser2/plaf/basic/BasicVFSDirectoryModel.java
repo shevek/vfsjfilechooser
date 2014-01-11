@@ -54,9 +54,9 @@ public class BasicVFSDirectoryModel extends AbstractListModel
     private static final Comparator<FileObject> fileNameComparator = FileObjectComparatorFactory.newFileNameComparator(true);
     private VFSJFileChooser filechooser = null;
     private final List<FileObject> fileCache = new ArrayList<FileObject>();
-    private ReadWriteLock aLock = new ReentrantReadWriteLock(true);
+    private final ReadWriteLock aLock = new ReentrantReadWriteLock(true);
     private volatile Future<?> loadThread = null;
-    private ExecutorService executor;
+    private final ExecutorService executor;
     private List<FileObject> files = null;
     private List<FileObject> directories = null;
     private int fetchID = 0;
@@ -369,8 +369,8 @@ public class BasicVFSDirectoryModel extends AbstractListModel
 
     class LoadFilesThread implements Runnable {
 
-        private int fid;
-        private Queue<DoChangeContents> runnables = new ConcurrentLinkedQueue<DoChangeContents>();
+        private final int fid;
+        private final Queue<DoChangeContents> runnables = new ConcurrentLinkedQueue<DoChangeContents>();
 
         public LoadFilesThread(FileObject currentDirectory, int fid) {
             this.fid = fid;
@@ -547,10 +547,10 @@ public class BasicVFSDirectoryModel extends AbstractListModel
 
     class DoChangeContents implements Runnable {
 
-        private List<FileObject> addFiles;
-        private List<FileObject> remFiles;
+        private final List<FileObject> addFiles;
+        private final List<FileObject> remFiles;
         private boolean doFire = true;
-        private int fid;
+        private final int fid;
         private int addStart = 0;
         private int remStart = 0;
 

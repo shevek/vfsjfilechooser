@@ -33,8 +33,8 @@ import java.awt.LayoutManager;
  */
 final class ButtonAreaLayout implements LayoutManager {
 
-    private int hGap = 5;
-    private int topMargin = 17;
+    private final int hGap = 5;
+    private final int topMargin = 17;
     private final Dimension dummyDimension = new Dimension(0, 0);
 
     @Override

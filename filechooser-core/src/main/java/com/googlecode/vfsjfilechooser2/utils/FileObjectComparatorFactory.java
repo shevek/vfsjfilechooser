@@ -97,7 +97,7 @@ public final class FileObjectComparatorFactory {
      */
     private static class DirectoriesFirstComparatorWrapper implements Comparator<FileObject> {
 
-        private Comparator<FileObject> delegate;
+        private final Comparator<FileObject> delegate;
 
         public DirectoriesFirstComparatorWrapper(
                 Comparator<FileObject> comparator) {

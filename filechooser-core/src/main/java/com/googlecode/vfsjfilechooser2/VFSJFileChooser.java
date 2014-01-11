@@ -110,7 +110,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     private String approveButtonText = null;
     private String approveButtonToolTipText = null;
     private int approveButtonMnemonic = 0;
-    private List<AbstractVFSFileFilter> filters = new CopyOnWriteArrayList<AbstractVFSFileFilter>();
+    private final List<AbstractVFSFileFilter> filters = new CopyOnWriteArrayList<AbstractVFSFileFilter>();
     private JDialog dialog = null;
     private DIALOG_TYPE dialogType = DIALOG_TYPE.OPEN;
     private RETURN_TYPE returnValue = RETURN_TYPE.ERROR;

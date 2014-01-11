@@ -50,19 +50,19 @@ import org.apache.commons.vfs2.FileObject;
 public class BookmarksManagerPanel extends JPanel {
 
     public static final int NO_BOOKMARK_SELECTION_INDEX = -1;
-    private JScrollPane scrollPane;
-    private JTable table;
-    private JButton bOpen;
-    private JButton bCancel;
-    private JButton bEdit;
-    private JButton bAdd;
-    private JButton bDelete;
-    private JButton bMoveUp;
-    private JButton bMoveDown;
-    private Bookmarks model;
-    private VFSJFileChooser chooser;
+    private final JScrollPane scrollPane;
+    private final JTable table;
+    private final JButton bOpen;
+    private final JButton bCancel;
+    private final JButton bEdit;
+    private final JButton bAdd;
+    private final JButton bDelete;
+    private final JButton bMoveUp;
+    private final JButton bMoveDown;
+    private final Bookmarks model;
+    private final VFSJFileChooser chooser;
     private final Dimension tableSize = new Dimension(350, 200);
-    private BookmarksDialog parentDialog;
+    private final BookmarksDialog parentDialog;
 
     public BookmarksManagerPanel(BookmarksDialog parentDialog,
             VFSJFileChooser chooser) {

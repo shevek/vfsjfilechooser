@@ -96,20 +96,20 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private static final Insets shrinkwrap = new Insets(0, 0, 0, 0);
 
     // Preferred and Minimum sizes for the dialog box
-    private static int PREF_WIDTH = 500;
-    private static int PREF_HEIGHT = 326;
-    private static Dimension PREF_SIZE = new Dimension(PREF_WIDTH, PREF_HEIGHT);
-    private static int MIN_WIDTH = 500;
-    private static int MIN_HEIGHT = 326;
-    private static Dimension MIN_SIZE = new Dimension(MIN_WIDTH, MIN_HEIGHT);
-    private static int LIST_PREF_WIDTH = 405;
-    private static int LIST_PREF_HEIGHT = 135;
-    private static Dimension LIST_PREF_SIZE = new Dimension(LIST_PREF_WIDTH,
+    private static final int PREF_WIDTH = 500;
+    private static final int PREF_HEIGHT = 326;
+    private static final Dimension PREF_SIZE = new Dimension(PREF_WIDTH, PREF_HEIGHT);
+    private static final int MIN_WIDTH = 500;
+    private static final int MIN_HEIGHT = 326;
+    private static final Dimension MIN_SIZE = new Dimension(MIN_WIDTH, MIN_HEIGHT);
+    private static final int LIST_PREF_WIDTH = 405;
+    private static final int LIST_PREF_HEIGHT = 135;
+    private static final Dimension LIST_PREF_SIZE = new Dimension(LIST_PREF_WIDTH,
             LIST_PREF_HEIGHT);
     private JLabel lookInLabel;
     private JComboBox directoryComboBox;
     private DirectoryComboBoxModel directoryComboBoxModel;
-    private Action directoryComboBoxAction = new DirectoryComboBoxAction();
+    private final Action directoryComboBoxAction = new DirectoryComboBoxAction();
     private FilterComboBoxModel filterComboBoxModel;
     private JTextField fileNameTextField;
     private VFSFilePane filePane;
@@ -138,7 +138,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private String listViewButtonAccessibleName = null;
     private String detailsViewButtonToolTipText = null;
     private String detailsViewButtonAccessibleName = null;
-    private VFSJFileChooser chooser;
+    private final VFSJFileChooser chooser;
     private AlignedLabel fileNameLabel;
     private JPanel topButtonPanel;
     private JButton upFolderButton;
