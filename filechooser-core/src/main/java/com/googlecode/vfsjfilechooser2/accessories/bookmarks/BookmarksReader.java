@@ -52,7 +52,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 final class BookmarksReader {
 
     private List<TitledURLEntry> entries;
-    private Logger logger = Logger.getLogger(Bookmarks.class.getName());
+    private static final Logger logger = Logger.getLogger(Bookmarks.class.getName());
 
     public BookmarksReader(File bookmarksFile) {
         entries = new ArrayList<TitledURLEntry>();

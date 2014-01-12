@@ -1,2 +1,2 @@
 rootProject.name='vfsjfilechooser'
-include 'filechooser-core'
+include 'filechooser-core', 'filechooser-vfs', 'filechooser-vfs2', 'filechooser-nio'

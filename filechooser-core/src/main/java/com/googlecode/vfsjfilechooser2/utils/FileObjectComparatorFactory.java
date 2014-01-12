@@ -18,6 +18,7 @@
  */
 package com.googlecode.vfsjfilechooser2.utils;
 
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import java.util.Comparator;
 import org.apache.commons.vfs2.FileObject;
 
@@ -40,10 +41,11 @@ public final class FileObjectComparatorFactory {
      * @param isSortAsc ascendant sorting
      * @return a new comparator
      */
-    public static Comparator<FileObject> newFileNameComparator(
+    public static <FileObject> Comparator<FileObject> newFileNameComparator(
+            VFSFileSystemView<FileObject> fileSystemView,
             boolean isSortAsc) {
-        return new DirectoriesFirstComparatorWrapper(new FileNameComparator(
-                isSortAsc));
+        Comparator<FileObject> comparator = new FileNameComparator(isSortAsc);
+        return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
     /**
@@ -51,9 +53,11 @@ public final class FileObjectComparatorFactory {
      * @param isSortAsc ascendant sorting
      * @return a new comparator
      */
-    public static Comparator<FileObject> newSizeComparator(boolean isSortAsc) {
-        return new DirectoriesFirstComparatorWrapper(new SizeComparator(
-                isSortAsc));
+    public static <FileObject> Comparator<FileObject> newSizeComparator(
+            VFSFileSystemView<FileObject> fileSystemView,
+            boolean isSortAsc) {
+        Comparator<FileObject> comparator = new SizeComparator(isSortAsc);
+        return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
     /**
@@ -61,9 +65,11 @@ public final class FileObjectComparatorFactory {
      * @param isSortAsc ascendant sorting
      * @return a new comparator
      */
-    public static Comparator<FileObject> newDateComparator(boolean isSortAsc) {
-        return new DirectoriesFirstComparatorWrapper(new DateComparator(
-                isSortAsc));
+    public static <FileObject> Comparator<FileObject> newDateComparator(
+            VFSFileSystemView<FileObject> fileSystemView,
+            boolean isSortAsc) {
+        Comparator<FileObject> comparator = new DateComparator(isSortAsc);
+        return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
     private static class FileNameComparator implements Comparator<FileObject> {
@@ -95,20 +101,23 @@ public final class FileObjectComparatorFactory {
      * This class sorts directories before files, comparing directory to
      * directory and file to file using the wrapped comparator.
      */
-    private static class DirectoriesFirstComparatorWrapper implements Comparator<FileObject> {
+    private static class DirectoriesFirstComparatorWrapper<FileObject> implements Comparator<FileObject> {
 
+        private final VFSFileSystemView<FileObject> fileSystemView;
         private final Comparator<FileObject> delegate;
 
         public DirectoriesFirstComparatorWrapper(
-                Comparator<FileObject> comparator) {
-            this.delegate = comparator;
+                VFSFileSystemView<FileObject> fileSystemView,
+                Comparator<FileObject> delegate) {
+            this.fileSystemView = fileSystemView;
+            this.delegate = delegate;
         }
 
         @Override
         public int compare(FileObject f1, FileObject f2) {
             if ((f1 != null) && (f2 != null)) {
-                boolean traversable1 = VFSUtils.isDirectory(f1);
-                boolean traversable2 = VFSUtils.isDirectory(f2);
+                boolean traversable1 = fileSystemView.isTraversable(f1);
+                boolean traversable2 = fileSystemView.isTraversable(f2);
 
                 // directories go first
                 if (traversable1 && !traversable2) {

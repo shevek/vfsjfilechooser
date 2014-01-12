@@ -35,26 +35,8 @@ import org.apache.commons.vfs2.FileObject;
  */
 public final class SwingCommonsUtilities {
 
-    private final static javax.swing.JFileChooser fr = new javax.swing.JFileChooser();
-    private final static javax.swing.filechooser.FileSystemView fw = fr.getFileSystemView();
-    private static FileObject defaultDir;
-
     private SwingCommonsUtilities() {
         throw new AssertionError("Trying to instanciate SwingCommonsUtilities");
-    }
-
-    public static FileObject getVFSFileChooserDefaultDirectory() {
-        if (defaultDir == null) {
-            try {
-                defaultDir = VFSUtils.getFileSystemManager()
-                        .toFileObject(fw.getDefaultDirectory());
-            } catch (Exception e) {
-                defaultDir = VFSUtils.resolveFileObject(System.getProperty(
-                        "user.home"));
-            }
-        }
-
-        return defaultDir;
     }
 
     /**

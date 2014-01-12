@@ -18,12 +18,15 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.basic;
 
+import com.googlecode.vfsjfilechooser2.filechooser.GlobFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.AcceptAllFileFilter;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileView;
 import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
 import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
@@ -65,17 +68,13 @@ import javax.swing.UIManager;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.provider.local.LocalFile;
 
 /**
  * The BasicFileChooserUI implementation using commons-vfs based on Swing BasicFileChooserUI
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
+public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<FileObject> {
     /* FileView icons */
 
     protected Icon directoryIcon = null;
@@ -144,14 +143,14 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     private String newFolderParentDoesntExistText = null;
     private String fileDescriptionText = null;
     private String directoryDescriptionText = null;
-    private VFSJFileChooser filechooser = null;
+    private VFSJFileChooser<FileObject> filechooser = null;
     private boolean directorySelected = false;
     private FileObject directory = null;
     private PropertyChangeListener propertyChangeListener = null;
     private AcceptAllFileFilter acceptAllFileFilter = new AcceptAllFileFilter();
-    private AbstractVFSFileFilter actualFileFilter = null;
-    private GlobFilter globFilter = null;
-    private BasicVFSDirectoryModel model = null;
+    private VFSFileFilter<FileObject> actualFileFilter = null;
+    private GlobFileFilter<FileObject> globFilter = null;
+    private BasicVFSDirectoryModel<FileObject> model = null;
     private BasicVFSFileView fileView = new BasicVFSFileView();
     private boolean usesSingleFilePane;
     private boolean readOnly;
@@ -160,7 +159,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     private JPanel accessoryPanel = null;
     private Handler handler;
 
-    public BasicVFSFileChooserUI(VFSJFileChooser b) {
+    public BasicVFSFileChooserUI(VFSJFileChooser<FileObject> b) {
         this.filechooser = b;
     }
 
@@ -171,7 +170,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     @Override
     public void installUI(JComponent c) {
         accessoryPanel = new JPanel(new BorderLayout());
-        filechooser = (VFSJFileChooser) c;
+        filechooser = (VFSJFileChooser<FileObject>) c;
 
         createModel();
 
@@ -190,9 +189,9 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
      */
     @Override
     public void uninstallUI(JComponent c) {
-        uninstallListeners((VFSJFileChooser) filechooser);
-        uninstallComponents((VFSJFileChooser) filechooser);
-        uninstallDefaults((VFSJFileChooser) filechooser);
+        uninstallListeners(filechooser);
+        uninstallComponents(filechooser);
+        uninstallDefaults(filechooser);
 
         if (accessoryPanel != null) {
             accessoryPanel.removeAll();
@@ -208,17 +207,17 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
      *
      * @param fc
      */
-    public void installComponents(VFSJFileChooser fc) {
+    public void installComponents(VFSJFileChooser<FileObject> fc) {
     }
 
     /**
      *
      * @param fc
      */
-    public void uninstallComponents(VFSJFileChooser fc) {
+    public void uninstallComponents(VFSJFileChooser<FileObject> fc) {
     }
 
-    protected void installListeners(VFSJFileChooser fc) {
+    protected void installListeners(VFSJFileChooser<FileObject> fc) {
         propertyChangeListener = createPropertyChangeListener(fc);
 
         if (propertyChangeListener != null) {
@@ -255,7 +254,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         return map;
     }
 
-    protected void uninstallListeners(VFSJFileChooser fc) {
+    protected void uninstallListeners(VFSJFileChooser<FileObject> fc) {
         if (propertyChangeListener != null) {
             fc.removePropertyChangeListener(propertyChangeListener);
         }
@@ -266,7 +265,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         SwingUtilities.replaceUIActionMap(fc, null);
     }
 
-    protected void installDefaults(VFSJFileChooser fc) {
+    protected void installDefaults(VFSJFileChooser<FileObject> fc) {
         installIcons(fc);
         installStrings(fc);
         usesSingleFilePane = UIManager.getBoolean(
@@ -275,7 +274,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         LookAndFeel.installProperty(fc, "opaque", Boolean.FALSE);
     }
 
-    protected void installIcons(VFSJFileChooser fc) {
+    protected void installIcons(VFSJFileChooser<FileObject> fc) {
         UIDefaults defaults = UIManager.getLookAndFeel().getDefaults();
         directoryIcon = lookupIcon("folder.png");
         fileIcon = lookupIcon("file.png");
@@ -298,7 +297,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                         + path));
     }
 
-    protected void installStrings(VFSJFileChooser fc) {
+    protected void installStrings(VFSJFileChooser<FileObject> fc) {
         Locale l = fc.getLocale();
         newFolderErrorText = VFSResources.getMessage("VFSJFileChooser.newFolderErrorText");
         newFolderErrorSeparator = VFSResources.getMessage("VFSJFileChooser.newFolderErrorSeparator");
@@ -334,12 +333,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         directoryOpenButtonToolTipText = VFSResources.getMessage("VFSJFileChooser.directoryOpenButtonToolTipText");
     }
 
-    protected void uninstallDefaults(VFSJFileChooser fc) {
+    protected void uninstallDefaults(VFSJFileChooser<FileObject> fc) {
         uninstallIcons(fc);
         uninstallStrings(fc);
     }
 
-    protected void uninstallIcons(VFSJFileChooser fc) {
+    protected void uninstallIcons(VFSJFileChooser<FileObject> fc) {
         directoryIcon = null;
         fileIcon = null;
         computerIcon = null;
@@ -354,7 +353,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         viewMenuIcon = null;
     }
 
-    protected void uninstallStrings(VFSJFileChooser fc) {
+    protected void uninstallStrings(VFSJFileChooser<FileObject> fc) {
         saveButtonText = null;
         openButtonText = null;
         cancelButtonText = null;
@@ -375,15 +374,15 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
             model.invalidateFileCache();
         }
 
-        model = new BasicVFSDirectoryModel(getFileChooser());
+        model = new BasicVFSDirectoryModel<FileObject>(getFileChooser());
     }
 
-    public BasicVFSDirectoryModel getModel() {
+    public BasicVFSDirectoryModel<FileObject> getModel() {
         return model;
     }
 
     public PropertyChangeListener createPropertyChangeListener(
-            VFSJFileChooser fc) {
+            VFSJFileChooser<FileObject> fc) {
         return null;
     }
 
@@ -402,14 +401,14 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     }
 
     @Override
-    public void rescanCurrentDirectory(VFSJFileChooser fc) {
+    public void rescanCurrentDirectory(VFSJFileChooser<FileObject> fc) {
     }
 
     @Override
-    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f) {
+    public void ensureFileIsVisible(VFSJFileChooser<FileObject> fc, FileObject f) {
     }
 
-    public VFSJFileChooser getFileChooser() {
+    public VFSJFileChooser<FileObject> getFileChooser() {
         return filechooser;
     }
 
@@ -417,11 +416,11 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         return accessoryPanel;
     }
 
-    protected JButton getApproveButton(VFSJFileChooser fc) {
+    protected JButton getApproveButton(VFSJFileChooser<FileObject> fc) {
         return null;
     }
 
-    public String getApproveButtonToolTipText(VFSJFileChooser fc) {
+    public String getApproveButtonToolTipText(VFSJFileChooser<FileObject> fc) {
         String tooltipText = fc.getApproveButtonToolTipText();
 
         if (tooltipText != null) {
@@ -452,12 +451,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         return handler;
     }
 
-    protected MouseListener createDoubleClickListener(VFSJFileChooser fc,
+    protected MouseListener createDoubleClickListener(VFSJFileChooser<FileObject> fc,
             JList list) {
         return new Handler(list);
     }
 
-    public ListSelectionListener createListSelectionListener(VFSJFileChooser fc) {
+    public ListSelectionListener createListSelectionListener(VFSJFileChooser<FileObject> fc) {
         return getHandler();
     }
 
@@ -508,8 +507,8 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     public static int getUIDefaultsInt(Object key, Locale l, int defaultValue) {
         Object value = UIManager.get(key, l);
 
-        if (value instanceof Integer) {
-            return ((Integer) value).intValue();
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
         }
 
         if (value instanceof String) {
@@ -536,12 +535,12 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
      * Returns the default accept all file filter
      */
     @Override
-    public AbstractVFSFileFilter getAcceptAllFileFilter(VFSJFileChooser fc) {
+    public VFSFileFilter<? super FileObject> getAcceptAllFileFilter(VFSJFileChooser<FileObject> fc) {
         return acceptAllFileFilter;
     }
 
     @Override
-    public AbstractVFSFileView getFileView(VFSJFileChooser fc) {
+    public VFSFileView<FileObject> getFileView(VFSJFileChooser<FileObject> fc) {
         return fileView;
     }
 
@@ -549,7 +548,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
      * Returns the title of this dialog
      */
     @Override
-    public String getDialogTitle(VFSJFileChooser fc) {
+    public String getDialogTitle(VFSJFileChooser<FileObject> fc) {
         String dialogTitle = fc.getDialogTitle();
 
         if (dialogTitle != null) {
@@ -563,7 +562,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         }
     }
 
-    public int getApproveButtonMnemonic(VFSJFileChooser fc) {
+    public int getApproveButtonMnemonic(VFSJFileChooser<FileObject> fc) {
         int mnemonic = fc.getApproveButtonMnemonic();
 
         if (mnemonic > 0) {
@@ -578,7 +577,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     }
 
     @Override
-    public String getApproveButtonText(VFSJFileChooser fc) {
+    public String getApproveButtonText(VFSJFileChooser<FileObject> fc) {
         String buttonText = fc.getApproveButtonText();
 
         if (buttonText != null) {
@@ -631,8 +630,8 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
 
     private void resetGlobFilter() {
         if (actualFileFilter != null) {
-            VFSJFileChooser chooser = getFileChooser();
-            AbstractVFSFileFilter currentFilter = chooser.getFileFilter();
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileFilter<? super FileObject> currentFilter = chooser.getFileFilter();
 
             if ((currentFilter != null) && currentFilter.equals(globFilter)) {
                 chooser.setFileFilter(actualFileFilter);
@@ -652,7 +651,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
     }
 
     public void changeDirectory(FileObject dir) {
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
 
         fc.setCurrentDirectory(dir);
 
@@ -729,8 +728,8 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         @Override
         public void valueChanged(ListSelectionEvent evt) {
             if (!evt.getValueIsAdjusting()) {
-                VFSJFileChooser chooser = getFileChooser();
-                AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
+                VFSJFileChooser<FileObject> chooser = getFileChooser();
+                VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
                 JList list = (JList) evt.getSource();
 
                 SELECTION_MODE fsm = chooser.getFileSelectionMode();
@@ -746,7 +745,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                         final int count = objects.length;
 
                         if ((count == 1)
-                                && (VFSUtils.isDirectory((FileObject) objects[0])
+                                && (true // VFSUtils.isDirectory((FileObject) objects[0])
                                 && chooser.isTraversable(((FileObject) objects[0]))
                                 && (useSetDirectory
                                 || !fsv.isFileSystem(((FileObject) objects[0]))))) {
@@ -857,7 +856,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                 return;
             }
 
-            VFSJFileChooser fc = getFileChooser();
+            VFSJFileChooser<FileObject> fc = getFileChooser();
             FileObject currentDirectory = fc.getCurrentDirectory();
 
             if (!VFSUtils.exists(currentDirectory)) {
@@ -904,7 +903,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            VFSJFileChooser fc = getFileChooser();
+            VFSJFileChooser<FileObject> fc = getFileChooser();
             FileObject currentDir = fc.getCurrentDirectory();
 
             if (currentDir instanceof LocalFile) {
@@ -964,10 +963,10 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                 }
             }
 
-            VFSJFileChooser chooser = getFileChooser();
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
 
             String filename = getFileName();
-            AbstractVFSFileSystemView fs = chooser.getFileSystemView();
+            VFSFileSystemView<FileObject> fs = chooser.getFileSystemView();
             FileObject dir = chooser.getCurrentDirectory();
 
             if (filename != null) {
@@ -1028,7 +1027,8 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                     } while (filename.length() > 0);
 
                     if (!fList.isEmpty()) {
-                        selectedFiles = fList.toArray(new FileObject[fList.size()]);
+                        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+                        selectedFiles = fList.toArray(fsv.newFileObjectArray());
                     }
 
                     resetGlobFilter();
@@ -1046,7 +1046,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                     }
 
                     // check for wildcard pattern
-                    AbstractVFSFileFilter currentFilter = chooser.getFileFilter();
+                    VFSFileFilter<? super FileObject> currentFilter = chooser.getFileFilter();
 
                     if (!VFSUtils.exists(selectedFile)
                             && isGlobPattern(filename)) {
@@ -1054,14 +1054,14 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                                 selectedFile));
 
                         if (globFilter == null) {
-                            globFilter = new GlobFilter();
+                            globFilter = new GlobFileFilter();
                         }
 
                         try {
                             globFilter.setPattern(selectedFile.getName()
                                     .getBaseName());
 
-                            if (!(currentFilter instanceof GlobFilter)) {
+                            if (!(currentFilter instanceof GlobFileFilter)) {
                                 actualFileFilter = currentFilter;
                             }
 
@@ -1127,34 +1127,6 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         }
     }
 
-    /* A file filter which accepts file patterns containing
-     * the special wildcards *? on Windows and *?[] on Unix.
-     */
-    static class GlobFilter extends AbstractVFSFileFilter {
-
-        String globPattern;
-
-        public void setPattern(String globPattern) {
-            this.globPattern = globPattern;
-        }
-
-        @Override
-        public boolean accept(FileObject f) {
-            if (f == null) {
-                return false;
-            }
-            if (VFSUtils.isDirectory(f)) {
-                return true;
-            }
-            return FilenameUtils.wildcardMatch(f.getName().getBaseName(), globPattern);
-        }
-
-        @Override
-        public String getDescription() {
-            return globPattern;
-        }
-    }
-
     /**
      * Responds to a cancel request.
      */
@@ -1175,41 +1147,17 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            VFSJFileChooser fc = getFileChooser();
+            VFSJFileChooser<FileObject> fc = getFileChooser();
             fc.setCurrentDirectory(fc.getFileSystemView()
                     .createFileObject(getDirectoryName()));
             fc.rescanCurrentDirectory();
         }
     }
 
-    // *****************************************
-    // ***** default AcceptAll file filter *****
-    // *****************************************
-    protected static class AcceptAllFileFilter extends AbstractVFSFileFilter {
-
-        public AcceptAllFileFilter() {
-        }
-
-        @Override
-        public boolean accept(FileObject f) {
-            return true;
-        }
-
-        @Override
-        public String getDescription() {
-            return VFSResources.getMessage("VFSJFileChooser.acceptAllFileFilterText");
-        }
-
-        @Override
-        public String toString() {
-            return getDescription();
-        }
-    }
-
     // ***********************
     // * FileView operations *
     // ***********************
-    public class BasicVFSFileView extends AbstractVFSFileView {
+    public class BasicVFSFileView extends AbstractVFSFileView<FileObject> {
         /* FileView type descriptions */
 
         // PENDING(jeff) - pass in the icon cache size
@@ -1263,7 +1211,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
         }
 
         public Icon getCachedIcon(FileObject f) {
-            return (Icon) iconCache.get(f);
+            return iconCache.get(f);
         }
 
         public void cacheIcon(FileObject f, Icon i) {
@@ -1285,7 +1233,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
             icon = fileIcon;
 
             if (f != null) {
-                AbstractVFSFileSystemView fsv = getFileChooser()
+                VFSFileSystemView<FileObject> fsv = getFileChooser()
                         .getFileSystemView();
 
                 if (fsv.isFloppyDrive(f)) {
@@ -1294,7 +1242,7 @@ public class BasicVFSFileChooserUI extends AbstractVFSFileChooserUI {
                     icon = hardDriveIcon;
                 } else if (fsv.isComputerNode(f)) {
                     icon = computerIcon;
-                } else if (VFSUtils.isDirectory(f)) {
+                } else if (fsv.isTraversable(f)) {
                     icon = directoryIcon;
                 }
             }

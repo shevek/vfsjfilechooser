@@ -36,8 +36,28 @@ subprojects {
 
 project(':filechooser-core') {
     dependencies {
-        compile 'org.slf4j:slf4j-api:1.7.5'
+        // compile 'org.slf4j:slf4j-api:1.7.5'
 		compile 'commons-io:commons-io:2.4'
-		compile 'org.apache.commons:commons-vfs2:2.0'
+		// compile 'org.apache.commons:commons-vfs2:2.0'
     }
+}
+
+project(':filechooser-vfs') {
+    dependencies {
+		compile project(':filechooser-core')
+		compile 'commons-vfs:commons-vfs:1.0'
+	}
+}
+
+project(':filechooser-vfs2') {
+    dependencies {
+		compile project(':filechooser-core')
+		compile 'org.apache.commons:commons-vfs2:2.0'
+	}
+}
+
+project(':filechooser-nio') {
+    dependencies {
+		compile project(':filechooser-core')
+	}
 }

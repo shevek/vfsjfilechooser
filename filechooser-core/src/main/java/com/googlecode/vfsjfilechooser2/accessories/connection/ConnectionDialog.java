@@ -57,7 +57,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * The connection dialog
@@ -66,7 +65,7 @@ import org.apache.commons.vfs2.FileObject;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class ConnectionDialog extends JDialog {
+public final class ConnectionDialog<FileObject> extends JDialog {
 
     private static final String DIALOG_TITLE = VFSResources.getMessage(
             "VFSJFileChooser.connectionButtonText");
@@ -88,8 +87,8 @@ public final class ConnectionDialog extends JDialog {
     private DefaultComboBoxModel protocolModel;
     private JButton cancelButton;
     private JComponent centerPanel;
-    private final VFSJFileChooser fileChooser;
-    private final BookmarksDialog bookmarksDialog;
+    private final VFSJFileChooser<FileObject> fileChooser;
+    private final BookmarksDialog<FileObject> bookmarksDialog;
     private Thread currentWorker;
 
     /**
@@ -98,7 +97,7 @@ public final class ConnectionDialog extends JDialog {
      * @param chooser
      */
     public ConnectionDialog(Frame parent, BookmarksDialog m_dialog,
-            VFSJFileChooser chooser) {
+            VFSJFileChooser<FileObject> chooser) {
         super(parent, DIALOG_TITLE, true);
 
         this.fileChooser = chooser;
@@ -324,8 +323,7 @@ public final class ConnectionDialog extends JDialog {
                         resetFields();
 
                         if (bookmarksDialog != null) {
-                            String bTitle = fo.getName()
-                                    .getBaseName();
+                            String bTitle = fo.getName().getBaseName();
 
                             if (bTitle.trim().equals("")) {
                                 bTitle = fo.getName().toString();
@@ -333,8 +331,7 @@ public final class ConnectionDialog extends JDialog {
 
                             String bURL = fo.getName().getURI();
                             bookmarksDialog.getBookmarks()
-                                    .add(new TitledURLEntry(
-                                                    bTitle, bURL));
+                                    .add(new TitledURLEntry(bTitle, bURL));
                             bookmarksDialog.getBookmarks().save();
                         }
 

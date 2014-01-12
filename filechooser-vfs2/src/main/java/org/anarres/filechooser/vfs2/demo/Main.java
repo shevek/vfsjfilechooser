@@ -16,9 +16,8 @@
  * limitations under the License.
  * under the License.
  */
-package com.googlecode.vfsjfilechooser2.demo;
+package org.anarres.filechooser.vfs2.demo;
 
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
 import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
@@ -31,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import org.anarres.filechooser.vfs2.CommonsVfs2JFileChooser;
 import org.apache.commons.vfs2.FileObject;
 
 /**
@@ -42,7 +42,7 @@ import org.apache.commons.vfs2.FileObject;
 public final class Main extends JFrame implements Runnable {
 
     // private members
-    private VFSJFileChooser fileChooser;
+    private CommonsVfs2JFileChooser fileChooser;
     private JTextField filenameTextField;
     private JButton openButton;
     private String buttonText;
@@ -62,7 +62,7 @@ public final class Main extends JFrame implements Runnable {
      * Setup the GUI components
      */
     private void createGUI() {
-        fileChooser = new VFSJFileChooser(); // create a file dialog
+        fileChooser = new CommonsVfs2JFileChooser(); // create a file dialog
 
         // configure the file dialog
         fileChooser.setAccessory(new DefaultAccessoriesPanel(fileChooser));

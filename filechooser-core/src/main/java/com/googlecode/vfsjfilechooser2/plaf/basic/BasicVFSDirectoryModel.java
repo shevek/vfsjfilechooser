@@ -19,9 +19,8 @@ package com.googlecode.vfsjfilechooser2.plaf.basic;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
-import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -35,12 +34,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.swing.AbstractListModel;
 import javax.swing.SwingUtilities;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 
 /**
  * The DirectoryModel implementation based on Swing BasicDirectoryModel
@@ -48,18 +46,18 @@ import org.apache.commons.vfs2.FileSystemException;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class BasicVFSDirectoryModel extends AbstractListModel
+public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileObject>
         implements PropertyChangeListener {
 
-    private static final Comparator<FileObject> fileNameComparator = FileObjectComparatorFactory.newFileNameComparator(true);
-    private VFSJFileChooser filechooser = null;
+    // private static final Comparator<FileObject> fileNameComparator = FileObjectComparatorFactory.newFileNameComparator(true);
+    private final VFSJFileChooser<FileObject> filechooser;
     private final List<FileObject> fileCache = new ArrayList<FileObject>();
     private final ReadWriteLock aLock = new ReentrantReadWriteLock(true);
     private volatile Future<?> loadThread = null;
-    private final ExecutorService executor;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
     private List<FileObject> files = null;
     private List<FileObject> directories = null;
-    private int fetchID = 0;
+    private final AtomicInteger fetchID = new AtomicInteger(0);
     private PropertyChangeSupport changeSupport;
     private boolean busy = false;
 
@@ -67,9 +65,8 @@ public class BasicVFSDirectoryModel extends AbstractListModel
      *
      * @param filechooser
      */
-    public BasicVFSDirectoryModel(VFSJFileChooser filechooser) {
+    public BasicVFSDirectoryModel(VFSJFileChooser<FileObject> filechooser) {
         this.filechooser = filechooser;
-        this.executor = Executors.newCachedThreadPool();
         validateFileCache();
     }
 
@@ -133,7 +130,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
             directories = new CopyOnWriteArrayList<FileObject>();
 
             FileObject currentDir = filechooser.getCurrentDirectory();
-            AbstractVFSFileSystemView v = filechooser.getFileSystemView();
+            VFSFileSystemView<FileObject> v = filechooser.getFileSystemView();
             directories.add(v.createFileObject(currentDir, ".."));
 
             for (FileObject f : fileCache) {
@@ -160,19 +157,14 @@ public class BasicVFSDirectoryModel extends AbstractListModel
             return;
         }
 
-        try {
-            currentDirectory.refresh();
-        } catch (FileSystemException ex) {
-        }
-
         if (loadThread != null) {
             loadThread.cancel(true);
         }
 
-        setBusy(true, ++fetchID);
+        int fid = fetchID.incrementAndGet();
+        setBusy(true, fid);
 
-        loadThread = executor.submit(new LoadFilesThread(currentDirectory,
-                fetchID));
+        loadThread = executor.submit(new LoadFilesThread(currentDirectory, fid));
     }
 
     /**
@@ -234,7 +226,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
      * @see javax.swing.ListModel#getElementAt(int)
      */
     @Override
-    public Object getElementAt(int index) {
+    public FileObject getElementAt(int index) {
         return fileCache.get(index);
     }
 
@@ -343,7 +335,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
         aLock.writeLock().lock();
 
         try {
-            if (fid == fetchID) {
+            if (fetchID.intValue() == fid) {
                 boolean oldValue = this.busy;
                 this.busy = busy;
 
@@ -393,13 +385,14 @@ public class BasicVFSDirectoryModel extends AbstractListModel
         }
 
         public void run0() {
-            AbstractVFSFileSystemView fileSystem = filechooser.getFileSystemView();
+            VFSFileSystemView<FileObject> fileSystem = filechooser.getFileSystemView();
 
             FileObject cwd = filechooser.getCurrentDirectory();
+            // TODO: cwd.refresh()
 
             // fix a bug here when the filesystem changes, the directories list needs to be notified
             if (!contains(cwd)) {
-                MetalVFSFileChooserUI ui = (MetalVFSFileChooserUI) filechooser.getUI();
+                MetalVFSFileChooserUI<FileObject> ui = (MetalVFSFileChooserUI<FileObject>) filechooser.getUI();
                 ui.getCombo().setSelectedItem(cwd);
             }
 
@@ -533,7 +526,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
         }
 
         public void cancelRunnables(Queue<DoChangeContents> runnables) {
-            DoChangeContents runnable = null;
+            DoChangeContents runnable;
 
             while ((runnable = runnables.poll()) != null) {
                 runnable.cancel();
@@ -575,7 +568,7 @@ public class BasicVFSDirectoryModel extends AbstractListModel
 
         @Override
         public void run() {
-            if ((fetchID == fid) && doFire) {
+            if ((fetchID.intValue() == fid) && doFire) {
                 int remSize = (remFiles == null) ? 0 : remFiles.size();
                 int addSize = (addFiles == null) ? 0 : addFiles.size();
 

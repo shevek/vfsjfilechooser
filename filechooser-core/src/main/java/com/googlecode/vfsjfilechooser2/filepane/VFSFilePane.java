@@ -20,7 +20,7 @@ package com.googlecode.vfsjfilechooser2.filepane;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
 import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
 import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
@@ -34,6 +34,7 @@ import java.awt.ComponentOrientation;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
@@ -103,7 +104,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.text.Position;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * This class is based on sun.swing.FilePane
@@ -111,7 +111,7 @@ import org.apache.commons.vfs2.FileObject;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class VFSFilePane extends JPanel implements PropertyChangeListener {
+public final class VFSFilePane<FileObject> extends JPanel implements PropertyChangeListener {
 
     public final static String ACTION_APPROVE_SELECTION = "approveSelection";
     public final static String ACTION_CANCEL = "cancelSelection";
@@ -219,7 +219,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
     private FileObject newFolderFile;
 
     // Used for accessing methods in the corresponding UI class
-    private VFSFileChooserUIAccessorIF fileChooserUIAccessor;
+    private VFSFileChooserUIAccessorIF<FileObject> fileChooserUIAccessor;
     private DetailsTableCellEditor tableCellEditor;
     private int lastIndex = -1;
     private FileObject editFile = null;
@@ -251,7 +251,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
          */
         @Override
         public void keyTyped(KeyEvent e) {
-            BasicVFSDirectoryModel model = getModel();
+            BasicVFSDirectoryModel<FileObject> model = getModel();
             int rowCount = model.getSize();
 
             if ((detailsTable == null) || (rowCount == 0) || e.isAltDown()
@@ -284,7 +284,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             if ((time - lastTime) < timeFactor) {
                 if ((typedString.length() == 1)
                         && (typedString.charAt(0) == c)) {
-                        // Subsequent same key presses move the keyboard focus to the next
+                    // Subsequent same key presses move the keyboard focus to the next
                     // object that starts with the same letter.
                     startIndex++;
                 } else {
@@ -349,14 +349,14 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
     /**
      * @return
      */
-    protected VFSJFileChooser getFileChooser() {
+    protected VFSJFileChooser<FileObject> getFileChooser() {
         return fileChooserUIAccessor.getFileChooser();
     }
 
     /**
      * @return
      */
-    protected BasicVFSDirectoryModel getModel() {
+    protected BasicVFSDirectoryModel<FileObject> getModel() {
         return fileChooserUIAccessor.getModel();
     }
 
@@ -656,7 +656,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
     public JPanel createList() {
         JPanel p = new JPanel(new BorderLayout());
-        final VFSJFileChooser fileChooser = getFileChooser();
+        final VFSJFileChooser<FileObject> fileChooser = getFileChooser();
         final JList aList = new JList() {
             @Override
             public int getNextMatch(String prefix, int startIndex,
@@ -674,8 +674,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
                 for (int i = startIndex; backwards ? (i >= 0) : (i < max);
                         i += (backwards ? (-1) : 1)) {
-                    String filename = fileChooser.getName((FileObject) model.getElementAt(
-                            i));
+                    String filename = fileChooser.getName((FileObject) model.getElementAt(i));
 
                     if (filename.regionMatches(true, 0, prefix, 0,
                             prefix.length())) {
@@ -792,7 +791,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
         switch (viewType) {
             case VIEWTYPE_LIST:
-                editFile = (FileObject) getModel().getElementAt(index);
+                editFile = getModel().getElementAt(index);
 
                 Rectangle r = list.getCellBounds(index, index);
 
@@ -830,7 +829,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
     private void applyEdit() {
         if ((editFile != null) && VFSUtils.exists(editFile)) {
-            VFSJFileChooser chooser = getFileChooser();
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
             String oldDisplayName = chooser.getName(editFile);
             String oldFileName = editFile.getName().getBaseName();
             String newDisplayName = editCell.getText().trim();
@@ -848,11 +847,10 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
                 }
 
                 // rename
-                AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
-                FileObject f2 = fsv.createFileObject(VFSUtils.getParentDirectory(
-                        editFile), newFileName);
+                VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+                FileObject f2 = fsv.createFileObject(fsv.getParentDirectory(editFile), newFileName);
 
-                if (VFSUtils.exists(f2)) {
+                if (fsv.exists(f2)) {
                     JOptionPane.showMessageDialog(chooser,
                             MessageFormat.format(renameErrorFileExistsText,
                                     oldFileName), renameErrorTitleText,
@@ -908,7 +906,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
                         basicNewFolderAction = fileChooserUIAccessor.getNewFolderAction();
                     }
 
-                    VFSJFileChooser fc = getFileChooser();
+                    VFSJFileChooser<FileObject> fc = getFileChooser();
                     FileObject oldFile = fc.getSelectedFile();
                     basicNewFolderAction.actionPerformed(ev);
 
@@ -971,7 +969,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
                 listSelectionModel.setValueIsAdjusting(false);
             }
         } else {
-            VFSJFileChooser chooser = getFileChooser();
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
             FileObject f;
 
             if (isDirectorySelected()) {
@@ -1011,6 +1009,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
     private void doSelectedFileChanged(PropertyChangeEvent e) {
         applyEdit();
 
+        @SuppressWarnings("unchecked")
         FileObject f = (FileObject) e.getNewValue();
 
         if ((f != null)) {
@@ -1021,19 +1020,20 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
     private void doSelectedFilesChanged(PropertyChangeEvent e) {
         applyEdit();
 
+        @SuppressWarnings("unchecked")
         FileObject[] files = (FileObject[]) e.getNewValue();
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
 
         if ((files != null) && (files.length > 0)
                 && ((files.length > 1) || fc.isDirectorySelectionEnabled()
-                || !VFSUtils.isDirectory(files[0]))) {
+                || !fc.isTraversable(files[0]))) {
             setFileSelected();
         }
     }
 
     private void doDirectoryChanged(PropertyChangeEvent e) {
-        VFSJFileChooser fc = getFileChooser();
-        AbstractVFSFileSystemView fsv = fc.getFileSystemView();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
+        VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
 
         applyEdit();
         resetEditIndex();
@@ -1114,7 +1114,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             setCursor((Boolean) e.getNewValue() ? waitCursor : null);
         } else if (s.equals("componentOrientation")) {
             ComponentOrientation o = (ComponentOrientation) e.getNewValue();
-            VFSJFileChooser cc = (VFSJFileChooser) e.getSource();
+            @SuppressWarnings("unchecked")
+            VFSJFileChooser<FileObject> cc = (VFSJFileChooser<FileObject>) e.getSource();
 
             if (o != e.getOldValue()) {
                 cc.applyComponentOrientation(o);
@@ -1487,10 +1488,10 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
     class DetailsTableCellRenderer extends DefaultTableCellRenderer {
 
-        VFSJFileChooser chooser;
-        DateFormat df;
+        private final VFSJFileChooser<FileObject> chooser;
+        private final DateFormat df;
 
-        DetailsTableCellRenderer(VFSJFileChooser chooser) {
+        DetailsTableCellRenderer(VFSJFileChooser<FileObject> chooser) {
             this.chooser = chooser;
             df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
                     DateFormat.SHORT, chooser.getLocale());
@@ -1537,9 +1538,10 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             // TODO: it's rather a temporary trick, to be revised
             String text;
 
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             if (value == null) {
                 text = "";
-            } else if (value instanceof FileObject) {
+            } else if (fsv.getFileObjectType().isInstance(value)) {
                 FileObject file = (FileObject) value;
                 text = chooser.getName(file);
 
@@ -1619,7 +1621,9 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             Component comp = super.getTableCellEditorComponent(table, value,
                     isSelected, row, column);
 
-            if (value instanceof FileObject) {
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+            if (fsv.getFileObjectType().isInstance(value)) {
                 tf.setText(getFileChooser().getName((FileObject) value));
                 tf.selectAll();
             }
@@ -1638,10 +1642,6 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
         DelayedSelectionUpdater(FileObject editFile) {
             this.editFile = editFile;
-
-            if (isShowing()) {
-                SwingUtilities.invokeLater(this);
-            }
         }
 
         @Override
@@ -1847,8 +1847,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
         public static final long ONE_GB = ONE_KB * ONE_MB;
         protected int sortCol = 0;
         protected boolean isSortAsc = true;
-        private final VFSJFileChooser chooser;
-        private final BasicVFSDirectoryModel directoryModel;
+        private final VFSJFileChooser<FileObject> chooser;
+        private final BasicVFSDirectoryModel<FileObject> directoryModel;
         private final List<String> columns;
         private final int columnsCount = 3;
         int[] columnMap;
@@ -1858,7 +1858,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
                     fileNameHeaderText, fileSizeHeaderText, fileDateHeaderText
                 };
 
-        DetailsTableModel(VFSJFileChooser fc) {
+        DetailsTableModel(VFSJFileChooser<FileObject> fc) {
             this.chooser = fc;
             directoryModel = getModel();
             directoryModel.addListDataListener(this);
@@ -1893,8 +1893,7 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             //
             // Use (f.exists() && !chooser.getFileSystemView().isFileSystemRoot(f)) to
             // determine if it is safe to call methods directly on f.
-            return getFileColumnValue((FileObject) directoryModel.getElementAt(
-                    row), col);
+            return getFileColumnValue(directoryModel.getElementAt(row), col);
         }
 
         private Object getFileColumnValue(FileObject f, int col) {
@@ -1932,7 +1931,6 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
         @Override
         public void setValueAt(Object value, int row, int col) {
             if (col == COLUMN_FILENAME) {
-                VFSJFileChooser chooser = getFileChooser();
                 FileObject f = (FileObject) getValueAt(row, col);
 
                 if (f != null) {
@@ -1954,15 +1952,14 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
                         }
 
                         // rename
-                        AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
-                        FileObject f2 = fsv.createFileObject(VFSUtils.getParentDirectory(
-                                f), newFileName);
+                        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+                        FileObject f2 = fsv.createFileObject(fsv.getParentDirectory(f), newFileName);
 
-                        if (!VFSUtils.exists(f2)
+                        if (!fsv.exists(f2)
                                 && VFSFilePane.this.getModel().renameFile(f, f2)) {
                             if (fsv.isParent(chooser.getCurrentDirectory(), f2)) {
                                 if (chooser.isMultiSelectionEnabled()) {
-                                    chooser.setSelectedFiles(new FileObject[]{f2});
+                                    chooser.setSelectedFiles(fsv.newFileObjectArray(f2));
                                 } else {
                                     chooser.setSelectedFile(f2);
                                 }
@@ -1984,7 +1981,8 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
         @Override
         public void contentsChanged(ListDataEvent e) {
             // Update the selection after the model has been updated
-            new DelayedSelectionUpdater();
+            if (isShowing())
+                EventQueue.invokeLater(new DelayedSelectionUpdater());
             fireTableDataChanged();
         }
 
@@ -1994,11 +1992,12 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
             int i1 = e.getIndex1();
 
             if (i0 == i1) {
-                FileObject file = (FileObject) getModel().getElementAt(i0);
+                FileObject file = getModel().getElementAt(i0);
 
                 if ((file != null) && (newFolderFile != null)) {
                     if (file.getName().equals(newFolderFile.getName())) {
-                        new DelayedSelectionUpdater(file);
+                        if (isShowing())
+                            EventQueue.invokeLater(new DelayedSelectionUpdater(file));
                         newFolderFile = null;
                     }
                 }
@@ -2053,12 +2052,13 @@ public final class VFSFilePane extends JPanel implements PropertyChangeListener 
 
                 detailsTable.getTableHeader().repaint();
 
-                Comparator<FileObject> cpt = FileObjectComparatorFactory.newFileNameComparator(isSortAsc);
+                VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+                Comparator<FileObject> cpt = FileObjectComparatorFactory.newFileNameComparator(fsv, isSortAsc);
 
                 if (modelIndex == 1) {
-                    cpt = FileObjectComparatorFactory.newSizeComparator(isSortAsc);
+                    cpt = FileObjectComparatorFactory.newSizeComparator(fsv, isSortAsc);
                 } else if (modelIndex == 2) {
-                    cpt = FileObjectComparatorFactory.newDateComparator(isSortAsc);
+                    cpt = FileObjectComparatorFactory.newDateComparator(fsv, isSortAsc);
                 }
 
                 directoryModel.sort(cpt);

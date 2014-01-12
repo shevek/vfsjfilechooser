@@ -18,10 +18,10 @@
  */
 package com.googlecode.vfsjfilechooser2;
 
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileView;
-import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileView;
+import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.AWTEvent;
@@ -42,16 +42,18 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.accessibility.AccessibleRole;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -65,8 +67,6 @@ import javax.swing.UIManager;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.filechooser.FileView;
-import org.apache.commons.vfs2.FileFilter;
-import org.apache.commons.vfs2.FileObject;
 import static com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants.ACCEPT_ALL_FILE_FILTER_USED_CHANGED_PROPERTY;
 import static com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants.ACCESSORY_CHANGED_PROPERTY;
 import static com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants.APPROVE_BUTTON_MNEMONIC_CHANGED_PROPERTY;
@@ -96,10 +96,10 @@ import static com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class VFSJFileChooser extends JComponent implements Accessible {
+public class VFSJFileChooser<FileObject> extends JComponent implements Accessible {
 
     private static final Frame SHARED_FRAME = new Frame();
-    private static final FileObject[] EMPTY_FILEOBJECT_ARRAY = new FileObject[]{};
+    // private static final FileObject[] EMPTY_FILEOBJECT_ARRAY = new FileObject[]{};
 
     // ******************************
     // ***** instance variables *****
@@ -108,16 +108,13 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     private String approveButtonText = null;
     private String approveButtonToolTipText = null;
     private int approveButtonMnemonic = 0;
-    private final List<AbstractVFSFileFilter> filters = new CopyOnWriteArrayList<AbstractVFSFileFilter>();
+    private final List<VFSFileFilter<? super FileObject>> filters = new CopyOnWriteArrayList<VFSFileFilter<? super FileObject>>();
     private JDialog dialog = null;
     private DIALOG_TYPE dialogType = DIALOG_TYPE.OPEN;
     private RETURN_TYPE returnValue = RETURN_TYPE.ERROR;
     private JComponent accessory = null;
-    private AbstractVFSFileView fileView = null;
+    private VFSFileView<FileObject> fileView = null;
 
-    // uiFileView is not serialized, as it is initialized
-    // by updateUI() after deserialization
-    private transient AbstractVFSFileView uiFileView = null;
     private boolean controlsShown = true;
     private boolean useFileHiding = true;
 
@@ -129,8 +126,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     private boolean multiSelectionEnabled = false;
     private boolean useAcceptAllFileFilter = true;
     private boolean dragEnabled = false;
-    private AbstractVFSFileFilter fileFilter = null;
-    private AbstractVFSFileSystemView fileSystemView = null;
+    private VFSFileFilter<? super FileObject> fileFilter = null;
+    private VFSFileSystemView<FileObject> fileSystemView = null;
     private FileObject currentDirectory = null;
     private FileObject selectedFile = null;
     private FileObject[] selectedFiles;
@@ -139,68 +136,14 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     protected AccessibleContext m_accessibleContext = null;
 
     // Pluggable L&F  
-    private MetalVFSFileChooserUI defaultUI;
-
-    /**
-     * Constructs a <code>VFSJFileChooser</code> pointing to the user's
-     * default directory. This default depends on the operating system.
-     * It is typically the "My Documents" folder on Windows, and the
-     * user's home directory on Unix.
-     */
-    public VFSJFileChooser() {
-        this((FileObject) null, (AbstractVFSFileSystemView) null);
-    }
-
-    /**
-     * Constructs a <code>VFSJFileChooser</code> using the given path.
-     * Passing in a <code>null</code>
-     * string causes the file chooser to point to the user's default directory.
-     * This default depends on the operating system. It is
-     * typically the "My Documents" folder on Windows, and the user's
-     * home directory on Unix.
-     *
-     * @param currentDirectoryPath  a <code>String</code> giving the path
-     *                          to a file or directory
-     */
-    public VFSJFileChooser(String currentDirectoryPath) {
-        this(currentDirectoryPath, (AbstractVFSFileSystemView) null);
-    }
-
-    /**
-     * Constructs a <code>VFSJFileChooser</code> using the given <code>File</code>
-     * as the path. Passing in a <code>null</code> file
-     * causes the file chooser to point to the user's default directory.
-     * This default depends on the operating system. It is
-     * typically the "My Documents" folder on Windows, and the user's
-     * home directory on Unix.
-     *
-     * @param currentDirectory  a <code>File</code> object specifying
-     *                          the path to a file or directory
-     */
-    public VFSJFileChooser(File currentDirectory) {
-        this(VFSUtils.toFileObject(currentDirectory));
-    }
-
-    /**
-     * Constructs a <code>VFSJFileChooser</code> using the given <code>File</code>
-     * as the path. Passing in a <code>null</code> file
-     * causes the file chooser to point to the user's default directory.
-     * This default depends on the operating system. It is
-     * typically the "My Documents" folder on Windows, and the user's
-     * home directory on Unix.
-     *
-     * @param currentDirectory  a <code>File</code> object specifying
-     *                          the path to a file or directory
-     */
-    public VFSJFileChooser(FileObject currentDirectory) {
-        this(currentDirectory, (AbstractVFSFileSystemView) null);
-    }
+    private MetalVFSFileChooserUI<FileObject> defaultUI;
 
     /**
      * Constructs a <code>VFSJFileChooser</code> using the given
      * <code>FileSystemView</code>.
      */
-    public VFSJFileChooser(AbstractVFSFileSystemView fsv) {
+    public VFSJFileChooser(
+            @Nonnull VFSFileSystemView<FileObject> fsv) {
         this((FileObject) null, fsv);
     }
 
@@ -208,8 +151,9 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * Constructs a <code>VFSJFileChooser</code> using the given current directory
      * and <code>FileSystemView</code>.
      */
-    public VFSJFileChooser(FileObject currentDirectory,
-            AbstractVFSFileSystemView fsv) {
+    public VFSJFileChooser(
+            @CheckForNull FileObject currentDirectory,
+            @Nonnull VFSFileSystemView<FileObject> fsv) {
         setup(fsv);
         setCurrentDirectory(currentDirectory);
     }
@@ -220,15 +164,15 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @param currentDirectoryPath
      * @param fsv
      */
-    public VFSJFileChooser(String currentDirectoryPath,
-            AbstractVFSFileSystemView fsv) {
+    public VFSJFileChooser(
+            @CheckForNull String currentDirectoryPath,
+            @Nonnull VFSFileSystemView<FileObject> fsv) {
         setup(fsv);
 
         if (currentDirectoryPath == null) {
             setCurrentDirectory(null);
         } else {
-            setCurrentDirectory(fileSystemView.createFileObject(
-                    currentDirectoryPath));
+            setCurrentDirectory(fileSystemView.createFileObject(currentDirectoryPath));
         }
     }
 
@@ -252,12 +196,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * Performs common constructor initialization and setup.
      * @param view
      */
-    protected void setup(AbstractVFSFileSystemView view) {
+    protected final void setup(VFSFileSystemView<FileObject> view) {
         installShowFilesListener();
-
-        if (view == null) {
-            view = AbstractVFSFileSystemView.getFileSystemView();
-        }
 
         setFileSystemView(view);
         updateUI();
@@ -376,7 +316,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
 
         if (selectedFile != null) {
             if (!getFileSystemView().isParent(getCurrentDirectory(), selectedFile)) {
-                setCurrentDirectory(VFSUtils.getParentDirectory(selectedFile));
+                setCurrentDirectory(getFileSystemView().getParentDirectory(selectedFile));
             }
 
             if (!isMultiSelectionEnabled() || (selectedFiles == null)
@@ -395,9 +335,9 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      */
     public FileObject[] getSelectedFiles() {
         if (selectedFiles == null) {
-            return new FileObject[0];
+            return getFileSystemView().newFileObjectArray();
         } else {
-            return (FileObject[]) selectedFiles.clone();
+            return selectedFiles.clone();
         }
     }
 
@@ -459,6 +399,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     public void setCurrentDirectory(FileObject dir) {
         FileObject oldValue = currentDirectory;
 
+        // getFileSystemView().isTraversable(dir)
         if ((dir != null) && !VFSUtils.exists(dir)) {
             dir = currentDirectory;
         }
@@ -1018,15 +959,16 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     /**
      * Gets the list of user choosable file filters.
      *
-     * @return a <code>FileFilter</code> array containing all the choosable
+     * @return a <code>VFSFileFilter</code> array containing all the choosable
      *         file filters
      *
      * @see #addChoosableFileFilter
      * @see #removeChoosableFileFilter
      * @see #resetChoosableFileFilters
      */
-    public AbstractVFSFileFilter[] getChoosableFileFilters() {
-        return filters.toArray(new AbstractVFSFileFilter[filters.size()]);
+    @SuppressWarnings("unchecked")
+    public VFSFileFilter<? super FileObject>[] getChoosableFileFilters() {
+        return filters.toArray(new VFSFileFilter/*<FileObject>*/[filters.size()]);
     }
 
     /**
@@ -1034,7 +976,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * For information on setting the file selection mode, see
      * {@link #setFileSelectionMode setFileSelectionMode}.
      *
-     * @param filter the <code>FileFilter</code> to add to the choosable file
+     * @param filter the <code>VFSFileFilter</code> to add to the choosable file
      *               filter list
      *
      * @beaninfo
@@ -1047,9 +989,9 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @see #resetChoosableFileFilters
      * @see #setFileSelectionMode
      */
-    public void addChoosableFileFilter(AbstractVFSFileFilter filter) {
+    public void addChoosableFileFilter(VFSFileFilter<? super FileObject> filter) {
         if ((filter != null) && !filters.contains(filter)) {
-            AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
+            VFSFileFilter<? super FileObject>[] oldValue = getChoosableFileFilters();
             filters.add(filter);
             firePropertyChange(CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY,
                     oldValue, getChoosableFileFilters());
@@ -1068,13 +1010,13 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @see #getChoosableFileFilters
      * @see #resetChoosableFileFilters
      */
-    public boolean removeChoosableFileFilter(AbstractVFSFileFilter f) {
+    public boolean removeChoosableFileFilter(VFSFileFilter<? super FileObject> f) {
         if (filters.contains(f)) {
             if (getFileFilter() == f) {
                 setFileFilter(null);
             }
 
-            AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
+            VFSFileFilter<? super FileObject>[] oldValue = getChoosableFileFilters();
             filters.remove(f);
             firePropertyChange(CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY,
                     oldValue, getChoosableFileFilters());
@@ -1095,7 +1037,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @see #removeChoosableFileFilter
      */
     public void resetChoosableFileFilters() {
-        AbstractVFSFileFilter[] oldValue = getChoosableFileFilters();
+        VFSFileFilter<? super FileObject>[] oldValue = getChoosableFileFilters();
         setFileFilter(null);
         filters.clear();
 
@@ -1111,8 +1053,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * Returns the <code>AcceptAll</code> file filter.
      * For example, on Microsoft Windows this would be All Files (*.*).
      */
-    public AbstractVFSFileFilter getAcceptAllFileFilter() {
-        AbstractVFSFileFilter filter = null;
+    public VFSFileFilter<? super FileObject> getAcceptAllFileFilter() {
+        VFSFileFilter<? super FileObject> filter = null;
 
         if (getUI() != null) {
             filter = getUI().getAcceptAllFileFilter(this);
@@ -1122,8 +1064,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     }
 
     /**
-     * Returns whether the <code>AcceptAll FileFilter</code> is used.
-     * @return true if the <code>AcceptAll FileFilter</code> is used
+     * Returns whether the <code>AcceptAll VFSFileFilter</code> is used.
+     * @return true if the <code>AcceptAll VFSFileFilter</code> is used
      * @see #setAcceptAllFileFilterUsed
      * @since 1.3
      */
@@ -1132,7 +1074,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
     }
 
     /**
-     * Determines whether the <code>AcceptAll FileFilter</code> is used
+     * Determines whether the <code>AcceptAll VFSFileFilter</code> is used
      * as an available choice in the choosable filter list.
      * If false, the <code>AcceptAll</code> file filter is removed from
      * the list of available file filters.
@@ -1142,7 +1084,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @beaninfo
      *   preferred: true
      *       bound: true
-     * description: Sets whether the AcceptAll FileFilter is used as an available choice in the choosable filter list.
+     * description: Sets whether the AcceptAll VFSFileFilter is used as an available choice in the choosable filter list.
      *
      * @see #isAcceptAllFileFilterUsed
      * @see #getAcceptAllFileFilter
@@ -1355,8 +1297,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @param filter the new current file filter to use
      * @see #getFileFilter
      */
-    public void setFileFilter(AbstractVFSFileFilter filter) {
-        AbstractVFSFileFilter oldValue = fileFilter;
+    public void setFileFilter(VFSFileFilter<? super FileObject> filter) {
+        VFSFileFilter<? super FileObject> oldValue = fileFilter;
         fileFilter = filter;
 
         if (filter != null) {
@@ -1374,7 +1316,13 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 }
 
                 if (failed) {
-                    setSelectedFiles(EMPTY_FILEOBJECT_ARRAY);
+                    if (fList.isEmpty()) {
+                        setSelectedFiles(null);
+                    } else {
+                        @SuppressWarnings("unchecked")
+                        FileObject[] files = (FileObject[]) Array.newInstance(getFileSystemView().getFileObjectType(), fList.size());
+                        setSelectedFiles(fList.toArray(files));
+                    }
                 }
             } else if ((selectedFile != null) && !filter.accept(selectedFile)) {
                 setSelectedFile(null);
@@ -1391,7 +1339,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @see #setFileFilter
      * @see #addChoosableFileFilter
      */
-    public AbstractVFSFileFilter getFileFilter() {
+    public VFSFileFilter<? super FileObject> getFileFilter() {
         return fileFilter;
     }
 
@@ -1406,8 +1354,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      *
      * @see #getFileView
      */
-    public void setFileView(AbstractVFSFileView fileView) {
-        AbstractVFSFileView oldValue = this.fileView;
+    public void setFileView(VFSFileView<FileObject> fileView) {
+        VFSFileView<FileObject> oldValue = this.fileView;
         this.fileView = fileView;
         firePropertyChange(FILE_VIEW_CHANGED_PROPERTY, oldValue, fileView);
     }
@@ -1417,7 +1365,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      *
      * @see #setFileView
      */
-    public AbstractVFSFileView getFileView() {
+    public VFSFileView<FileObject> getFileView() {
         return fileView;
     }
 
@@ -1436,6 +1384,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 filename = getFileView().getName(fileObject);
             }
 
+            VFSFileView<FileObject> uiFileView = getUI().getFileView(this);
             if ((filename == null) && (uiFileView != null)) {
                 filename = uiFileView.getName(fileObject);
             }
@@ -1459,6 +1408,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 description = getFileView().getDescription(fileObject);
             }
 
+            VFSFileView<FileObject> uiFileView = getUI().getFileView(this);
             if ((description == null) && (uiFileView != null)) {
                 description = uiFileView.getDescription(fileObject);
             }
@@ -1482,6 +1432,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 typeDescription = getFileView().getTypeDescription(fileObject);
             }
 
+            VFSFileView<FileObject> uiFileView = getUI().getFileView(this);
             if ((typeDescription == null) && (uiFileView != null)) {
                 typeDescription = uiFileView.getTypeDescription(fileObject);
             }
@@ -1505,6 +1456,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 icon = getFileView().getIcon(fileObject);
             }
 
+            VFSFileView<FileObject> uiFileView = getUI().getFileView(this);
             if ((icon == null) && (uiFileView != null)) {
                 icon = uiFileView.getIcon(fileObject);
             }
@@ -1528,6 +1480,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
                 traversable = getFileView().isTraversable(fileObject);
             }
 
+            VFSFileView<FileObject> uiFileView = getUI().getFileView(this);
             if ((traversable == null) && (uiFileView != null)) {
                 traversable = uiFileView.isTraversable(fileObject);
             }
@@ -1544,7 +1497,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * Returns true if the file should be displayed.
      * @param fileObject the <code>File</code>
      * @return true if the file should be displayed, otherwise false
-     * @see FileFilter#accept
+     * @see VFSFileFilter#accept
      */
     public boolean accept(FileObject fileObject) {
         boolean shown = true;
@@ -1560,7 +1513,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * Sets the file system view that the <code>VFSJFileChooser</code> uses for
      * accessing and creating file system resources, such as finding
      * the floppy drive and getting a list of root drives.
-     * @param fsv  the new <code>AbstractVFSFileSystemView</code>
+     * @param fsv  the new <code>VFSFileSystemView</code>
      *
      * @beaninfo
      *      expert: true
@@ -1569,8 +1522,10 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      *
      * @see FileSystemView
      */
-    public void setFileSystemView(AbstractVFSFileSystemView fsv) {
-        AbstractVFSFileSystemView oldValue = fileSystemView;
+    public void setFileSystemView(@Nonnull VFSFileSystemView<FileObject> fsv) {
+        if (fsv == null)
+            throw new NullPointerException("VFSFileSystemView was null.");
+        VFSFileSystemView<FileObject> oldValue = fileSystemView;
         fileSystemView = fsv;
         firePropertyChange(FILE_SYSTEM_VIEW_CHANGED_PROPERTY, oldValue,
                 fileSystemView);
@@ -1578,10 +1533,11 @@ public class VFSJFileChooser extends JComponent implements Accessible {
 
     /**
      * Returns the file system view.
-     * @return the <code>AbstractVFSFileSystemView</code> object
+     * @return the <code>VFSFileSystemView</code> object
      * @see #setFileSystemView
      */
-    public AbstractVFSFileSystemView getFileSystemView() {
+    @Nonnull
+    public VFSFileSystemView<FileObject> getFileSystemView() {
         return fileSystemView;
     }
 
@@ -1657,7 +1613,7 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * @since 1.4
      */
     public ActionListener[] getActionListeners() {
-        return (ActionListener[]) listenerList.getListeners(ActionListener.class);
+        return listenerList.getListeners(ActionListener.class);
     }
 
     /**
@@ -1712,13 +1668,6 @@ public class VFSJFileChooser extends JComponent implements Accessible {
             setUI(defaultUI);
         }
 
-        if (fileSystemView == null) {
-            // We were probably deserialized
-            setFileSystemView(AbstractVFSFileSystemView.getFileSystemView());
-        }
-
-        uiFileView = getUI().getFileView(this);
-
         if (isAcceptAllFileFilterUsed()) {
             addChoosableFileFilter(getAcceptAllFileFilter());
         }
@@ -1745,8 +1694,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      *
      * @return the FileChooserUI object that implements the FileChooserUI L&F
      */
-    public AbstractVFSFileChooserUI getUI() {
-        return (AbstractVFSFileChooserUI) defaultUI;
+    public VFSFileChooserUI<FileObject> getUI() {
+        return defaultUI;
     }
 
     /**
@@ -1754,8 +1703,8 @@ public class VFSJFileChooser extends JComponent implements Accessible {
      * 
      * @return the default UI
      */
-    protected MetalVFSFileChooserUI createDefaultUI() {
-        return new MetalVFSFileChooserUI(this);
+    protected MetalVFSFileChooserUI<FileObject> createDefaultUI() {
+        return new MetalVFSFileChooserUI<FileObject>(this);
     }
 
     /**
@@ -1907,17 +1856,17 @@ public class VFSJFileChooser extends JComponent implements Accessible {
 
     private static class WeakPCL implements PropertyChangeListener {
 
-        WeakReference<VFSJFileChooser> jfcRef;
+        WeakReference<VFSJFileChooser<?>> jfcRef;
 
-        public WeakPCL(VFSJFileChooser jfc) {
-            jfcRef = new WeakReference<VFSJFileChooser>(jfc);
+        public WeakPCL(VFSJFileChooser<?> jfc) {
+            jfcRef = new WeakReference<VFSJFileChooser<?>>(jfc);
         }
 
         @Override
         public void propertyChange(PropertyChangeEvent ev) {
             assert ev.getPropertyName().equals(SHOW_HIDDEN_PROP);
 
-            VFSJFileChooser jfc = jfcRef.get();
+            VFSJFileChooser<?> jfc = jfcRef.get();
 
             if (jfc == null) {
                 // Our VFSJFileChooser is no longer around, so we no longer need to

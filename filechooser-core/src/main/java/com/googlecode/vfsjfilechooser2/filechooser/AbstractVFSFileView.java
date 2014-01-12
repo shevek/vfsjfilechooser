@@ -17,16 +17,14 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import javax.swing.Icon;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * The fileview implementation using commons-vfs based on Swing FileView
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSFileView {
+public abstract class AbstractVFSFileView<FileObject> implements VFSFileView<FileObject> {
 
     /**
      * The name of the file. Normally this would be simply
@@ -34,8 +32,9 @@ public abstract class AbstractVFSFileView {
      * @param f
      * @return
      */
+    @Override
     public String getName(FileObject f) {
-        return VFSUtils.getFriendlyName(f.getName().toString());
+        return null;
     }
 
     /**
@@ -45,8 +44,9 @@ public abstract class AbstractVFSFileView {
      * @param f
      * @return
      */
+    @Override
     public String getDescription(FileObject f) {
-        return getName(f);
+        return null;
     }
 
     /**
@@ -56,6 +56,7 @@ public abstract class AbstractVFSFileView {
      * @param f
      * @return
      */
+    @Override
     public String getTypeDescription(FileObject f) {
         return getName(f);
     }
@@ -65,6 +66,7 @@ public abstract class AbstractVFSFileView {
      * @param f
      * @return
      */
+    @Override
     public Icon getIcon(FileObject f) {
         return null;
     }
@@ -76,6 +78,7 @@ public abstract class AbstractVFSFileView {
      * @param f
      * @return
      */
+    @Override
     public Boolean isTraversable(FileObject f) {
         return null;
     }

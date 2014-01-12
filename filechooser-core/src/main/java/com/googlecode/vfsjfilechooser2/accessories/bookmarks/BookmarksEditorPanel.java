@@ -65,7 +65,7 @@ import javax.swing.plaf.basic.BasicComboBoxRenderer;
  * @version 0.0.4
  */
 @SuppressWarnings("serial")
-public final class BookmarksEditorPanel extends JPanel {
+public final class BookmarksEditorPanel<FileObject> extends JPanel {
 
     private JLabel usernameLabel;
     private JLabel passwordLabel;
@@ -85,7 +85,7 @@ public final class BookmarksEditorPanel extends JPanel {
     private JComponent centerPanel;
     private final Bookmarks bookmarks;
     private int editIndex = -1;
-    private final BookmarksDialog parentDialog;
+    private final BookmarksDialog<FileObject> parentDialog;
 
     /**
      * Default constructor
@@ -95,7 +95,7 @@ public final class BookmarksEditorPanel extends JPanel {
      * @param bookmarks
      *            The bookmarks
      */
-    public BookmarksEditorPanel(BookmarksDialog parentDialog,
+    public BookmarksEditorPanel(BookmarksDialog<FileObject> parentDialog,
             Bookmarks bookmarks) {
         this.parentDialog = parentDialog;
         this.bookmarks = bookmarks;

@@ -18,33 +18,31 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
+import com.googlecode.vfsjfilechooser2.VFSException;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.text.MessageFormat;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
-import javax.swing.filechooser.FileView;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.impl.DecoratedFileObject;
-import org.apache.commons.vfs2.provider.local.LocalFile;
 
 /**
  * The implementation using commons-vfs based on Swing FileSystemView
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSFileSystemView {
+public abstract class AbstractVFSFileSystemView<FileObject> implements VFSFileSystemView<FileObject> {
 
+    /*
+    public FileObject[] newArray(FileObject... args) {
+        return null;
+    }
+    */
+
+    /*
     //static FileSystemView macFileSystemView = null;
     static AbstractVFSFileSystemView genericFileSystemView = null;
     static boolean useSystemExtensionsHiding = false;
-    FileObject[] localRoots = new FileObject[0];
 
     public static AbstractVFSFileSystemView getFileSystemView() {
         useSystemExtensionsHiding = UIManager.getDefaults()
@@ -65,6 +63,7 @@ public abstract class AbstractVFSFileSystemView {
 
         return genericFileSystemView;
     }
+    */
 
     /**
      * Determines if the given file is a root in the navigatable tree(s).
@@ -78,22 +77,9 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>true</code> if <code>f</code> is a root in the navigatable tree.
      * @see #isFileSystemRoot
      */
+    @Override
     public boolean isRoot(FileObject f) {
-        return VFSUtils.isRoot(f);
-    }
-
-    /**
-     * Returns true if the file (directory) can be visited.
-     * Returns false if the directory cannot be traversed.
-     *
-     * @param f the <code>File</code>
-     * @return <code>true</code> if the file/directory can be traversed, otherwise <code>false</code>
-     * @see JFileChooser#isTraversable
-     * @see FileView#isTraversable
-     * @since 1.4
-     */
-    public Boolean isTraversable(FileObject f) {
-        return Boolean.valueOf(VFSUtils.isDirectory(f));
+        return getParentDirectory(f) == null;
     }
 
     /**
@@ -108,14 +94,15 @@ public abstract class AbstractVFSFileSystemView {
      * @see JFileChooser#getName
      * @since 1.4
      */
+    @Override
     public String getSystemDisplayName(FileObject f) {
         String name = null;
 
         if (f != null) {
-            name = f.getName().getBaseName();
+            name = getName(f);
 
             if (!name.trim().equals("")) {
-                name = VFSUtils.getFriendlyName(f.getName() + "");
+                name = VFSUtils.getFriendlyName(getUrl(f));
             }
         }
 
@@ -135,8 +122,9 @@ public abstract class AbstractVFSFileSystemView {
      * @see JFileChooser#getTypeDescription
      * @since 1.4
      */
+    @Override
     public String getSystemTypeDescription(FileObject f) {
-        return VFSUtils.getFriendlyName(f.getName().toString());
+        return VFSUtils.getFriendlyName(getUrl(f));
     }
 
     /**
@@ -151,9 +139,10 @@ public abstract class AbstractVFSFileSystemView {
      * @see JFileChooser#getIcon
      * @since 1.4
      */
+    @Override
     public Icon getSystemIcon(FileObject f) {
         if (f != null) {
-            return UIManager.getIcon(VFSUtils.isDirectory(f)
+            return UIManager.getIcon(isTraversable(f)
                     ? "FileView.directoryIcon" : "FileView.fileIcon");
         } else {
             return null;
@@ -170,8 +159,9 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>true</code> if <code>folder</code> is a directory or special folder and contains <code>file</code>.
      * @since 1.4
      */
+    @Override
     public boolean isParent(FileObject folder, FileObject file) {
-        return VFSUtils.isParent(folder, file);
+        return folder.equals(getParentDirectory(file));
     }
 
     /**
@@ -184,6 +174,7 @@ public abstract class AbstractVFSFileSystemView {
      * a <code>ShellFolder</code> object.
      * @since 1.4
      */
+    @Override
     public FileObject getChild(FileObject parent, String fileName) {
         return createFileObject(parent, fileName);
     }
@@ -197,26 +188,20 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>true</code> if <code>f</code> is a real file or directory.
      * @since 1.4
      */
+    @Override
     public boolean isFileSystem(FileObject f) {
         return true;
     }
-
-    /**
-     * Creates a new folder with a default folder name.
-     * @param containingDir
-     * @return
-     * @throws org.apache.commons.vfs.FileSystemException
-     */
-    public abstract FileObject createNewFolder(FileObject containingDir)
-            throws FileSystemException;
 
     /**
      * Returns whether a file is hidden or not.
      * @param f
      * @return
      */
+    @Override
     public boolean isHiddenFile(FileObject f) {
-        return VFSUtils.isHiddenFile(f);
+        String name = getName(f);
+        return name.charAt(0) == '.';
     }
 
     /**
@@ -228,8 +213,9 @@ public abstract class AbstractVFSFileSystemView {
      * @see #isRoot
      * @since 1.4
      */
+    @Override
     public boolean isFileSystemRoot(FileObject dir) {
-        return VFSUtils.isRoot(dir);
+        return isRoot(dir);
     }
 
     /**
@@ -242,8 +228,9 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>false</code> always
      * @since 1.4
      */
+    @Override
     public boolean isDrive(FileObject dir) {
-        return VFSUtils.getParentDirectory(dir) == null;
+        return isRoot(dir);
     }
 
     /**
@@ -256,6 +243,7 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>false</code> always
      * @since 1.4
      */
+    @Override
     public boolean isFloppyDrive(FileObject dir) {
         return false;
     }
@@ -270,38 +258,9 @@ public abstract class AbstractVFSFileSystemView {
      * @return <code>false</code> always
      * @since 1.4
      */
+    @Override
     public boolean isComputerNode(FileObject dir) {
         return false;
-    }
-
-    /**
-     * Returns all root partitions on this system. For example, on
-     * Windows, this would be the "Desktop" folder, while on DOS this
-     * would be the A: through Z: drives.
-     * @param fo
-     * @return
-     */
-    public FileObject[] getRoots(FileObject fo) {
-        if (fo instanceof DecoratedFileObject) {
-            fo = ((DecoratedFileObject) fo).getDecoratedFileObject();
-        }
-
-        if (fo instanceof LocalFile) {
-            File[] roots = File.listRoots();
-            final int count = roots.length;
-            localRoots = new FileObject[roots.length];
-
-            for (int i = 0; i < count; i++) {
-                localRoots[i] = VFSUtils.toFileObject(roots[i]);
-            }
-
-            return localRoots.clone();
-        } // Don't cache this array, because filesystem might change
-        else {
-            FileObject p = VFSUtils.getRootFileSystem(fo);
-
-            return new FileObject[]{p};
-        }
     }
 
     // Providing default implementations for the remaining methods
@@ -312,8 +271,9 @@ public abstract class AbstractVFSFileSystemView {
      *
      * @return
      */
+    @Override
     public FileObject getHomeDirectory() {
-        return SwingCommonsUtilities.getVFSFileChooserDefaultDirectory();
+        return createFileObject(System.getProperty("user.dir"));
     }
 
     /**
@@ -323,6 +283,7 @@ public abstract class AbstractVFSFileSystemView {
      *         starting folder
      * @since 1.4
      */
+    @Override
     public FileObject getDefaultDirectory() {
         return createFileObject(System.getProperty("user.dir"));
     }
@@ -333,31 +294,13 @@ public abstract class AbstractVFSFileSystemView {
      * @param filename
      * @return
      */
+    @Override
     public FileObject createFileObject(FileObject dir, String filename) {
         if (dir == null) {
-            return VFSUtils.createFileObject(filename);
+            return createFileObject(filename);
         } else {
             return VFSUtils.resolveFileObject(dir, filename);
         }
-    }
-
-    /**
-     * Returns a File object constructed from the given path string.
-     * @param path
-     * @return
-     */
-    public FileObject createFileObject(String path) {
-        return VFSUtils.resolveFileObject(path);
-    }
-
-    /**
-     * Gets the list of shown (i.e. not hidden) files.
-     * @param dir
-     * @param useFileHiding
-     * @return
-     */
-    public FileObject[] getFiles(FileObject dir, boolean useFileHiding) {
-        return VFSUtils.getFiles(dir, useFileHiding);
     }
 
     /**
@@ -366,8 +309,9 @@ public abstract class AbstractVFSFileSystemView {
      * @return the parent directory of <code>dir</code>, or
      *   <code>null</code> if <code>dir</code> is <code>null</code>
      */
+    @Override
     public FileObject getParentDirectory(FileObject dir) {
-        if ((dir != null) && VFSUtils.exists(dir)) {
+        if ((dir != null) && exists(dir)) {
             FileObject parentDir = VFSUtils.getParentDirectory(dir);
 
             if (parentDir == null) {
@@ -396,7 +340,7 @@ public abstract class AbstractVFSFileSystemView {
     /**
      * Fallthrough FileSystemView in case we can't determine the OS.
      */
-    static class GenericFileSystemView extends AbstractVFSFileSystemView {
+    static class GenericFileSystemView<FileObject> extends AbstractVFSFileSystemView<FileObject> {
 
         private static final String newFolderString = VFSResources.getMessage(
                 "VFSJFileChooser.other.newFolder");
@@ -408,9 +352,9 @@ public abstract class AbstractVFSFileSystemView {
          */
         @Override
         public FileObject createNewFolder(FileObject containingDir)
-                throws FileSystemException {
+                throws VFSException {
             if (containingDir == null) {
-                throw new FileSystemException(
+                throw new VFSException(
                         "Trying to create a new folder into a non existing folder");
             }
 
@@ -421,16 +365,15 @@ public abstract class AbstractVFSFileSystemView {
 
             // avoid creating a folder called New Folder so we loop as in the 
             // Windows FileSystemView
-            for (int i = 1; newFolder.exists(); i++) {
+            for (int i = 1; exists(newFolder); i++) {
                 newFolder = createFileObject(containingDir,
                         MessageFormat.format(newFolderNextString,
                                 new Object[]{i}));
             }
 
             // if the folder already exists throw an exception
-            if (newFolder.exists()) {
-                throw new FileSystemException("Directory already exists:"
-                        + newFolder.getName().getURI());
+            if (exists(newFolder)) {
+                throw new VFSException("Directory already exists:" + getUrl(newFolder));
             } else {
                 // create the folder 
                 newFolder.createFolder();

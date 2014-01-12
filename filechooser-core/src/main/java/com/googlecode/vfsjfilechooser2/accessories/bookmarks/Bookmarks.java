@@ -40,6 +40,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class Bookmarks extends AbstractTableModel {
 
+    private static final Logger logger = Logger.getLogger(Bookmarks.class.getName());
     private static final long serialVersionUID = 6142063286592461932L;
     private static final String COLUMN_TITLE_NAME = VFSResources
             .getMessage("VFSJFileChooser.fileNameHeaderText");
@@ -50,7 +51,6 @@ public class Bookmarks extends AbstractTableModel {
     private static final int NB_COLUMNS = 2;
     private final List<TitledURLEntry> entries = new ArrayList<TitledURLEntry>();
     private final File favorites = VFSJFileChooserConstants.BOOKMARKS_FILE;
-    private final Logger logger = Logger.getLogger(Bookmarks.class.getName());
     private transient final BookmarksWriter writer = new BookmarksWriter();
 
     /**

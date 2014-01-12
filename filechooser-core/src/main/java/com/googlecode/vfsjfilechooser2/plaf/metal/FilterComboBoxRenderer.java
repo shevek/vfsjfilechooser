@@ -17,7 +17,7 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.metal;
 
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileFilter;
 import java.awt.Component;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
@@ -36,8 +36,8 @@ final class FilterComboBoxRenderer extends DefaultListCellRenderer {
         super.getListCellRendererComponent(list, value, index, isSelected,
                 cellHasFocus);
 
-        if ((value != null) && value instanceof AbstractVFSFileFilter) {
-            setText(((AbstractVFSFileFilter) value).getDescription());
+        if ((value != null) && value instanceof VFSFileFilter<?>) {
+            setText(((VFSFileFilter<?>) value).getDescription());
         }
 
         return this;

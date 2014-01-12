@@ -18,6 +18,7 @@
 package com.googlecode.vfsjfilechooser2.accessories.bookmarks;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
@@ -38,7 +39,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * Bookmarks manager panel
@@ -47,7 +47,7 @@ import org.apache.commons.vfs2.FileObject;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class BookmarksManagerPanel extends JPanel {
+public class BookmarksManagerPanel<FileObject> extends JPanel {
 
     public static final int NO_BOOKMARK_SELECTION_INDEX = -1;
     private final JScrollPane scrollPane;
@@ -60,12 +60,12 @@ public class BookmarksManagerPanel extends JPanel {
     private final JButton bMoveUp;
     private final JButton bMoveDown;
     private final Bookmarks model;
-    private final VFSJFileChooser chooser;
+    private final VFSJFileChooser<FileObject> chooser;
     private final Dimension tableSize = new Dimension(350, 200);
-    private final BookmarksDialog parentDialog;
+    private final BookmarksDialog<FileObject> parentDialog;
 
-    public BookmarksManagerPanel(BookmarksDialog parentDialog,
-            VFSJFileChooser chooser) {
+    public BookmarksManagerPanel(BookmarksDialog<FileObject> parentDialog,
+            VFSJFileChooser<FileObject> chooser) {
         this.parentDialog = parentDialog;
         this.chooser = chooser;
 
@@ -186,7 +186,7 @@ public class BookmarksManagerPanel extends JPanel {
                 }
             } else if (button.equals(bOpen)) {
                 if (row != NO_BOOKMARK_SELECTION_INDEX) {
-                    Thread worker = new Thread() {
+                    Runnable worker = new Runnable() {
                         @Override
                         public void run() {
                             setCursor(Cursor.getPredefinedCursor(
@@ -194,17 +194,9 @@ public class BookmarksManagerPanel extends JPanel {
 
                             TitledURLEntry aTitledURLEntry = model.getEntry(row);
 
-                            FileObject fo = null;
-
-                            try {
-                                fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
-
-                                if ((fo != null) && !fo.exists()) {
-                                    fo = null;
-                                }
-                            } catch (Exception exc) {
-                                fo = null;
-                            }
+                            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+                            FileObject fo = fsv.createFileObject(aTitledURLEntry.getURL());
+                            // TODO: Check that it exists.
 
                             setCursor(Cursor.getDefaultCursor());
 
@@ -224,7 +216,6 @@ public class BookmarksManagerPanel extends JPanel {
                         }
                     };
 
-                    worker.setPriority(Thread.MIN_PRIORITY);
                     SwingUtilities.invokeLater(worker);
                 } else {
                     JOptionPane.showMessageDialog(getParent(),

@@ -20,7 +20,7 @@ package com.googlecode.vfsjfilechooser2.accessories;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 import com.googlecode.vfsjfilechooser2.accessories.connection.ConnectionDialog;
-import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import java.awt.BorderLayout;
 import java.awt.Frame;
@@ -41,7 +41,6 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * <p>The default accessory panel you could add
@@ -50,22 +49,22 @@ import org.apache.commons.vfs2.FileObject;
  * @version 0.0.2
  */
 @SuppressWarnings("serial")
-public final class DefaultAccessoriesPanel extends JComponent {
+public final class DefaultAccessoriesPanel<FileObject> extends JComponent {
 
     private static final String RES_PATH = "/com/googlecode/vfsjfilechooser2/plaf/icons/";
     private JButton bookmarksButton;
     private JButton localFSButton;
     private JButton connectionsButton;
-    private BookmarksDialog bookmarksDialog;
-    private ConnectionDialog connectionDialog;
+    private BookmarksDialog<FileObject> bookmarksDialog;
+    private ConnectionDialog<FileObject> connectionDialog;
     private JComponent buttonsPanel;
-    private final VFSJFileChooser fileChooser;
+    private final VFSJFileChooser<FileObject> fileChooser;
 
     /**
      * Create an accessory panel
      * @param fileChooser The file dialog
      */
-    public DefaultAccessoriesPanel(final VFSJFileChooser fileChooser) {
+    public DefaultAccessoriesPanel(final VFSJFileChooser<FileObject> fileChooser) {
         setLayout(new BorderLayout());
 
         this.fileChooser = fileChooser;
@@ -124,9 +123,9 @@ public final class DefaultAccessoriesPanel extends JComponent {
 
         final Frame c = (Frame) SwingUtilities.getWindowAncestor(fileChooser);
 
-        bookmarksDialog = new BookmarksDialog(c, fileChooser);
+        bookmarksDialog = new BookmarksDialog<FileObject>(c, fileChooser);
 
-        connectionDialog = new ConnectionDialog(c, bookmarksDialog, fileChooser);
+        connectionDialog = new ConnectionDialog<FileObject>(c, bookmarksDialog, fileChooser);
     }
 
     /**
@@ -156,7 +155,8 @@ public final class DefaultAccessoriesPanel extends JComponent {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            FileObject fo = SwingCommonsUtilities.getVFSFileChooserDefaultDirectory();
+            VFSFileSystemView<FileObject> fsv = fileChooser.getFileSystemView();
+            FileObject fo = fsv.getDefaultDirectory();
             fileChooser.setCurrentDirectory(fo);
         }
     }

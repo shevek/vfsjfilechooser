@@ -17,27 +17,10 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import javax.swing.filechooser.FileView;
-import org.apache.commons.vfs2.FileObject;
-
 /**
  * A file filter for file objects based on java.io.FileFilter
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public abstract class AbstractVFSFileFilter {
-
-    /**
-     * Whether the given file is accepted by this filter.
-     * @param f
-     * @return
-     */
-    public abstract boolean accept(FileObject f);
-
-    /**
-     * The description of this filter. For example: "JPG and GIF Images"
-     * @return
-     * @see FileView#getName
-     */
-    public abstract String getDescription();
+public abstract class AbstractVFSFileFilter<FileObject> implements VFSFileFilter<FileObject> {
 }

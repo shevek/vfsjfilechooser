@@ -32,7 +32,7 @@ import javax.swing.JPanel;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public class BookmarksDialog extends JDialog {
+public class BookmarksDialog<FileObject> extends JDialog {
 
     private static final String MANAGER_PANEL_ID = "MANAGER";
     private static final String EDITOR_PANEL_ID = "EDITOR";
@@ -40,8 +40,8 @@ public class BookmarksDialog extends JDialog {
             "VFSJFileChooser.bookmarksManagerDialogTitle");
     private static final String EDITOR_DIALOG_TITLE = VFSResources.getMessage(
             "VFSJFileChooser.bookmarksEditorDialogTitle");
-    private final BookmarksManagerPanel managerPanel;
-    private final BookmarksEditorPanel editorPanel;
+    private final BookmarksManagerPanel<FileObject> managerPanel;
+    private final BookmarksEditorPanel<FileObject> editorPanel;
     private final CardLayout layout = new CardLayout();
     private final JPanel cards = new JPanel(layout);
     private boolean defaultViewVisible = true;
@@ -51,13 +51,13 @@ public class BookmarksDialog extends JDialog {
      * @param parent The parent window
      * @param chooser the file chooser
      */
-    public BookmarksDialog(Frame parent, VFSJFileChooser chooser) {
+    public BookmarksDialog(Frame parent, VFSJFileChooser<FileObject> chooser) {
         super(parent, MANAGER_DIALOG_TITLE, true);
 
         saveBookmarksOnWindowClosing();
 
-        managerPanel = new BookmarksManagerPanel(this, chooser);
-        editorPanel = new BookmarksEditorPanel(this, managerPanel.getModel());
+        managerPanel = new BookmarksManagerPanel<FileObject>(this, chooser);
+        editorPanel = new BookmarksEditorPanel<FileObject>(this, managerPanel.getModel());
 
         cards.add(managerPanel, MANAGER_PANEL_ID);
         cards.add(editorPanel, EDITOR_PANEL_ID);

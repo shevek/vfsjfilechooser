@@ -24,9 +24,10 @@ import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileFilter;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
 import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUIAccessorIF;
 import com.googlecode.vfsjfilechooser2.plaf.basic.BasicVFSDirectoryModel;
@@ -87,7 +88,7 @@ import org.apache.commons.vfs2.FileSystemException;
  * @author Stephan Schuster <stephanschuster at users.sourceforge.net>
  * @version 0.0.1
  */
-public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
+public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<FileObject> {
 
     private static final Dimension hstrut5 = new Dimension(5, 1);
 
@@ -112,7 +113,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private final Action directoryComboBoxAction = new DirectoryComboBoxAction();
     private FilterComboBoxModel filterComboBoxModel;
     private JTextField fileNameTextField;
-    private VFSFilePane filePane;
+    private VFSFilePane<FileObject> filePane;
     private JToggleButton listViewButton;
     private JToggleButton detailsViewButton;
     private boolean useShellFolder;
@@ -138,14 +139,14 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private String listViewButtonAccessibleName = null;
     private String detailsViewButtonToolTipText = null;
     private String detailsViewButtonAccessibleName = null;
-    private final VFSJFileChooser chooser;
+    private final VFSJFileChooser<FileObject> chooser;
     private AlignedLabel fileNameLabel;
     private JPanel topButtonPanel;
     private JButton upFolderButton;
     private JButton homeFolderButton;
     private JButton newFolderButton;
 
-    public MetalVFSFileChooserUI(VFSJFileChooser filechooser) {
+    public MetalVFSFileChooserUI(VFSJFileChooser<FileObject> filechooser) {
         super(filechooser);
         this.chooser = filechooser;
     }
@@ -173,7 +174,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     }
 
     @Override
-    public void uninstallComponents(VFSJFileChooser fc) {
+    public void uninstallComponents(VFSJFileChooser<FileObject> fc) {
         fc.removeAll();
         bottomPanel = null;
         buttonPanel = null;
@@ -197,13 +198,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
 
     @SuppressWarnings("serial")
     @Override
-    public void installComponents(VFSJFileChooser fc) {
-        AbstractVFSFileSystemView fsv = fc.getFileSystemView();
+    public void installComponents(VFSJFileChooser<FileObject> fc) {
+        VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
 
         fc.setBorder(new EmptyBorder(12, 12, 11, 11));
         fc.setLayout(new BorderLayout(0, 11));
 
-        filePane = new VFSFilePane(new MetalVFSFileChooserUIAccessor());
+        filePane = new VFSFilePane<FileObject>(new MetalVFSFileChooserUIAccessor());
         fc.addPropertyChangeListener(filePane);
 
         updateUseShellFolder();
@@ -455,15 +456,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private void updateUseShellFolder() {
         // Decide whether to use the ShellFolder class to populate shortcut
         // panel and combobox.
-        VFSJFileChooser fc = getFileChooser();
-        Boolean prop = (Boolean) fc.getClientProperty(
-                "FileChooser.useShellFolder");
+        VFSJFileChooser<FileObject> fc = getFileChooser();
+        Boolean prop = (Boolean) fc.getClientProperty("FileChooser.useShellFolder");
 
         if (prop != null) {
             useShellFolder = prop.booleanValue();
         } else {
-            useShellFolder = fc.getFileSystemView()
-                    .equals(AbstractVFSFileSystemView.getFileSystemView());
+            useShellFolder = true;
         }
     }
 
@@ -684,30 +683,32 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
 
     /* The following methods are used by the PropertyChange Listener */
     private void doSelectedFileChanged(PropertyChangeEvent e) {
+        @SuppressWarnings("unchecked")
         FileObject f = (FileObject) e.getNewValue();
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
 
         if ((f != null)
-                && ((fc.isFileSelectionEnabled() && !VFSUtils.isDirectory(f))
-                || (VFSUtils.isDirectory(f) && fc.isDirectorySelectionEnabled()))) {
+                && ((fc.isFileSelectionEnabled() && !fc.isTraversable(f))
+                || (fc.isTraversable(f) && fc.isDirectorySelectionEnabled()))) {
             setFileName(fileNameString(f));
         }
     }
 
     private void doSelectedFilesChanged(PropertyChangeEvent e) {
+        @SuppressWarnings("unchecked")
         FileObject[] files = (FileObject[]) e.getNewValue();
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
 
         if ((files != null) && (files.length > 0)
                 && ((files.length > 1) || fc.isDirectorySelectionEnabled()
-                || !VFSUtils.isDirectory(files[0]))) {
+                || !fc.isTraversable(files[0]))) {
             setFileName(fileNameString(files));
         }
     }
 
     private void doDirectoryChanged(PropertyChangeEvent e) {
-        VFSJFileChooser fc = getFileChooser();
-        AbstractVFSFileSystemView fsv = fc.getFileSystemView();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
+        VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
 
         clearIconCache();
 
@@ -748,7 +749,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
 
         clearIconCache();
 
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
         FileObject currentDirectory = fc.getCurrentDirectory();
 
         if ((currentDirectory != null) && fc.isDirectorySelectionEnabled()
@@ -771,10 +772,10 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     private void doAccessoryChanged(PropertyChangeEvent e) {
         if (getAccessoryPanel() != null) {
             if (e.getOldValue() != null) {
-                getAccessoryPanel().remove((JComponent) e.getOldValue());
+                getAccessoryPanel().remove((Component) e.getOldValue());
             }
 
-            JComponent accessory = (JComponent) e.getNewValue();
+            Component accessory = (Component) e.getNewValue();
 
             if (accessory != null) {
                 getAccessoryPanel().add(accessory, BorderLayout.CENTER);
@@ -783,13 +784,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     }
 
     private void doApproveButtonTextChanged(PropertyChangeEvent e) {
-        VFSJFileChooser m_chooser = getFileChooser();
+        VFSJFileChooser<FileObject> m_chooser = getFileChooser();
         approveButton.setText(getApproveButtonText(m_chooser));
         approveButton.setToolTipText(getApproveButtonToolTipText(m_chooser));
     }
 
     private void doDialogTypeChanged(PropertyChangeEvent e) {
-        VFSJFileChooser m_chooser = getFileChooser();
+        VFSJFileChooser<FileObject> m_chooser = getFileChooser();
         approveButton.setText(getApproveButtonText(m_chooser));
         approveButton.setToolTipText(getApproveButtonToolTipText(m_chooser));
 
@@ -858,7 +859,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
                     doControlButtonsChanged(e);
                 } else if (s.equals("componentOrientation")) {
                     ComponentOrientation o = (ComponentOrientation) e.getNewValue();
-                    VFSJFileChooser cc = (VFSJFileChooser) e.getSource();
+                    VFSJFileChooser<FileObject> cc = (VFSJFileChooser) e.getSource();
 
                     if (o != (ComponentOrientation) e.getOldValue()) {
                         cc.applyComponentOrientation(o);
@@ -893,12 +894,12 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     }
 
     @Override
-    public void ensureFileIsVisible(VFSJFileChooser fc, FileObject f) {
+    public void ensureFileIsVisible(VFSJFileChooser<FileObject> fc, FileObject f) {
         filePane.ensureFileIsVisible(fc, f);
     }
 
     @Override
-    public void rescanCurrentDirectory(VFSJFileChooser fc) {
+    public void rescanCurrentDirectory(VFSJFileChooser<FileObject> fc) {
         filePane.rescanCurrentDirectory();
     }
 
@@ -958,8 +959,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
      * @param fc
      * @return
      */
-    protected ListCellRenderer createDirectoryComboBoxRenderer(
-            VFSJFileChooser fc) {
+    protected ListCellRenderer createDirectoryComboBoxRenderer(VFSJFileChooser<FileObject> fc) {
         return new DirectoryComboBoxRenderer();
     }
 
@@ -970,8 +970,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
      * @param fc
      * @return
      */
-    protected DirectoryComboBoxModel createDirectoryComboBoxModel(
-            VFSJFileChooser fc) {
+    protected DirectoryComboBoxModel createDirectoryComboBoxModel(VFSJFileChooser<FileObject> fc) {
         return new DirectoryComboBoxModel();
     }
 
@@ -993,7 +992,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
      * @param e
      */
     public void valueChanged(ListSelectionEvent e) {
-        VFSJFileChooser fc = getFileChooser();
+        VFSJFileChooser<FileObject> fc = getFileChooser();
         FileObject f = fc.getSelectedFile();
 
         if (!e.getValueIsAdjusting() && (f != null)
@@ -1003,7 +1002,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     }
 
     @Override
-    protected JButton getApproveButton(VFSJFileChooser fc) {
+    protected JButton getApproveButton(VFSJFileChooser<FileObject> fc) {
         return approveButton;
     }
 
@@ -1024,12 +1023,12 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
             implements VFSFileChooserUIAccessorIF {
 
         @Override
-        public VFSJFileChooser getFileChooser() {
+        public VFSJFileChooser<FileObject> getFileChooser() {
             return chooser;
         }
 
         @Override
-        public BasicVFSDirectoryModel getModel() {
+        public BasicVFSDirectoryModel<FileObject> getModel() {
             return MetalVFSFileChooserUI.this.getModel();
         }
 
@@ -1129,11 +1128,11 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     public final class DirectoryComboBoxModel extends AbstractListModel
             implements ComboBoxModel {
 
-        List<FileObject> directories = new CopyOnWriteArrayList<FileObject>();
+        private final List<FileObject> directories = new CopyOnWriteArrayList<FileObject>();
         int[] depths = null;
         FileObject selectedDirectory = null;
-        VFSJFileChooser chooser = getFileChooser();
-        AbstractVFSFileSystemView fsv = chooser.getFileSystemView();
+        private final VFSJFileChooser<FileObject> chooser = getFileChooser();
+        private final VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
 
         public DirectoryComboBoxModel() {
             // Add the current directory to the model, and make it the
@@ -1205,13 +1204,13 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
             final int count = depths.length;
 
             for (int i = 0; i < count; i++) {
-                FileObject dir = (FileObject) directories.get(i);
+                FileObject dir = directories.get(i);
                 FileObject parent = VFSUtils.getParentDirectory(dir);
                 depths[i] = 0;
 
                 if (parent != null) {
                     for (int j = i - 1; j >= 0; j--) {
-                        if (parent.equals((FileObject) directories.get(j))) {
+                        if (parent.equals(directories.get(j))) {
                             depths[i] = depths[j] + 1;
 
                             break;
@@ -1259,7 +1258,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
     public final class FilterComboBoxModel extends AbstractListModel
             implements ComboBoxModel, PropertyChangeListener {
 
-        protected AbstractVFSFileFilter[] filters;
+        private VFSFileFilter<? super FileObject>[] filters;
 
         protected FilterComboBoxModel() {
             super();
@@ -1272,7 +1271,7 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
 
             if (prop.equals(
                     VFSJFileChooserConstants.CHOOSABLE_FILE_FILTER_CHANGED_PROPERTY)) {
-                filters = (AbstractVFSFileFilter[]) e.getNewValue();
+                filters = (VFSFileFilter<? super FileObject>[]) e.getNewValue();
                 fireContentsChanged(this, -1, -1);
             } else if (prop.equals(
                     VFSJFileChooserConstants.FILE_FILTER_CHANGED_PROPERTY)) {
@@ -1283,24 +1282,24 @@ public class MetalVFSFileChooserUI extends BasicVFSFileChooserUI {
         @Override
         public void setSelectedItem(Object filter) {
             if (filter != null) {
-                getFileChooser().setFileFilter((AbstractVFSFileFilter) filter);
+                getFileChooser().setFileFilter((VFSFileFilter<? super FileObject>) filter);
                 fireContentsChanged(this, -1, -1);
             }
         }
 
         @Override
-        public Object getSelectedItem() {
+        public VFSFileFilter<? super FileObject> getSelectedItem() {
             // Ensure that the current filter is in the list.
             // NOTE: we shouldnt' have to do this, since VFSJFileChooser adds
             // the filter to the choosable filters list when the filter
             // is set. Lets be paranoid just in case someone overrides
             // setFileFilter in VFSJFileChooser.
-            AbstractVFSFileFilter currentFilter = getFileChooser()
+            VFSFileFilter<? super FileObject> currentFilter = getFileChooser()
                     .getFileFilter();
             boolean found = false;
 
             if (currentFilter != null) {
-                for (AbstractVFSFileFilter aFilter : filters) {
+                for (VFSFileFilter<? super FileObject> aFilter : filters) {
                     if (aFilter == currentFilter) {
                         found = true;
                     }

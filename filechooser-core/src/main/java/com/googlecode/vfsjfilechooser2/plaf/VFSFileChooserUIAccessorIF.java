@@ -24,26 +24,25 @@ import javax.swing.Action;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionListener;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * Interface for a delegate class of the FileChooserUI
  * @author Yves Zoundi <yveszoundi at users dot sf dot net>
  * @version 0.0.1
  */
-public interface VFSFileChooserUIAccessorIF {
+public interface VFSFileChooserUIAccessorIF<FileObject> {
 
     /**
      *
      * @return
      */
-    public VFSJFileChooser getFileChooser();
+    public VFSJFileChooser<FileObject> getFileChooser();
 
     /**
      *
      * @return
      */
-    public BasicVFSDirectoryModel getModel();
+    public BasicVFSDirectoryModel<FileObject> getModel();
 
     /**
      *
