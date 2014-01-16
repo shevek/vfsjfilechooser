@@ -48,7 +48,7 @@ public final class Main extends JFrame implements Runnable {
     private String buttonText;
 
     /** Create a new instance of this class */
-    public Main() {
+    public Main() throws Exception {
         // create the frame with a default title
         super("VFSJFileChooser Demo");
 
@@ -61,7 +61,7 @@ public final class Main extends JFrame implements Runnable {
     /**
      * Setup the GUI components
      */
-    private void createGUI() {
+    private void createGUI() throws Exception {
         fileChooser = new CommonsVfs2JFileChooser(); // create a file dialog
 
         // configure the file dialog

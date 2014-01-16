@@ -31,7 +31,6 @@ import com.googlecode.vfsjfilechooser2.filepane.VFSFilePane;
 import com.googlecode.vfsjfilechooser2.plaf.AbstractVFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.utils.SwingCommonsUtilities;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
@@ -47,8 +46,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -148,8 +145,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
     private FileObject directory = null;
     private PropertyChangeListener propertyChangeListener = null;
     private AcceptAllFileFilter acceptAllFileFilter = new AcceptAllFileFilter();
-    private VFSFileFilter<FileObject> actualFileFilter = null;
-    private GlobFileFilter<FileObject> globFilter = null;
+    private VFSFileFilter<? super FileObject> actualFileFilter = null;
     private BasicVFSDirectoryModel<FileObject> model = null;
     private BasicVFSFileView fileView = new BasicVFSFileView();
     private boolean usesSingleFilePane;
@@ -633,10 +629,10 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
             VFSJFileChooser<FileObject> chooser = getFileChooser();
             VFSFileFilter<? super FileObject> currentFilter = chooser.getFileFilter();
 
-            if ((currentFilter != null) && currentFilter.equals(globFilter)) {
-                chooser.setFileFilter(actualFileFilter);
-                chooser.removeChoosableFileFilter(globFilter);
-            }
+            // if ((currentFilter != null) && currentFilter.equals(globFilter)) {
+            chooser.setFileFilter(actualFileFilter);
+            // chooser.removeChoosableFileFilter(globFilter);
+            // }
 
             actualFileFilter = null;
         }
@@ -652,12 +648,13 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
 
     public void changeDirectory(FileObject dir) {
         VFSJFileChooser<FileObject> fc = getFileChooser();
+        VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
 
         fc.setCurrentDirectory(dir);
 
         if ((fc.getFileSelectionMode() == SELECTION_MODE.FILES_AND_DIRECTORIES)
                 && fc.getFileSystemView().isFileSystem(dir)) {
-            setFileName(dir.getName().getBaseName());
+            setFileName(fsv.getName(dir));
         }
     }
 
@@ -737,7 +734,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                         && (fsm == SELECTION_MODE.FILES_ONLY);
 
                 if (chooser.isMultiSelectionEnabled()) {
-                    FileObject[] files = new FileObject[0];
+                    FileObject[] files = fsv.newFileObjectArray();
 
                     Object[] objects = list.getSelectedValues();
 
@@ -756,7 +753,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
 
                             for (int i = 0; i < count; i++) {
                                 FileObject f = (FileObject) objects[i];
-                                boolean isDir = VFSUtils.isDirectory(f);
+                                boolean isDir = chooser.isTraversable(f);
 
                                 if ((chooser.isFileSelectionEnabled()
                                         && !isDir)
@@ -767,7 +764,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                             }
 
                             if (!fList.isEmpty()) {
-                                files = fList.toArray(new FileObject[fList.size()]);
+                                files = fList.toArray(fsv.newFileObjectArray());
                             }
 
                             setDirectorySelected(false);
@@ -857,9 +854,10 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
             }
 
             VFSJFileChooser<FileObject> fc = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
             FileObject currentDirectory = fc.getCurrentDirectory();
 
-            if (!VFSUtils.exists(currentDirectory)) {
+            if (!fsv.exists(currentDirectory)) {
                 JOptionPane.showMessageDialog(fc,
                         newFolderParentDoesntExistText,
                         newFolderParentDoesntExistTitleText,
@@ -875,7 +873,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                         .createNewFolder(currentDirectory);
 
                 if (fc.isMultiSelectionEnabled()) {
-                    fc.setSelectedFiles(new FileObject[]{newFolder});
+                    fc.setSelectedFiles(fsv.newFileObjectArray(newFolder));
                 } else {
                     fc.setSelectedFile(newFolder);
                 }
@@ -904,19 +902,8 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
         @Override
         public void actionPerformed(ActionEvent e) {
             VFSJFileChooser<FileObject> fc = getFileChooser();
-            FileObject currentDir = fc.getCurrentDirectory();
-
-            if (currentDir instanceof LocalFile) {
-                changeDirectory(fc.getFileSystemView().getHomeDirectory());
-            } else {
-                try {
-                    changeDirectory(fc.getCurrentDirectory().getFileSystem()
-                            .getRoot());
-                } catch (FileSystemException ex) {
-                    Logger.getLogger(BasicVFSFileChooserUI.class.getName())
-                            .log(Level.SEVERE, null, ex);
-                }
-            }
+            VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
+            changeDirectory(fsv.getDefaultDirectory());
         }
     }
 
@@ -964,6 +951,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
             }
 
             VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
 
             String filename = getFileName();
             VFSFileSystemView<FileObject> fs = chooser.getFileSystemView();
@@ -1027,7 +1015,6 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                     } while (filename.length() > 0);
 
                     if (!fList.isEmpty()) {
-                        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
                         selectedFiles = fList.toArray(fsv.newFileObjectArray());
                     }
 
@@ -1036,11 +1023,11 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                     /// ZOUNDI MARK
                     selectedFile = fs.createFileObject(filename);
 
-                    if (!VFSUtils.exists(selectedFile)) {
-                        selectedFile = VFSUtils.resolveFileObject(getFileName());
+                    if (!fsv.exists(selectedFile)) {
+                        selectedFile = fsv.createFileObject(getFileName());
 
                         if ((selectedFile == null)
-                                || !VFSUtils.exists(selectedFile)) {
+                                || !fsv.exists(selectedFile)) {
                             selectedFile = fs.getChild(dir, filename);
                         }
                     }
@@ -1048,24 +1035,18 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                     // check for wildcard pattern
                     VFSFileFilter<? super FileObject> currentFilter = chooser.getFileFilter();
 
-                    if (!VFSUtils.exists(selectedFile)
+                    if (!fsv.exists(selectedFile)
                             && isGlobPattern(filename)) {
-                        changeDirectory(VFSUtils.getParentDirectory(
-                                selectedFile));
-
-                        if (globFilter == null) {
-                            globFilter = new GlobFileFilter();
-                        }
+                        changeDirectory(fsv.getParentDirectory(selectedFile));
 
                         try {
-                            globFilter.setPattern(selectedFile.getName()
-                                    .getBaseName());
+                            GlobFileFilter<FileObject> globFilter = new GlobFileFilter<FileObject>(fsv, filename);
 
                             if (!(currentFilter instanceof GlobFileFilter)) {
                                 actualFileFilter = currentFilter;
                             }
 
-                            chooser.setFileFilter(null);
+                            // chooser.setFileFilter(null);
                             chooser.setFileFilter(globFilter);
 
                             return;
@@ -1077,8 +1058,9 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                     resetGlobFilter();
 
                     // Check for directory change action
+                    // TODO: It's either traversable or it isn't.
                     boolean isDir = ((selectedFile != null)
-                            && VFSUtils.isDirectory(selectedFile));
+                            && chooser.isTraversable(selectedFile));
                     boolean isTrav = ((selectedFile != null)
                             && chooser.isTraversable(selectedFile));
                     boolean isDirSelEnabled = chooser.isDirectorySelectionEnabled();
@@ -1092,7 +1074,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                         return;
                     } else if ((isDir || !isFileSelEnabled)
                             && (!isDir || !isDirSelEnabled)
-                            && (!isDirSelEnabled || VFSUtils.exists(selectedFile))) {
+                            && (!isDirSelEnabled || fsv.exists(selectedFile))) {
                         selectedFile = null;
                     }
                 }
@@ -1102,7 +1084,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
                 if ((selectedFiles != null)
                         || chooser.isMultiSelectionEnabled()) {
                     if (selectedFiles == null) {
-                        selectedFiles = new FileObject[]{selectedFile};
+                        selectedFiles = fsv.newFileObjectArray(selectedFile);
                     }
 
                     chooser.setSelectedFiles(selectedFiles);
@@ -1173,16 +1155,18 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
 
         @Override
         public String getName(FileObject f) {
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             // Note: Returns display name rather than file name
             String fileName = null;
 
             if (f != null) {
-                fileName = f.getName().getBaseName();
+                fileName = fsv.getName(f);
             }
 
             if (fileName != null) {
                 if (fileName.trim().equals("")) {
-                    fileName = f.getName().toString();
+                    fileName = fsv.getUrl(f);
                 }
             }
 
@@ -1191,16 +1175,19 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
 
         @Override
         public String getDescription(FileObject f) {
-            return f.getName().getBaseName();
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+            return fsv.getName(f);
         }
 
         @Override
         public String getTypeDescription(FileObject f) {
-            String type = getFileChooser().getFileSystemView()
-                    .getSystemTypeDescription(f);
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+            String type = fsv.getSystemTypeDescription(f);
 
             if (type == null) {
-                if (VFSUtils.isDirectory(f)) {
+                if (chooser.isTraversable(f)) {
                     type = directoryDescriptionText;
                 } else {
                     type = fileDescriptionText;
@@ -1253,7 +1240,9 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
         }
 
         public Boolean isHidden(FileObject f) {
-            return VFSUtils.isHiddenFile(f);
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+            return fsv.isHiddenFile(f);
         }
     }
 }

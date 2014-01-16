@@ -17,10 +17,12 @@
  */
 package com.googlecode.vfsjfilechooser2.plaf.basic;
 
+import com.googlecode.vfsjfilechooser2.VFSException;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
+import com.googlecode.vfsjfilechooser2.utils.FileObjectComparatorFactory;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -92,8 +94,9 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
             Object old = e.getOldValue();
 
             if (old instanceof BasicVFSFileChooserUI) {
-                BasicVFSFileChooserUI ui = (BasicVFSFileChooserUI) old;
-                BasicVFSDirectoryModel model = ui.getModel();
+                @SuppressWarnings("unchecked")
+                BasicVFSFileChooserUI<FileObject> ui = (BasicVFSFileChooserUI<FileObject>) old;
+                BasicVFSDirectoryModel<FileObject> model = ui.getModel();
 
                 if (model != null) {
                     model.invalidateFileCache();
@@ -182,11 +185,12 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
         aLock.writeLock().lock();
 
         try {
-            oldFile.moveTo(newFile);
+            VFSFileSystemView<FileObject> fsv = filechooser.getFileSystemView();
+            fsv.rename(oldFile, newFile);
             validateFileCache();
 
             return true;
-        } catch (Exception e) {
+        } catch (VFSException e) {
             return false;
         } finally {
             aLock.writeLock().unlock();
@@ -210,7 +214,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      * @param o
      * @return
      */
-    public boolean contains(Object o) {
+    public boolean contains(FileObject o) {
         return fileCache.contains(o);
     }
 
@@ -218,7 +222,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      * @param o
      * @return
      */
-    public int indexOf(Object o) {
+    public int indexOf(FileObject o) {
         return fileCache.indexOf(o);
     }
 
@@ -242,7 +246,9 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      * @param v
      */
     protected void sort(List<FileObject> v) {
-        Collections.sort(v, fileNameComparator);
+        VFSFileSystemView<FileObject> fsv = filechooser.getFileSystemView();
+        Comparator<FileObject> comparator = FileObjectComparatorFactory.newFileNameComparator(fsv, true);
+        Collections.sort(v, comparator);
     }
 
     /**
@@ -396,8 +402,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
                 ui.getCombo().setSelectedItem(cwd);
             }
 
-            FileObject[] list = fileSystem.getFiles(cwd,
-                    filechooser.isFileHidingEnabled());
+            FileObject[] list = fileSystem.getChildren(cwd, filechooser.isFileHidingEnabled());
 
             List<FileObject> acceptsList = new ArrayList<FileObject>(list.length);
 
@@ -542,7 +547,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
 
         private final List<FileObject> addFiles;
         private final List<FileObject> remFiles;
-        private boolean doFire = true;
+        private volatile boolean doFire = true;
         private final int fid;
         private int addStart = 0;
         private int remStart = 0;
@@ -557,13 +562,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
         }
 
         void cancel() {
-            aLock.writeLock().lock();
-
-            try {
-                doFire = false;
-            } finally {
-                aLock.writeLock().unlock();
-            }
+            doFire = false;
         }
 
         @Override

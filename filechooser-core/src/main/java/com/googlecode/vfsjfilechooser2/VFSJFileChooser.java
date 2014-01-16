@@ -23,7 +23,6 @@ import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileView;
 import com.googlecode.vfsjfilechooser2.plaf.VFSFileChooserUI;
 import com.googlecode.vfsjfilechooser2.plaf.metal.MetalVFSFileChooserUI;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -142,8 +141,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      * Constructs a <code>VFSJFileChooser</code> using the given
      * <code>FileSystemView</code>.
      */
-    public VFSJFileChooser(
-            @Nonnull VFSFileSystemView<FileObject> fsv) {
+    public VFSJFileChooser(@Nonnull VFSFileSystemView<FileObject> fsv) {
         this((FileObject) null, fsv);
     }
 
@@ -151,8 +149,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      * Constructs a <code>VFSJFileChooser</code> using the given current directory
      * and <code>FileSystemView</code>.
      */
-    public VFSJFileChooser(
-            @CheckForNull FileObject currentDirectory,
+    public VFSJFileChooser(@CheckForNull FileObject currentDirectory,
             @Nonnull VFSFileSystemView<FileObject> fsv) {
         setup(fsv);
         setCurrentDirectory(currentDirectory);
@@ -196,7 +193,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      * Performs common constructor initialization and setup.
      * @param view
      */
-    protected final void setup(VFSFileSystemView<FileObject> view) {
+    protected final void setup(@Nonnull VFSFileSystemView<FileObject> view) {
         installShowFilesListener();
 
         setFileSystemView(view);
@@ -293,6 +290,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      * @see #setSelectedFile
      * @return the selected file
      */
+    @CheckForNull
     public FileObject getSelectedFile() {
         return selectedFile;
     }
@@ -310,7 +308,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      *
      * @param file the selected file
      */
-    public void setSelectedFile(FileObject file) {
+    public void setSelectedFile(@CheckForNull FileObject file) {
         FileObject oldValue = selectedFile;
         selectedFile = file;
 
@@ -333,6 +331,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      * Returns a list of selected files if the file chooser is
      * set to allow multiple selection.
      */
+    @Nonnull
     public FileObject[] getSelectedFiles() {
         if (selectedFiles == null) {
             return getFileSystemView().newFileObjectArray();
@@ -349,7 +348,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
      *       bound: true
      * description: The list of selected files if the chooser is in multiple selection mode.
      */
-    public void setSelectedFiles(FileObject[] selectedFiles) {
+    public void setSelectedFiles(@CheckForNull FileObject[] selectedFiles) {
         FileObject[] oldValue = this.selectedFiles;
 
         if ((selectedFiles == null) || (selectedFiles.length == 0)) {
@@ -361,8 +360,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
             setSelectedFile(this.selectedFiles[0]);
         }
 
-        firePropertyChange(SELECTED_FILES_CHANGED_PROPERTY, oldValue,
-                selectedFiles);
+        firePropertyChange(SELECTED_FILES_CHANGED_PROPERTY, oldValue, selectedFiles);
     }
 
     /**
@@ -400,7 +398,8 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
         FileObject oldValue = currentDirectory;
 
         // getFileSystemView().isTraversable(dir)
-        if ((dir != null) && !VFSUtils.exists(dir)) {
+        VFSFileSystemView<FileObject> fsv = getFileSystemView();
+        if ((dir != null) && !fsv.exists(dir)) {
             dir = currentDirectory;
         }
 
@@ -415,6 +414,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
             }
         }
 
+        // TODO: if !dir.exists() && currentDirectory == null, we NPE here.
         FileObject prev = null;
 
         while (!isTraversable(dir) && (prev != dir)) {
@@ -424,8 +424,7 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
 
         currentDirectory = dir;
 
-        firePropertyChange(DIRECTORY_CHANGED_PROPERTY, oldValue,
-                currentDirectory);
+        firePropertyChange(DIRECTORY_CHANGED_PROPERTY, oldValue, currentDirectory);
     }
 
     /**
@@ -438,7 +437,9 @@ public class VFSJFileChooser<FileObject> extends JComponent implements Accessibl
         selectedFile = null;
 
         FileObject oldValue = getCurrentDirectory();
-        setCurrentDirectory(getFileSystemView().getParentDirectory(oldValue));
+        FileObject newValue = getFileSystemView().getParentDirectory(oldValue);
+        if (newValue != null)
+            setCurrentDirectory(newValue);
     }
 
     /**

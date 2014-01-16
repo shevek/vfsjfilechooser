@@ -18,10 +18,8 @@
  */
 package com.googlecode.vfsjfilechooser2.filechooser;
 
-import com.googlecode.vfsjfilechooser2.VFSException;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
 import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
-import java.text.MessageFormat;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.UIManager;
@@ -33,38 +31,42 @@ import javax.swing.UIManager;
  */
 public abstract class AbstractVFSFileSystemView<FileObject> implements VFSFileSystemView<FileObject> {
 
-    /*
-    public FileObject[] newArray(FileObject... args) {
-        return null;
-    }
-    */
+    protected static final String newFolderString = VFSResources.getMessage(
+            "VFSJFileChooser.other.newFolder");
+    protected static final String newFolderNextString = VFSResources.getMessage(
+            "VFSJFileChooser.other.newFolder.subsequent");
 
     /*
-    //static FileSystemView macFileSystemView = null;
-    static AbstractVFSFileSystemView genericFileSystemView = null;
-    static boolean useSystemExtensionsHiding = false;
+     public FileObject[] newArray(FileObject... args) {
+     return null;
+     }
+     */
 
-    public static AbstractVFSFileSystemView getFileSystemView() {
-        useSystemExtensionsHiding = UIManager.getDefaults()
-                .getBoolean("FileChooser.useSystemExtensionHiding");
-        UIManager.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent e) {
-                if (e.getPropertyName().equals("lookAndFeel")) {
-                    useSystemExtensionsHiding = UIManager.getDefaults()
-                            .getBoolean("FileChooser.useSystemExtensionHiding");
-                }
-            }
-        });
+    /*
+     //static FileSystemView macFileSystemView = null;
+     static AbstractVFSFileSystemView genericFileSystemView = null;
+     static boolean useSystemExtensionsHiding = false;
 
-        if (genericFileSystemView == null) {
-            genericFileSystemView = new GenericFileSystemView();
-        }
+     public static AbstractVFSFileSystemView getFileSystemView() {
+     useSystemExtensionsHiding = UIManager.getDefaults()
+     .getBoolean("FileChooser.useSystemExtensionHiding");
+     UIManager.addPropertyChangeListener(new PropertyChangeListener() {
+     @Override
+     public void propertyChange(PropertyChangeEvent e) {
+     if (e.getPropertyName().equals("lookAndFeel")) {
+     useSystemExtensionsHiding = UIManager.getDefaults()
+     .getBoolean("FileChooser.useSystemExtensionHiding");
+     }
+     }
+     });
 
-        return genericFileSystemView;
-    }
-    */
+     if (genericFileSystemView == null) {
+     genericFileSystemView = new GenericFileSystemView();
+     }
 
+     return genericFileSystemView;
+     }
+     */
     /**
      * Determines if the given file is a root in the navigatable tree(s).
      * Examples: Windows 98 has one root, the Desktop folder. DOS has one root
@@ -142,7 +144,7 @@ public abstract class AbstractVFSFileSystemView<FileObject> implements VFSFileSy
     @Override
     public Icon getSystemIcon(FileObject f) {
         if (f != null) {
-            return UIManager.getIcon(isTraversable(f)
+            return UIManager.getIcon(isDirectory(f)
                     ? "FileView.directoryIcon" : "FileView.fileIcon");
         } else {
             return null;
@@ -273,7 +275,7 @@ public abstract class AbstractVFSFileSystemView<FileObject> implements VFSFileSy
      */
     @Override
     public FileObject getHomeDirectory() {
-        return createFileObject(System.getProperty("user.dir"));
+        return createFileObject(System.getProperty("user.home"));
     }
 
     /**
@@ -288,99 +290,9 @@ public abstract class AbstractVFSFileSystemView<FileObject> implements VFSFileSy
         return createFileObject(System.getProperty("user.dir"));
     }
 
-    /**
-     * Returns a File object constructed in dir from the given filename.
-     * @param dir
-     * @param filename
-     * @return
-     */
     @Override
-    public FileObject createFileObject(FileObject dir, String filename) {
-        if (dir == null) {
-            return createFileObject(filename);
-        } else {
-            return VFSUtils.resolveFileObject(dir, filename);
-        }
+    public boolean isTraversable(FileObject f) {
+        return isDirectory(f);
     }
 
-    /**
-     * Returns the parent directory of <code>dir</code>.
-     * @param dir the <code>File</code> being queried
-     * @return the parent directory of <code>dir</code>, or
-     *   <code>null</code> if <code>dir</code> is <code>null</code>
-     */
-    @Override
-    public FileObject getParentDirectory(FileObject dir) {
-        if ((dir != null) && exists(dir)) {
-            FileObject parentDir = VFSUtils.getParentDirectory(dir);
-
-            if (parentDir == null) {
-                return dir;
-            } else {
-                return parentDir;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Creates a new <code>File</code> object for <code>f</code> with correct
-     * behavior for a file system root directory.
-     *
-     * @param f a <code>File</code> object representing a file system root
-     *          directory, for example "/" on Unix or "C:\" on Windows.
-     * @return a new <code>File</code> object
-     * @since 1.4
-     */
-    protected FileObject createFileSystemRoot(FileObject f) {
-        return VFSUtils.createFileSystemRoot(f);
-    }
-
-    /**
-     * Fallthrough FileSystemView in case we can't determine the OS.
-     */
-    static class GenericFileSystemView<FileObject> extends AbstractVFSFileSystemView<FileObject> {
-
-        private static final String newFolderString = VFSResources.getMessage(
-                "VFSJFileChooser.other.newFolder");
-        private static final String newFolderNextString = VFSResources.getMessage(
-                "VFSJFileChooser.other.newFolder.subsequent");
-
-        /**
-         * Creates a new folder with a default folder name.
-         */
-        @Override
-        public FileObject createNewFolder(FileObject containingDir)
-                throws VFSException {
-            if (containingDir == null) {
-                throw new VFSException(
-                        "Trying to create a new folder into a non existing folder");
-            }
-
-            FileObject newFolder = null;
-
-            // Using NT's default folder name
-            newFolder = createFileObject(containingDir, newFolderString);
-
-            // avoid creating a folder called New Folder so we loop as in the 
-            // Windows FileSystemView
-            for (int i = 1; exists(newFolder); i++) {
-                newFolder = createFileObject(containingDir,
-                        MessageFormat.format(newFolderNextString,
-                                new Object[]{i}));
-            }
-
-            // if the folder already exists throw an exception
-            if (exists(newFolder)) {
-                throw new VFSException("Directory already exists:" + getUrl(newFolder));
-            } else {
-                // create the folder 
-                newFolder.createFolder();
-            }
-
-            // return the created folder if no exception is thrown
-            return newFolder;
-        }
-    }
 }

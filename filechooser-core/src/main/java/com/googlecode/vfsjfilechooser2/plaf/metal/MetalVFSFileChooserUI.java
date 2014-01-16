@@ -24,7 +24,6 @@ import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.DIALOG_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
 import com.googlecode.vfsjfilechooser2.constants.VFSJFileChooserConstants;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileFilter;
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
@@ -78,8 +77,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.ActionMapUIResource;
 import javax.swing.plaf.ComponentUI;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 
 /**
  * <p>The MetalFileChooserUI implementation using commons-VFS
@@ -105,8 +102,7 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
     private static final Dimension MIN_SIZE = new Dimension(MIN_WIDTH, MIN_HEIGHT);
     private static final int LIST_PREF_WIDTH = 405;
     private static final int LIST_PREF_HEIGHT = 135;
-    private static final Dimension LIST_PREF_SIZE = new Dimension(LIST_PREF_WIDTH,
-            LIST_PREF_HEIGHT);
+    private static final Dimension LIST_PREF_SIZE = new Dimension(LIST_PREF_WIDTH, LIST_PREF_HEIGHT);
     private JLabel lookInLabel;
     private JComboBox directoryComboBox;
     private DirectoryComboBoxModel directoryComboBoxModel;
@@ -635,24 +631,17 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
         if (fileObject == null) {
             return null;
         } else {
-            VFSJFileChooser fc = getFileChooser();
+            VFSJFileChooser<FileObject> fc = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
 
             if ((fc.isDirectorySelectionEnabled()
                     && !fc.isFileSelectionEnabled())
                     || (fc.isDirectorySelectionEnabled()
                     && fc.isFileSelectionEnabled()
                     && fc.getFileSystemView().isFileSystemRoot(fileObject))) {
-                String url = null;
-
-                try {
-                    url = fileObject.getURL().toExternalForm();
-                } catch (FileSystemException ex) {
-                    ex.printStackTrace();
-                }
-
-                return url;
+                return fsv.getUrl(fileObject);
             } else {
-                return fileObject.getName().getBaseName();
+                return fsv.getName(fileObject);
             }
         }
     }
@@ -722,14 +711,7 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
             if (fc.isDirectorySelectionEnabled()
                     && !fc.isFileSelectionEnabled()) {
                 if (fsv.isFileSystem(currentDirectory)) {
-                    String url = null;
-
-                    try {
-                        url = currentDirectory.getURL().toExternalForm();
-                    } catch (FileSystemException e1) {
-                        e1.printStackTrace();
-                    }
-
+                    String url = fsv.getUrl(currentDirectory);
                     setFileName(url);
                 } else {
                     setFileName(null);
@@ -750,19 +732,13 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
         clearIconCache();
 
         VFSJFileChooser<FileObject> fc = getFileChooser();
+        VFSFileSystemView<FileObject> fsv = fc.getFileSystemView();
         FileObject currentDirectory = fc.getCurrentDirectory();
 
         if ((currentDirectory != null) && fc.isDirectorySelectionEnabled()
                 && !fc.isFileSelectionEnabled()
                 && fc.getFileSystemView().isFileSystem(currentDirectory)) {
-            String url = null;
-
-            try {
-                url = currentDirectory.getURL().toExternalForm();
-            } catch (FileSystemException e1) {
-                e1.printStackTrace();
-            }
-
+            String url = fsv.getUrl(currentDirectory);
             setFileName(url);
         } else {
             setFileName(null);
@@ -1173,7 +1149,7 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
 
                 do {
                     path.add(f);
-                } while ((f = VFSUtils.getParentDirectory(f)) != null);
+                } while ((f = fsv.getParentDirectory(f)) != null);
 
                 int pathCount = path.size();
 
@@ -1205,7 +1181,7 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
 
             for (int i = 0; i < count; i++) {
                 FileObject dir = directories.get(i);
-                FileObject parent = VFSUtils.getParentDirectory(dir);
+                FileObject parent = fsv.getParentDirectory(dir);
                 depths[i] = 0;
 
                 if (parent != null) {

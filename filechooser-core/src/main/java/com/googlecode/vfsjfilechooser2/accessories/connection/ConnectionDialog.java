@@ -22,8 +22,8 @@ import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.TitledURLEntry;
 import com.googlecode.vfsjfilechooser2.accessories.connection.Credentials.Builder;
 import com.googlecode.vfsjfilechooser2.filechooser.PopupHandler;
+import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import com.googlecode.vfsjfilechooser2.utils.VFSResources;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -287,9 +287,10 @@ public final class ConnectionDialog<FileObject> extends JDialog {
                                 return;
                             }
 
-                            fo = VFSUtils.resolveFileObject(uri);
+                            VFSFileSystemView<FileObject> fsv = fileChooser.getFileSystemView();
+                            fo = fsv.createFileObject(uri);
 
-                            if ((fo != null) && !fo.exists()) {
+                            if ((fo != null) && !fsv.exists(fo)) {
                                 fo = null;
                             }
                         } catch (Exception err) {
@@ -322,14 +323,15 @@ public final class ConnectionDialog<FileObject> extends JDialog {
 
                         resetFields();
 
+                        VFSFileSystemView<FileObject> fsv = fileChooser.getFileSystemView();
                         if (bookmarksDialog != null) {
-                            String bTitle = fo.getName().getBaseName();
+                            String bTitle = fsv.getName(fo);
 
                             if (bTitle.trim().equals("")) {
-                                bTitle = fo.getName().toString();
+                                bTitle = fsv.getUrl(fo);
                             }
 
-                            String bURL = fo.getName().getURI();
+                            String bURL = fsv.getUrl(fo);
                             bookmarksDialog.getBookmarks()
                                     .add(new TitledURLEntry(bTitle, bURL));
                             bookmarksDialog.getBookmarks().save();

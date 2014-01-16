@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.googlecode.vfsjfilechooser2;
+package org.anarres.filechooser.vfs2;
 
+import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import java.awt.EventQueue;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
@@ -52,7 +53,7 @@ public class VFSJFileChooserTest {
 
             @Override
             public void run() {
-                VFSJFileChooser chooser = new VFSJFileChooser();
+                CommonsVfs2JFileChooser chooser = new CommonsVfs2JFileChooser();
                 chooser.setMultiSelectionEnabled(true);
                 chooser.setCurrentDirectory(root);
                 VFSJFileChooser.RETURN_TYPE ret = chooser.showOpenDialog(null);

@@ -20,7 +20,6 @@ package com.googlecode.vfsjfilechooser2.utils;
 
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
 import java.util.Comparator;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  *
@@ -44,7 +43,7 @@ public final class FileObjectComparatorFactory {
     public static <FileObject> Comparator<FileObject> newFileNameComparator(
             VFSFileSystemView<FileObject> fileSystemView,
             boolean isSortAsc) {
-        Comparator<FileObject> comparator = new FileNameComparator(isSortAsc);
+        Comparator<FileObject> comparator = new FileNameComparator<FileObject>(fileSystemView, isSortAsc);
         return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
@@ -56,7 +55,7 @@ public final class FileObjectComparatorFactory {
     public static <FileObject> Comparator<FileObject> newSizeComparator(
             VFSFileSystemView<FileObject> fileSystemView,
             boolean isSortAsc) {
-        Comparator<FileObject> comparator = new SizeComparator(isSortAsc);
+        Comparator<FileObject> comparator = new SizeComparator<FileObject>(fileSystemView, isSortAsc);
         return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
@@ -68,23 +67,27 @@ public final class FileObjectComparatorFactory {
     public static <FileObject> Comparator<FileObject> newDateComparator(
             VFSFileSystemView<FileObject> fileSystemView,
             boolean isSortAsc) {
-        Comparator<FileObject> comparator = new DateComparator(isSortAsc);
+        Comparator<FileObject> comparator = new DateComparator<FileObject>(fileSystemView, isSortAsc);
         return new DirectoriesFirstComparatorWrapper<FileObject>(fileSystemView, comparator);
     }
 
-    private static class FileNameComparator implements Comparator<FileObject> {
+    private static class FileNameComparator<FileObject> implements Comparator<FileObject> {
 
-        private boolean isSortAsc = true;
+        private final VFSFileSystemView<FileObject> fileSystemView;
+        private final boolean isSortAsc;
 
-        FileNameComparator(boolean isSortAsc) {
+        public FileNameComparator(VFSFileSystemView<FileObject> fileSystemView, boolean isSortAsc) {
+            this.fileSystemView = fileSystemView;
             this.isSortAsc = isSortAsc;
         }
 
         @Override
         public int compare(FileObject a, FileObject b) {
             try {
-                int result = a.getName().toString().toLowerCase()
-                        .compareTo(b.getName().toString().toLowerCase());
+                String sa = fileSystemView.getName(a);
+                String sb = fileSystemView.getName(b);
+                int result = sa.toLowerCase()
+                        .compareTo(sb.toLowerCase());
 
                 if (!isSortAsc) {
                     result = -result;
@@ -133,18 +136,22 @@ public final class FileObjectComparatorFactory {
         }
     }
 
-    private static class SizeComparator implements Comparator<FileObject> {
+    private static class SizeComparator<FileObject> implements Comparator<FileObject> {
 
-        private boolean isSortAsc = true;
+        private final VFSFileSystemView<FileObject> fileSystemView;
+        private final boolean isSortAsc;
 
-        SizeComparator(boolean isSortAsc) {
+        public SizeComparator(VFSFileSystemView<FileObject> fileSystemView, boolean isSortAsc) {
+            this.fileSystemView = fileSystemView;
             this.isSortAsc = isSortAsc;
         }
 
         @Override
         public int compare(FileObject a, FileObject b) {
             try {
-                int result = new Long(a.getContent().getSize()).compareTo(new Long(b.getContent().getSize()));
+                long sa = fileSystemView.getSize(a);
+                long sb = fileSystemView.getSize(b);
+                int result = (sa < sb) ? -1 : ((sa == sb) ? 0 : 1);
 
                 if (!isSortAsc) {
                     result = -result;
@@ -157,18 +164,22 @@ public final class FileObjectComparatorFactory {
         }
     }
 
-    private static class DateComparator implements Comparator<FileObject> {
+    private static class DateComparator<FileObject> implements Comparator<FileObject> {
 
-        private boolean isSortAsc = true;
+        private final VFSFileSystemView<FileObject> fileSystemView;
+        private final boolean isSortAsc;
 
-        DateComparator(boolean isSortAsc) {
+        public DateComparator(VFSFileSystemView<FileObject> fileSystemView, boolean isSortAsc) {
+            this.fileSystemView = fileSystemView;
             this.isSortAsc = isSortAsc;
         }
 
         @Override
         public int compare(FileObject a, FileObject b) {
             try {
-                int result = new Long(a.getContent().getLastModifiedTime()).compareTo(new Long(b.getContent().getLastModifiedTime()));
+                long sa = fileSystemView.getLastModifiedTime(a);
+                long sb = fileSystemView.getLastModifiedTime(b);
+                int result = (sa < sb) ? -1 : ((sa == sb) ? 0 : 1);
 
                 if (!isSortAsc) {
                     result = -result;

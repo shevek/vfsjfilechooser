@@ -111,7 +111,7 @@ import javax.swing.text.Position;
  * @version 0.0.1
  */
 @SuppressWarnings("serial")
-public final class VFSFilePane<FileObject> extends JPanel implements PropertyChangeListener {
+public /* final */ class VFSFilePane<FileObject> extends JPanel implements PropertyChangeListener {
 
     public final static String ACTION_APPROVE_SELECTION = "approveSelection";
     public final static String ACTION_CANCEL = "cancelSelection";
@@ -351,6 +351,10 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
      */
     protected VFSJFileChooser<FileObject> getFileChooser() {
         return fileChooserUIAccessor.getFileChooser();
+    }
+
+    protected VFSFileSystemView<FileObject> getFileSystemView() {
+        return getFileChooser().getFileSystemView();
     }
 
     /**
@@ -674,6 +678,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
                 for (int i = startIndex; backwards ? (i >= 0) : (i < max);
                         i += (backwards ? (-1) : 1)) {
+                    @SuppressWarnings("unchecked")
                     String filename = fileChooser.getName((FileObject) model.getElementAt(i));
 
                     if (filename.regionMatches(true, 0, prefix, 0,
@@ -828,10 +833,11 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
     }
 
     private void applyEdit() {
-        if ((editFile != null) && VFSUtils.exists(editFile)) {
-            VFSJFileChooser<FileObject> chooser = getFileChooser();
+        VFSJFileChooser<FileObject> chooser = getFileChooser();
+        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
+        if ((editFile != null) && fsv.exists(editFile)) {
             String oldDisplayName = chooser.getName(editFile);
-            String oldFileName = editFile.getName().getBaseName();
+            String oldFileName = fsv.getName(editFile);
             String newDisplayName = editCell.getText().trim();
             String newFileName;
 
@@ -847,7 +853,6 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                 }
 
                 // rename
-                VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
                 FileObject f2 = fsv.createFileObject(fsv.getParentDirectory(editFile), newFileName);
 
                 if (fsv.exists(f2)) {
@@ -859,7 +864,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                     if (getModel().renameFile(editFile, f2)) {
                         if (fsv.isParent(chooser.getCurrentDirectory(), f2)) {
                             if (chooser.isMultiSelectionEnabled()) {
-                                chooser.setSelectedFiles(new FileObject[]{f2});
+                                chooser.setSelectedFiles(fsv.newFileObjectArray(f2));
                             } else {
                                 chooser.setSelectedFile(f2);
                             }
@@ -913,7 +918,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                     FileObject newFile = fc.getSelectedFile();
 
                     if ((newFile != null) && !newFile.equals(oldFile)
-                            && VFSUtils.isDirectory(newFile)) {
+                            && getFileChooser().isTraversable(newFile)) {
                         newFolderFile = newFile;
                     }
                 }
@@ -957,7 +962,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                 }
 
                 while (actuallyIndex < selectedFileCount) {
-                    doDeselectFile(selectedObjects[actuallyIndex++]);
+                    doDeselectFile((FileObject) selectedObjects[actuallyIndex++]);
                 }
 
                 // restore the anchor and lead
@@ -1000,7 +1005,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
         }
     }
 
-    private void doDeselectFile(Object fileToDeselect) {
+    private void doDeselectFile(FileObject fileToDeselect) {
         int index = getModel().indexOf(fileToDeselect);
         listSelectionModel.removeSelectionInterval(index, index);
     }
@@ -1310,7 +1315,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
     }
 
     public boolean canWrite(FileObject f) {
-        return VFSUtils.canWrite(f);
+        return getFileChooser().getFileSystemView().isWritable(f);
     }
 
     private void updateDetailsColumnModel(JTable table) {
@@ -1333,14 +1338,14 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
     private DetailsTableModel getDetailsTableModel() {
         if (detailsTableModel == null) {
-            detailsTableModel = new DetailsTableModel(getFileChooser());
+            detailsTableModel = new DetailsTableModel();
         }
 
         return detailsTableModel;
     }
 
     public JPanel createDetailsView() {
-        final VFSJFileChooser chooser = getFileChooser();
+        final VFSJFileChooser<FileObject> chooser = getFileChooser();
 
         JPanel p = new JPanel(new BorderLayout());
 
@@ -1542,6 +1547,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
             if (value == null) {
                 text = "";
             } else if (fsv.getFileObjectType().isInstance(value)) {
+                @SuppressWarnings("unchecked")
                 FileObject file = (FileObject) value;
                 text = chooser.getName(file);
 
@@ -1847,7 +1853,6 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
         public static final long ONE_GB = ONE_KB * ONE_MB;
         protected int sortCol = 0;
         protected boolean isSortAsc = true;
-        private final VFSJFileChooser<FileObject> chooser;
         private final BasicVFSDirectoryModel<FileObject> directoryModel;
         private final List<String> columns;
         private final int columnsCount = 3;
@@ -1858,13 +1863,12 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                     fileNameHeaderText, fileSizeHeaderText, fileDateHeaderText
                 };
 
-        DetailsTableModel(VFSJFileChooser<FileObject> fc) {
-            this.chooser = fc;
+        DetailsTableModel() {
             directoryModel = getModel();
             directoryModel.addListDataListener(this);
             columns = new ArrayList<String>(headers.length);
             df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                    DateFormat.SHORT, chooser.getLocale());
+                    DateFormat.SHORT, getFileChooser().getLocale());
 
             for (String header : headers) {
                 columns.add(header);
@@ -1899,6 +1903,8 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
         private Object getFileColumnValue(FileObject f, int col) {
             Object o = f;
 
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             try {
                 switch (col) {
                     case COLUMN_FILENAME:
@@ -1908,17 +1914,16 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
                     case COLUMN_SIZE:
 
-                        if (VFSUtils.isDirectory(f)) {
+                        if (chooser.isTraversable(f)) {
                             o = null;
                         } else {
-                            o = Long.parseLong("" + f.getContent().getSize());
+                            o = Long.parseLong("" + fsv.getSize(f));
                         }
 
                         break;
 
                     case COLUMN_DATE:
-                        o = f.getContent().getLastModifiedTime() + "";
-                        o = new Date(Long.parseLong(o.toString()));
+                        o = new Date(fsv.getLastModifiedTime(f));
 
                         break;
                 }
@@ -1930,12 +1935,14 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
         @Override
         public void setValueAt(Object value, int row, int col) {
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             if (col == COLUMN_FILENAME) {
                 FileObject f = (FileObject) getValueAt(row, col);
 
                 if (f != null) {
                     String oldDisplayName = chooser.getName(f);
-                    String oldFileName = f.getName().getBaseName();
+                    String oldFileName = fsv.getName(f);
                     String newDisplayName = ((String) value).trim();
                     String newFileName;
 
@@ -1952,7 +1959,6 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                         }
 
                         // rename
-                        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
                         FileObject f2 = fsv.createFileObject(fsv.getParentDirectory(f), newFileName);
 
                         if (!fsv.exists(f2)
@@ -1988,6 +1994,8 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
         @Override
         public void intervalAdded(ListDataEvent e) {
+            VFSJFileChooser<FileObject> chooser = getFileChooser();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             int i0 = e.getIndex0();
             int i1 = e.getIndex1();
 
@@ -1995,7 +2003,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
                 FileObject file = getModel().getElementAt(i0);
 
                 if ((file != null) && (newFolderFile != null)) {
-                    if (file.getName().equals(newFolderFile.getName())) {
+                    if (fsv.getName(file).equals(fsv.getName(newFolderFile))) {
                         if (isShowing())
                             EventQueue.invokeLater(new DelayedSelectionUpdater(file));
                         newFolderFile = null;
@@ -2052,6 +2060,7 @@ public final class VFSFilePane<FileObject> extends JPanel implements PropertyCha
 
                 detailsTable.getTableHeader().repaint();
 
+                VFSJFileChooser<FileObject> chooser = getFileChooser();
                 VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
                 Comparator<FileObject> cpt = FileObjectComparatorFactory.newFileNameComparator(fsv, isSortAsc);
 

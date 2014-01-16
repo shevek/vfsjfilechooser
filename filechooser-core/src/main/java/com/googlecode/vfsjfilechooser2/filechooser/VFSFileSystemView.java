@@ -13,9 +13,11 @@ import javax.swing.filechooser.FileView;
  */
 public interface VFSFileSystemView<FileObject> {
 
+    @Nonnull
     Class<FileObject> getFileObjectType();
 
-    public FileObject[] newFileObjectArray(Object... files);
+    @Nonnull
+    public FileObject[] newFileObjectArray(@Nonnull Object... files);
 
     /**
      * Returns a File object constructed in dir from the given filename.
@@ -23,6 +25,7 @@ public interface VFSFileSystemView<FileObject> {
      * @param filename
      * @return
      */
+    @Nonnull
     FileObject createFileObject(@CheckForNull FileObject dir, @Nonnull String filename);
 
     /**
@@ -30,7 +33,8 @@ public interface VFSFileSystemView<FileObject> {
      * @param path
      * @return
      */
-    FileObject createFileObject(String path);
+    @Nonnull
+    FileObject createFileObject(@Nonnull String path);
 
     /**
      * Creates a new folder with a default folder name.
@@ -38,7 +42,10 @@ public interface VFSFileSystemView<FileObject> {
      * @return
      * @throws org.apache.commons.vfs.FileSystemException
      */
+    @Nonnull
     FileObject createNewFolder(FileObject containingDir) throws VFSException;
+
+    void rename(@Nonnull FileObject from, @Nonnull FileObject to) throws VFSException;
 
     /**
      *
@@ -68,7 +75,8 @@ public interface VFSFileSystemView<FileObject> {
      * @return
      */
     // TODO: -> getChildren()
-    FileObject[] getFiles(FileObject dir, boolean useFileHiding);
+    @Nonnull
+    FileObject[] getChildren(FileObject dir, boolean useFileHiding);
 
     /**
      *
@@ -84,7 +92,7 @@ public interface VFSFileSystemView<FileObject> {
      */
     // TODO: Default impl returns self if no parent. Make -> null and audit.
     @CheckForNull
-    FileObject getParentDirectory(FileObject dir);
+    FileObject getParentDirectory(@Nonnull FileObject dir);
 
     /**
      * Returns all root partitions on this system. For example, on
@@ -94,13 +102,28 @@ public interface VFSFileSystemView<FileObject> {
      * @return
      */
     // TODO: This needs to be user-settable.
-    FileObject[] getRoots(FileObject fo);
+    @Nonnull
+    FileObject[] getRoots(@Nonnull FileObject fo);
 
     /** Full path. */
-    String getUrl(FileObject f);
+    @Nonnull
+    String getUrl(@Nonnull FileObject f);
 
     /** Base-name only. */
-    String getName(FileObject f);
+    @Nonnull
+    String getName(@Nonnull FileObject f);
+
+    boolean exists(@Nonnull FileObject file);
+
+    boolean isFile(@Nonnull FileObject f);
+
+    boolean isDirectory(@Nonnull FileObject f);
+
+    boolean isWritable(@Nonnull FileObject f);
+
+    long getSize(@Nonnull FileObject f);
+
+    long getLastModifiedTime(@Nonnull FileObject f);
 
     /**
      * Name of a file, directory, or folder as it would be displayed in
@@ -144,8 +167,6 @@ public interface VFSFileSystemView<FileObject> {
      * @since 1.4
      */
     String getSystemTypeDescription(FileObject f);
-
-    boolean exists(FileObject file);
 
     /**
      * Used by UI classes to decide whether to display a special icon
@@ -196,6 +217,7 @@ public interface VFSFileSystemView<FileObject> {
      */
     // TODO: Should this come from getSystemIcon() ?
     // TODO: This differs from isRoot() somehow.
+    // TODO: This differs from isDrive() as mountpoints are drives but not roots.
     boolean isFileSystemRoot(FileObject dir);
 
     /**
