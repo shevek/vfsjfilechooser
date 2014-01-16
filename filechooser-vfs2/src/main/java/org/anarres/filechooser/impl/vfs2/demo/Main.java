@@ -16,7 +16,7 @@
  * limitations under the License.
  * under the License.
  */
-package org.anarres.filechooser.vfs2.demo;
+package org.anarres.filechooser.impl.vfs2.demo;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
@@ -30,7 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
-import org.anarres.filechooser.vfs2.CommonsVfs2JFileChooser;
+import org.anarres.filechooser.impl.vfs2.CommonsVfs2JFileChooser;
 import org.apache.commons.vfs2.FileObject;
 
 /**

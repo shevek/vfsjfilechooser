@@ -1,4 +1,4 @@
-package org.anarres.filechooser.nio;
+package org.anarres.filechooser.impl.nio;
 
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 import java.nio.file.Path;

@@ -1,4 +1,4 @@
-package org.anarres.filechooser.vfs;
+package org.anarres.filechooser.impl.vfs;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.filechooser.VFSFileSystemView;
