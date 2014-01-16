@@ -1,0 +1,15 @@
+com.googlecode.vfsjfilechooser2
+com.googlecode.vfsjfilechooser2.accessories
+com.googlecode.vfsjfilechooser2.accessories.bookmarks
+com.googlecode.vfsjfilechooser2.accessories.connection
+com.googlecode.vfsjfilechooser2.constants
+com.googlecode.vfsjfilechooser2.filechooser
+com.googlecode.vfsjfilechooser2.filepane
+com.googlecode.vfsjfilechooser2.plaf
+com.googlecode.vfsjfilechooser2.plaf.basic
+com.googlecode.vfsjfilechooser2.plaf.metal
+com.googlecode.vfsjfilechooser2.utils
+org.anarres.filechooser.nio
+org.anarres.filechooser.vfs
+org.anarres.filechooser.vfs2
+org.anarres.filechooser.vfs2.demo
