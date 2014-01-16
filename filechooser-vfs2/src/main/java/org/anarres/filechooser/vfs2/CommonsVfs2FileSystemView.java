@@ -6,8 +6,7 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.annotation.Nonnull;
 import javax.swing.filechooser.FileSystemView;
 import org.apache.commons.vfs2.CacheStrategy;
 import org.apache.commons.vfs2.FileObject;
@@ -25,6 +24,7 @@ import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
  */
 public class CommonsVfs2FileSystemView extends AbstractVFSFileSystemView<FileObject> {
 
+    @Nonnull
     private static FileSystemManager newFileSystemManager() throws FileSystemException {
         StandardFileSystemManager manager = new StandardFileSystemManager();
         manager.setCacheStrategy(CacheStrategy.MANUAL);
@@ -32,6 +32,7 @@ public class CommonsVfs2FileSystemView extends AbstractVFSFileSystemView<FileObj
         return manager;
     }
 
+    @Nonnull
     private static FileSystemOptions newFileSystemOptions() throws FileSystemException {
         FileSystemOptions opts = new FileSystemOptions();
         SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(opts, "no");
@@ -42,7 +43,7 @@ public class CommonsVfs2FileSystemView extends AbstractVFSFileSystemView<FileObj
     private final FileSystemManager fileSystemManager;
     private final FileSystemOptions fileSystemOptions;
 
-    public CommonsVfs2FileSystemView(FileSystemManager fileSystemManager, FileSystemOptions fileSystemOptions) {
+    public CommonsVfs2FileSystemView(@Nonnull FileSystemManager fileSystemManager, @Nonnull FileSystemOptions fileSystemOptions) {
         this.fileSystemManager = fileSystemManager;
         this.fileSystemOptions = fileSystemOptions;
     }

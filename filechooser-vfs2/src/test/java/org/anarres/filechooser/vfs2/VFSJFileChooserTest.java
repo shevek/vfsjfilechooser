@@ -53,16 +53,20 @@ public class VFSJFileChooserTest {
 
             @Override
             public void run() {
-                CommonsVfs2JFileChooser chooser = new CommonsVfs2JFileChooser();
-                chooser.setMultiSelectionEnabled(true);
-                chooser.setCurrentDirectory(root);
-                VFSJFileChooser.RETURN_TYPE ret = chooser.showOpenDialog(null);
-                LOG.info("RETURN_TYPE = " + ret);
-                LOG.info("Selected FO  = " + chooser.getSelectedFile());
-                LOG.info("Selected FOs = " + Arrays.toString(chooser.getSelectedFiles()));
-                print(chooser.getSelectedFile());
-                for (FileObject file : chooser.getSelectedFiles()) {
-                    print(file);
+                try {
+                    CommonsVfs2JFileChooser chooser = new CommonsVfs2JFileChooser();
+                    chooser.setMultiSelectionEnabled(true);
+                    chooser.setCurrentDirectory(root);
+                    VFSJFileChooser.RETURN_TYPE ret = chooser.showOpenDialog(null);
+                    LOG.info("RETURN_TYPE = " + ret);
+                    LOG.info("Selected FO  = " + chooser.getSelectedFile());
+                    LOG.info("Selected FOs = " + Arrays.toString(chooser.getSelectedFiles()));
+                    print(chooser.getSelectedFile());
+                    for (FileObject file : chooser.getSelectedFiles()) {
+                        print(file);
+                    }
+                } catch (FileSystemException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

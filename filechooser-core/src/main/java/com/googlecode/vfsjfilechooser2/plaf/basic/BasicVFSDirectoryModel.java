@@ -52,7 +52,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
         implements PropertyChangeListener {
 
     // private static final Comparator<FileObject> fileNameComparator = FileObjectComparatorFactory.newFileNameComparator(true);
-    private final VFSJFileChooser<FileObject> filechooser;
+    private final VFSJFileChooser<FileObject> chooser;
     private final List<FileObject> fileCache = new ArrayList<FileObject>();
     private final ReadWriteLock aLock = new ReentrantReadWriteLock(true);
     private volatile Future<?> loadThread = null;
@@ -68,7 +68,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      * @param filechooser
      */
     public BasicVFSDirectoryModel(VFSJFileChooser<FileObject> filechooser) {
-        this.filechooser = filechooser;
+        this.chooser = filechooser;
         validateFileCache();
     }
 
@@ -94,9 +94,8 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
             Object old = e.getOldValue();
 
             if (old instanceof BasicVFSFileChooserUI) {
-                @SuppressWarnings("unchecked")
-                BasicVFSFileChooserUI<FileObject> ui = (BasicVFSFileChooserUI<FileObject>) old;
-                BasicVFSDirectoryModel<FileObject> model = ui.getModel();
+                BasicVFSFileChooserUI<?> ui = (BasicVFSFileChooserUI<?>) old;
+                BasicVFSDirectoryModel<?> model = ui.getModel();
 
                 if (model != null) {
                     model.invalidateFileCache();
@@ -132,12 +131,12 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
             files = new CopyOnWriteArrayList<FileObject>();
             directories = new CopyOnWriteArrayList<FileObject>();
 
-            FileObject currentDir = filechooser.getCurrentDirectory();
-            VFSFileSystemView<FileObject> v = filechooser.getFileSystemView();
+            FileObject currentDir = chooser.getCurrentDirectory();
+            VFSFileSystemView<FileObject> v = chooser.getFileSystemView();
             directories.add(v.createFileObject(currentDir, ".."));
 
             for (FileObject f : fileCache) {
-                if (filechooser.isTraversable(f)) {
+                if (chooser.isTraversable(f)) {
                     directories.add(f);
                 } else {
                     files.add(f);
@@ -154,7 +153,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      *
      */
     public void validateFileCache() {
-        FileObject currentDirectory = filechooser.getCurrentDirectory();
+        FileObject currentDirectory = chooser.getCurrentDirectory();
 
         if (currentDirectory == null) {
             return;
@@ -185,7 +184,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
         aLock.writeLock().lock();
 
         try {
-            VFSFileSystemView<FileObject> fsv = filechooser.getFileSystemView();
+            VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
             fsv.rename(oldFile, newFile);
             validateFileCache();
 
@@ -246,7 +245,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
      * @param v
      */
     protected void sort(List<FileObject> v) {
-        VFSFileSystemView<FileObject> fsv = filechooser.getFileSystemView();
+        VFSFileSystemView<FileObject> fsv = chooser.getFileSystemView();
         Comparator<FileObject> comparator = FileObjectComparatorFactory.newFileNameComparator(fsv, true);
         Collections.sort(v, comparator);
     }
@@ -391,18 +390,18 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
         }
 
         public void run0() {
-            VFSFileSystemView<FileObject> fileSystem = filechooser.getFileSystemView();
+            VFSFileSystemView<FileObject> fileSystem = chooser.getFileSystemView();
 
-            FileObject cwd = filechooser.getCurrentDirectory();
+            FileObject cwd = chooser.getCurrentDirectory();
             // TODO: cwd.refresh()
 
             // fix a bug here when the filesystem changes, the directories list needs to be notified
             if (!contains(cwd)) {
-                MetalVFSFileChooserUI<FileObject> ui = (MetalVFSFileChooserUI<FileObject>) filechooser.getUI();
+                MetalVFSFileChooserUI<FileObject> ui = (MetalVFSFileChooserUI<FileObject>) chooser.getUI();
                 ui.getCombo().setSelectedItem(cwd);
             }
 
-            FileObject[] list = fileSystem.getChildren(cwd, filechooser.isFileHidingEnabled());
+            FileObject[] list = fileSystem.getChildren(cwd, chooser.isFileHidingEnabled());
 
             List<FileObject> acceptsList = new ArrayList<FileObject>(list.length);
 
@@ -412,7 +411,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
 
             // run through the file list, add directories and selectable files to fileCache
             for (FileObject aFileObject : list) {
-                if (filechooser.accept(aFileObject)) {
+                if (chooser.accept(aFileObject)) {
                     acceptsList.add(aFileObject);
                 }
             }
@@ -433,7 +432,7 @@ public class BasicVFSDirectoryModel<FileObject> extends AbstractListModel<FileOb
 
             // run through list grabbing directories in chunks of ten
             for (FileObject f : acceptsList) {
-                boolean isTraversable = filechooser.isTraversable(f);
+                boolean isTraversable = chooser.isTraversable(f);
 
                 if (isTraversable) {
                     newDirectories.add(f);

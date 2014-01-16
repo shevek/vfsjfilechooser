@@ -1045,8 +1045,7 @@ public class MetalVFSFileChooserUI<FileObject> extends BasicVFSFileChooserUI<Fil
 
         @Override
         public MouseListener createDoubleClickListener(JList list) {
-            return MetalVFSFileChooserUI.this.createDoubleClickListener(getFileChooser(),
-                    list);
+            return MetalVFSFileChooserUI.this.createDoubleClickListener(getFileChooser(), list);
         }
 
         @Override
