@@ -8,22 +8,49 @@ package org.anarres.filechooser.impl.vfs2;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import java.awt.EventQueue;
 import java.util.Arrays;
+import javax.annotation.Nonnull;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-import org.junit.Ignore;
+import org.fest.swing.annotation.GUITest;
+import org.fest.swing.core.BasicRobot;
+import org.fest.swing.core.Robot;
+import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
+import org.fest.swing.finder.VFSJFileChooserFinder;
+import org.fest.swing.fixture.VFSJFileChooserFixture;
+import org.fest.swing.junit.v4_5.runner.GUITestRunner;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  *
  * @author shevek
  */
-@Ignore
+@GUITest
+@RunWith(GUITestRunner.class)
 public class VFSJFileChooserTest {
 
     private static final Log LOG = LogFactory.getLog(VFSJFileChooserTest.class);
+
+    @BeforeClass
+    public static void setUpClass() {
+        FailOnThreadViolationRepaintManager.install();
+    }
+
+    private static void print(@Nonnull FileObject file) {
+        try {
+            LOG.info("Selected file is " + file);
+            if (file == null)
+                return;
+            LOG.info("Selected size is " + file.getContent().getSize());
+            LOG.info("Selected operations is " + file.getFileOperations());
+        } catch (FileSystemException e) {
+            LOG.info("Exception is " + e);
+        }
+    }
 
     @Test
     public void testFileChooser() throws Exception {
@@ -37,19 +64,7 @@ public class VFSJFileChooserTest {
         foo.resolveFile("foo1").createFile();
         root.resolveFile("bar").createFile();
 
-        EventQueue.invokeAndWait(new Runnable() {
-
-            private void print(FileObject file) {
-                try {
-                    LOG.info("Selected file is " + file);
-                    if (file == null)
-                        return;
-                    LOG.info("Selected size is " + file.getContent().getSize());
-                    LOG.info("Selected operations is " + file.getFileOperations());
-                } catch (FileSystemException e) {
-                    LOG.info("Exception is " + e);
-                }
-            }
+        EventQueue.invokeLater(new Runnable() {
 
             @Override
             public void run() {
@@ -70,6 +85,10 @@ public class VFSJFileChooserTest {
                 }
             }
         });
+
+        Robot robot = BasicRobot.robotWithCurrentAwtHierarchy();
+        VFSJFileChooserFixture<FileObject> chooser = VFSJFileChooserFinder.<FileObject>findFileChooser().using(robot);
+        chooser.approve();
     }
 
 }

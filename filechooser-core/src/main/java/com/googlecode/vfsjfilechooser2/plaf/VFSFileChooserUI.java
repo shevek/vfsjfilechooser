@@ -29,14 +29,14 @@ public interface VFSFileChooserUI<FileObject> {
      * @param fc
      * @return
      */
-    String getApproveButtonText(VFSJFileChooser<FileObject> fc);
+    String getApproveButtonText(VFSJFileChooser<?> fc);
 
     /**
      *
      * @param fc
      * @return
      */
-    String getDialogTitle(VFSJFileChooser<FileObject> fc);
+    String getDialogTitle(VFSJFileChooser<?> fc);
 
     /**
      *

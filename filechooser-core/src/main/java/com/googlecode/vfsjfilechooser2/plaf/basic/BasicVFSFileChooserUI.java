@@ -544,7 +544,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
      * Returns the title of this dialog
      */
     @Override
-    public String getDialogTitle(VFSJFileChooser<FileObject> fc) {
+    public String getDialogTitle(VFSJFileChooser<?> fc) {
         String dialogTitle = fc.getDialogTitle();
 
         if (dialogTitle != null) {
@@ -558,7 +558,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
         }
     }
 
-    public int getApproveButtonMnemonic(VFSJFileChooser<FileObject> fc) {
+    public int getApproveButtonMnemonic(VFSJFileChooser<?> fc) {
         int mnemonic = fc.getApproveButtonMnemonic();
 
         if (mnemonic > 0) {
@@ -573,7 +573,7 @@ public class BasicVFSFileChooserUI<FileObject> extends AbstractVFSFileChooserUI<
     }
 
     @Override
-    public String getApproveButtonText(VFSJFileChooser<FileObject> fc) {
+    public String getApproveButtonText(VFSJFileChooser<?> fc) {
         String buttonText = fc.getApproveButtonText();
 
         if (buttonText != null) {
