@@ -13,3 +13,7 @@ org.anarres.filechooser.impl.nio
 org.anarres.filechooser.impl.vfs
 org.anarres.filechooser.impl.vfs2
 org.anarres.filechooser.impl.vfs2.demo
+org.fest.swing.driver
+org.fest.swing.finder
+org.fest.swing.fixture
+org.fest.swing.format
