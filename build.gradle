@@ -34,6 +34,14 @@ subprojects {
     }
 }
 
+project(':filechooser-test') {
+    dependencies {
+		compile project(':filechooser-core')
+        compile 'junit:junit:4.8.1'
+		compile 'org.easytesting:fest-swing-junit-4.5:1.2.1'
+    }
+}
+
 project(':filechooser-core') {
     dependencies {
         // compile 'org.slf4j:slf4j-api:1.7.5'
@@ -45,7 +53,7 @@ project(':filechooser-vfs') {
     dependencies {
 		compile project(':filechooser-core')
 		compile 'commons-vfs:commons-vfs:1.0'
-		testCompile project(':filechooser-core').sourceSets.test.output
+		testCompile project(':filechooser-test')
 	}
 }
 
@@ -53,13 +61,13 @@ project(':filechooser-vfs2') {
     dependencies {
 		compile project(':filechooser-core')
 		compile 'org.apache.commons:commons-vfs2:2.0'
-		testCompile project(':filechooser-core').sourceSets.test.output
+		testCompile project(':filechooser-test')
 	}
 }
 
 project(':filechooser-nio') {
     dependencies {
 		compile project(':filechooser-core')
-		testCompile project(':filechooser-core').sourceSets.test.output
+		testCompile project(':filechooser-test')
 	}
 }
