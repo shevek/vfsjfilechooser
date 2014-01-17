@@ -20,6 +20,8 @@ import org.fest.swing.core.Robot;
 import org.fest.swing.edt.FailOnThreadViolationRepaintManager;
 import org.fest.swing.finder.VFSJFileChooserFinder;
 import org.fest.swing.fixture.VFSJFileChooserFixture;
+import org.fest.swing.format.Formatting;
+import org.fest.swing.format.VFSJFileChooserFormatter;
 import org.fest.swing.junit.v4_5.runner.GUITestRunner;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,6 +40,7 @@ public class VFSJFileChooserTest {
     @BeforeClass
     public static void setUpClass() {
         FailOnThreadViolationRepaintManager.install();
+        Formatting.register(new VFSJFileChooserFormatter());
     }
 
     private static void print(@Nonnull FileObject file) {
