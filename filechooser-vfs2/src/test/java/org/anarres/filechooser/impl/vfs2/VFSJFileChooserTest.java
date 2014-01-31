@@ -90,7 +90,12 @@ public class VFSJFileChooserTest {
         });
 
         Robot robot = BasicRobot.robotWithCurrentAwtHierarchy();
+        robot.waitForIdle();
+
         VFSJFileChooserFixture<FileObject> chooser = VFSJFileChooserFinder.<FileObject>findFileChooser().using(robot);
+        // Thread.sleep(2000);
+        chooser.setCurrentDirectory(foo);
+        // Thread.sleep(2000);
         chooser.approve();
     }
 
